@@ -1,0 +1,24 @@
+{
+  "name": "Damietta Review System",
+  "short_name": "DamRS",
+  "description": "Damietta Review System (DamRS) - نظام دمياط لمراجعة المشاريع.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#123459",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/brand/fcai-logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/damietta-university.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}
