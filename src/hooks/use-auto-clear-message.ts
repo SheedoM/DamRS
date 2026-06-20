@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 
 export function useAutoClearMessage(message: string, delay = 5000) {
-  const [visible, setVisible] = useState(false);
+  const [clearedAtMessage, setClearedAtMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!message) return;
-    setVisible(true);
-    const timer = setTimeout(() => setVisible(false), delay);
+    if (!message || message === clearedAtMessage) return;
+    const timer = setTimeout(() => setClearedAtMessage(message), delay);
     return () => clearTimeout(timer);
-  }, [message, delay]);
+  }, [message, delay, clearedAtMessage]);
 
-  return visible;
+  return message ? message !== clearedAtMessage : false;
 }

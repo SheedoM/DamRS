@@ -68,6 +68,7 @@ export default async function PanelHomePage({
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <h2 className="font-semibold text-slate-950">{project.title}</h2>
+                      {/* eslint-disable-next-line react-hooks/purity */}
                       {project.assigned_at && (Date.now() - new Date(project.assigned_at).getTime()) < 48 * 60 * 60 * 1000 ? (
                         <Badge tone="info">جديد</Badge>
                       ) : null}

@@ -17,26 +17,25 @@ export function Toast() {
   const searchParams = useSearchParams();
   const successKey = searchParams.get("success");
   
-  const [visible, setVisible] = useState(false);
-  const [message, setMessage] = useState("");
+  const [clearedKey, setClearedKey] = useState<string | null>(null);
 
   useEffect(() => {
-    if (successKey && TOAST_MESSAGES[successKey]) {
-      setMessage(TOAST_MESSAGES[successKey]);
-      setVisible(true);
-      
+    if (successKey && TOAST_MESSAGES[successKey] && successKey !== clearedKey) {
       // Remove query param without full navigation
       const url = new URL(window.location.href);
       url.searchParams.delete("success");
       window.history.replaceState({}, "", url.toString());
 
       const timer = setTimeout(() => {
-        setVisible(false);
+        setClearedKey(successKey);
       }, 5000);
 
       return () => clearTimeout(timer);
     }
-  }, [successKey]);
+  }, [successKey, clearedKey]);
+
+  const message = (successKey && successKey !== clearedKey) ? TOAST_MESSAGES[successKey] : null;
+  const visible = !!message;
 
   if (!visible || !message) return null;
 
@@ -50,7 +49,7 @@ export function Toast() {
       <CheckCircle2 className="h-5 w-5 text-green-500" aria-hidden="true" />
       <p className="text-sm font-medium">{message}</p>
       <button
-        onClick={() => setVisible(false)}
+        onClick={() => setClearedKey(successKey)}
         className="ms-4 rounded-md p-1 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
         aria-label="إغلاق الإشعار"
       >

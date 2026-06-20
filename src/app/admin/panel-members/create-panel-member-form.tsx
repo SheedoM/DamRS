@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { Plus } from "lucide-react";
 
 import { createPanelMemberAction } from "../actions";
@@ -20,7 +20,10 @@ export function CreatePanelMemberForm() {
   const [createdPassword, setCreatedPassword] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
+  const [prevState, setPrevState] = useState(state);
+
+  if (state !== prevState) {
+    setPrevState(state);
     if (state.ok && state.message) {
       const match = state.message.match(/كلمة المرور المؤقتة:\s*(\S+)/);
       if (match) {
@@ -28,7 +31,7 @@ export function CreatePanelMemberForm() {
         setOpen(false);
       }
     }
-  }, [state]);
+  }
 
   return (
     <div className="space-y-4">
