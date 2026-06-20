@@ -1,12 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 
 import { saveSubmissionWindowAction } from "../actions";
 import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 const initialState = { ok: true, message: "" };
 
@@ -17,6 +19,7 @@ function toLocalDateTime(value?: string | null) {
 }
 
 type SubmissionWindowFormProps = {
+  mode: "create" | "edit";
   windowData: {
     id: string;
     cycle_id: string;
@@ -26,24 +29,25 @@ type SubmissionWindowFormProps = {
     allow_edit_after_submit: boolean;
     discussion_cycles?: { id: string; name: string; is_active: boolean } | null;
   } | null;
-};
+} ;
 
-export function SubmissionWindowForm({ windowData }: SubmissionWindowFormProps) {
+export function SubmissionWindowForm({ mode, windowData }: SubmissionWindowFormProps) {
   const [state, formAction, isPending] = useActionState(saveSubmissionWindowAction, initialState);
+  const isCreateMode = mode === "create";
 
   return (
     <form action={formAction} className="space-y-5 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
       {!state.ok ? <Alert>{state.message}</Alert> : null}
       {state.ok && state.message ? <p className="text-sm text-emerald-700">{state.message}</p> : null}
-      <input type="hidden" name="cycle_id" value={windowData?.cycle_id || ""} />
+      <input type="hidden" name="cycle_id" value={isCreateMode ? "" : windowData?.cycle_id || ""} />
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="cycle_name">Cycle name</Label>
-          <Input id="cycle_name" name="cycle_name" defaultValue={windowData?.discussion_cycles?.name || "Graduation Projects 2025/2026"} required />
+          <Input id="cycle_name" name="cycle_name" defaultValue={isCreateMode ? "" : windowData?.discussion_cycles?.name || ""} placeholder="Graduation Projects 2025/2026" required />
         </div>
         <div className="space-y-2">
           <Label htmlFor="academic_year">Academic year</Label>
-          <Input id="academic_year" name="academic_year" defaultValue="2025/2026" required />
+          <Input id="academic_year" name="academic_year" defaultValue={isCreateMode ? "" : "2025/2026"} placeholder="2025/2026" required />
         </div>
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="department">Department</Label>
@@ -51,24 +55,29 @@ export function SubmissionWindowForm({ windowData }: SubmissionWindowFormProps) 
         </div>
         <div className="space-y-2">
           <Label htmlFor="opens_at">Opens at</Label>
-          <Input id="opens_at" name="opens_at" type="datetime-local" defaultValue={toLocalDateTime(windowData?.opens_at)} required />
+          <Input id="opens_at" name="opens_at" type="datetime-local" defaultValue={isCreateMode ? "" : toLocalDateTime(windowData?.opens_at)} required />
         </div>
         <div className="space-y-2">
           <Label htmlFor="closes_at">Closes at</Label>
-          <Input id="closes_at" name="closes_at" type="datetime-local" defaultValue={toLocalDateTime(windowData?.closes_at)} required />
+          <Input id="closes_at" name="closes_at" type="datetime-local" defaultValue={isCreateMode ? "" : toLocalDateTime(windowData?.closes_at)} required />
         </div>
       </div>
       <label className="flex items-center gap-2 text-sm text-slate-700">
-        <input type="checkbox" name="allow_late_submission" defaultChecked={windowData?.allow_late_submission || false} />
+        <input type="checkbox" name="allow_late_submission" defaultChecked={!isCreateMode && (windowData?.allow_late_submission || false)} />
         Allow late submission
       </label>
       <label className="flex items-center gap-2 text-sm text-slate-700">
-        <input type="checkbox" name="allow_edit_after_submit" defaultChecked={windowData?.allow_edit_after_submit || false} />
+        <input type="checkbox" name="allow_edit_after_submit" defaultChecked={!isCreateMode && (windowData?.allow_edit_after_submit || false)} />
         Allow edit after submit
       </label>
-      <Button type="submit" disabled={isPending}>
-        {isPending ? "Saving..." : "Save submission window"}
-      </Button>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "Saving..." : isCreateMode ? "Create submission window" : "Save changes"}
+        </Button>
+        <Link href="/admin/submission-window" className={cn(buttonVariants({ variant: "outline" }))}>
+          Cancel
+        </Link>
+      </div>
     </form>
   );
 }

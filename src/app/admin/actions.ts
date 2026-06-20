@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireRole } from "@/lib/auth/require-role";
@@ -303,5 +304,5 @@ export async function saveSubmissionWindowAction(
   });
   revalidatePath("/admin");
   revalidatePath("/admin/submission-window");
-  return { ok: true, message: "Submission window saved." };
+  redirect("/admin/submission-window");
 }
