@@ -6,6 +6,7 @@ import { saveDraftReviewAction, saveFinalReviewAction } from "./review-actions";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import type { PanelReview } from "@/lib/panel/queries";
 
 type ReviewFormProps = {
@@ -79,7 +80,7 @@ export function ReviewForm({ mode, projectId, existingReview }: ReviewFormProps)
             <textarea
               name="notes"
               rows={5}
-              defaultValue={existingReview?.notes || ""}
+              defaultValue={isDraft ? existingReview?.draft_notes || "" : existingReview?.final_notes || ""}
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 outline-none focus:border-[var(--brand-blue)] focus:ring-2 focus:ring-[var(--brand-blue)]/20"
             />
           </label>
@@ -90,7 +91,7 @@ export function ReviewForm({ mode, projectId, existingReview }: ReviewFormProps)
               <textarea
                 name="questions"
                 rows={4}
-                defaultValue={existingReview?.questions || ""}
+                defaultValue={existingReview?.draft_questions || ""}
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 outline-none focus:border-[var(--brand-blue)] focus:ring-2 focus:ring-[var(--brand-blue)]/20"
               />
             </label>
@@ -98,9 +99,21 @@ export function ReviewForm({ mode, projectId, existingReview }: ReviewFormProps)
 
           {!state.ok ? <Alert>{state.message}</Alert> : null}
 
-          <Button type="submit" disabled={isPending}>
-            {isPending ? "Saving..." : existingReview ? "Update review" : "Submit review"}
-          </Button>
+          {isDraft ? (
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Saving..." : existingReview?.draft_submitted_at ? "Update draft review" : "Submit draft review"}
+            </Button>
+          ) : (
+            <ConfirmSubmitButton
+              title="Submit final review?"
+              message="This will save your final presentation and discussion scores. You can still edit while assigned, but this action affects the official panel grade."
+              confirmLabel={existingReview?.final_submitted_at ? "Update final review" : "Submit final review"}
+              pending={isPending}
+              pendingLabel="Saving..."
+            >
+              {existingReview?.final_submitted_at ? "Update final review" : "Submit final review"}
+            </ConfirmSubmitButton>
+          )}
         </form>
       </CardContent>
     </Card>

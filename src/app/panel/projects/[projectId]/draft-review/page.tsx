@@ -23,7 +23,7 @@ export default async function DraftReviewPage({
     notFound();
   }
 
-  const existingReview = project.reviews.find((review) => review.review_type === "draft") || null;
+  const existingReview = project.reviews[0] || null;
 
   return (
     <AppShell title="Draft Review" profile={profile}>
@@ -40,4 +40,3 @@ export default async function DraftReviewPage({
     </AppShell>
   );
 }
-

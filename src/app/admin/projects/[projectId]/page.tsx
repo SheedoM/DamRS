@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { FileText } from "lucide-react";
 
 import { AssignPanelMemberForm, RevokeAssignmentForm } from "../../assignments/assignment-forms";
+import { GradeOverrideForm } from "./grade-override-form";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,14 @@ function formatFileSize(size: number) {
   if (size < 1024) return `${size} B`;
   if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatDate(value: string | null) {
+  return value ? new Date(value).toLocaleString() : "Not available";
+}
+
+function scoreText(value: number | null | undefined) {
+  return typeof value === "number" ? `${value.toFixed(2)}%` : "Pending";
 }
 
 export default async function AdminProjectDetailPage({
@@ -104,6 +113,87 @@ export default async function AdminProjectDetailPage({
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader><CardTitle>Official Grade</CardTitle></CardHeader>
+          <CardContent className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-md border border-slate-200 p-4">
+              <p className="text-sm font-medium text-slate-700">Official result</p>
+              <p className="mt-1 text-3xl font-semibold text-slate-950">
+                {project.gradeSummary.officialPercentage || "Pending"}
+              </p>
+              <p className="mt-2 text-sm text-slate-500">
+                Source: {project.gradeSummary.officialSource === "override" ? "Dean override" : project.gradeSummary.officialSource === "panel" ? "Panel average" : "Awaiting final reviews"}
+              </p>
+            </div>
+            <div className="rounded-md border border-slate-200 p-4">
+              <p className="text-sm font-medium text-slate-700">Panel average</p>
+              <p className="mt-1 text-3xl font-semibold text-slate-950">
+                {project.gradeSummary.panelAveragePercentage || "Pending"}
+              </p>
+              <p className="mt-2 text-sm text-slate-500">
+                {project.gradeSummary.completedReviewCount} of {project.gradeSummary.requiredReviewCount} final reviews complete.
+              </p>
+            </div>
+            <div className="rounded-md border border-slate-200 p-4">
+              <p className="text-sm font-medium text-slate-700">Provisional average</p>
+              <p className="mt-1 text-3xl font-semibold text-slate-950">
+                {project.gradeSummary.provisionalAveragePercentage || "Pending"}
+              </p>
+              <p className="mt-2 text-sm text-slate-500">Shown for audit before all final reviews arrive.</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Panel Reviews</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            {project.reviews.length > 0 ? project.reviews.map((review) => (
+              <div key={review.id} className="rounded-md border border-slate-200 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="font-medium text-slate-950">{review.panel_member_name}</p>
+                    <p className="text-sm text-slate-500">{review.panel_member_email}</p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge tone={review.status === "final_reviewed" ? "success" : "warning"}>{review.status.replaceAll("_", " ")}</Badge>
+                    <Badge tone="info">{scoreText(review.total_score)}</Badge>
+                  </div>
+                </div>
+                <div className="mt-3 grid gap-2 text-sm text-slate-600 md:grid-cols-2">
+                  <p><span className="font-medium text-slate-900">Draft:</span> {formatDate(review.draft_submitted_at)}</p>
+                  <p><span className="font-medium text-slate-900">Final:</span> {formatDate(review.final_submitted_at)}</p>
+                </div>
+              </div>
+            )) : (
+              <p className="text-sm text-slate-500">No panel reviews yet.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <GradeOverrideForm projectId={project.id} activeOverride={project.activeOverride} />
+
+        {project.overrideHistory.length > 0 ? (
+          <Card>
+            <CardHeader><CardTitle>Override History</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              {project.overrideHistory.map((override) => (
+                <div key={override.id} className="rounded-md border border-slate-200 p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium text-slate-950">{scoreText(override.total_score)}</p>
+                      <p className="text-sm text-slate-500">
+                        {override.overridden_by_name} - {formatDate(override.created_at)}
+                      </p>
+                    </div>
+                    <Badge tone={override.is_active ? "success" : "neutral"}>{override.is_active ? "active" : "replaced"}</Badge>
+                  </div>
+                  <p className="mt-3 text-sm text-slate-600">{override.reason}</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        ) : null}
 
         <Card>
           <CardHeader><CardTitle>Assignments</CardTitle></CardHeader>

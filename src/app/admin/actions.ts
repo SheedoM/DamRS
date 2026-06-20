@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireRole } from "@/lib/auth/require-role";
+import { buildGradeOverridePayload, gradeOverrideFormSchema } from "@/lib/review/review.schema";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -39,6 +40,10 @@ const submissionWindowSchema = z.object({
   closes_at: z.string().min(1),
   allow_late_submission: z.boolean(),
   allow_edit_after_submit: z.boolean(),
+});
+
+const gradeOverrideActionSchema = gradeOverrideFormSchema.extend({
+  project_id: z.string().uuid(),
 });
 
 async function writeAuditLog(action: string, entityType: string, entityId: string, metadata = {}) {
@@ -193,17 +198,6 @@ export async function revokeAssignmentAction(
     return { ok: false, message: error.message };
   }
 
-  const { count } = await supabase
-    .from("panel_assignments")
-    .select("id", { count: "exact", head: true })
-    .eq("project_id", parsed.data.project_id)
-    .eq("is_active", true)
-    .is("revoked_at", null);
-
-  if (!count) {
-    await supabase.from("projects").update({ status: "submitted" }).eq("id", parsed.data.project_id);
-  }
-
   await writeAuditLog("admin_revoked_panel", "panel_assignment", parsed.data.assignment_id, {
     project_id: parsed.data.project_id,
   });
@@ -305,4 +299,74 @@ export async function saveSubmissionWindowAction(
   revalidatePath("/admin");
   revalidatePath("/admin/submission-window");
   redirect("/admin/submission-window");
+}
+
+export async function saveGradeOverrideAction(
+  _previousState: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const { profile } = await requireRole(["admin"]);
+  const parsed = gradeOverrideActionSchema.safeParse({
+    project_id: formData.get("project_id"),
+    documentation_score: formData.get("documentation_score"),
+    implementation_score: formData.get("implementation_score"),
+    code_quality_score: formData.get("code_quality_score"),
+    innovation_score: formData.get("innovation_score"),
+    presentation_score: formData.get("presentation_score"),
+    discussion_score: formData.get("discussion_score"),
+    reason: formData.get("reason"),
+  });
+
+  if (!parsed.success) {
+    return { ok: false, message: parsed.error.issues[0]?.message || "Invalid grade override." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const payload = buildGradeOverridePayload(parsed.data);
+
+  const { data: previousOverride } = await supabase
+    .from("project_grade_overrides")
+    .select("id")
+    .eq("project_id", parsed.data.project_id)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  const { error: deactivateError } = await supabase
+    .from("project_grade_overrides")
+    .update({ is_active: false })
+    .eq("project_id", parsed.data.project_id)
+    .eq("is_active", true);
+
+  if (deactivateError) {
+    return { ok: false, message: deactivateError.message };
+  }
+
+  const { data: override, error } = await supabase
+    .from("project_grade_overrides")
+    .insert({
+      project_id: parsed.data.project_id,
+      ...payload,
+      overridden_by: profile.id,
+      is_active: true,
+    })
+    .select("id")
+    .single();
+
+  if (error || !override) {
+    return { ok: false, message: error?.message || "Unable to save grade override." };
+  }
+
+  await writeAuditLog(
+    previousOverride ? "admin_replaced_grade_override" : "admin_created_grade_override",
+    "project_grade_override",
+    override.id,
+    {
+      project_id: parsed.data.project_id,
+      previous_override_id: previousOverride?.id || null,
+    },
+  );
+  revalidatePath("/admin");
+  revalidatePath("/admin/projects");
+  revalidatePath(`/admin/projects/${parsed.data.project_id}`);
+  return { ok: true, message: "Official grade override saved." };
 }

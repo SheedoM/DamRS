@@ -9,11 +9,8 @@ import {
   buildFinalReviewPayload,
   draftReviewFormSchema,
   finalReviewFormSchema,
-  getProjectStatusAfterReview,
-  type ReviewType,
 } from "@/lib/review/review.schema";
 import { requireRole } from "@/lib/auth/require-role";
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type ActionResult = {
@@ -39,6 +36,18 @@ async function ensureActiveAssignment(projectId: string, panelMemberId: string) 
     .maybeSingle();
 
   return Boolean(data);
+}
+
+async function getOwnReview(projectId: string, panelMemberId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase
+    .from("reviews")
+    .select("id, status, draft_submitted_at")
+    .eq("project_id", projectId)
+    .eq("panel_member_id", panelMemberId)
+    .maybeSingle();
+
+  return data as { id: string; status: string; draft_submitted_at: string | null } | null;
 }
 
 async function writePanelAuditLog(
@@ -71,41 +80,6 @@ function revalidatePanelReviewPaths(projectId: string) {
   revalidatePath("/student/project/status");
 }
 
-async function updateProjectStatusAfterReview(projectId: string, reviewType: ReviewType) {
-  let adminClient;
-  try {
-    adminClient = createSupabaseAdminClient();
-  } catch (error) {
-    return error instanceof Error ? error.message : "Supabase service role key is missing.";
-  }
-
-  const { data: project, error: projectError } = await adminClient
-    .from("projects")
-    .select("status, submitted_at")
-    .eq("id", projectId)
-    .single();
-
-  if (projectError || !project) {
-    return projectError?.message || "Unable to load project status.";
-  }
-
-  const nextStatus = getProjectStatusAfterReview(String(project.status), reviewType);
-
-  if (nextStatus === project.status) {
-    return null;
-  }
-
-  const { error } = await adminClient
-    .from("projects")
-    .update({
-      status: nextStatus,
-      submitted_at: project.submitted_at || new Date().toISOString(),
-    })
-    .eq("id", projectId);
-
-  return error?.message || null;
-}
-
 export async function saveDraftReviewAction(
   _previousState: ActionResult,
   formData: FormData,
@@ -135,28 +109,21 @@ export async function saveDraftReviewAction(
   }
 
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("reviews")
-    .upsert(
-      {
-        ...buildDraftReviewPayload(parsed.data, projectIdResult.data, profile.id),
-        submitted_at: new Date().toISOString(),
-      },
-      { onConflict: "project_id,panel_member_id,review_type" },
-    )
-    .select("id")
-    .single();
+  const existingReview = await getOwnReview(projectIdResult.data, profile.id);
+  const payload = {
+    ...buildDraftReviewPayload(parsed.data, projectIdResult.data, profile.id),
+    status: existingReview?.status === "final_reviewed" ? "final_reviewed" : "draft_reviewed",
+    draft_submitted_at: new Date().toISOString(),
+  };
+  const result = existingReview
+    ? await supabase.from("reviews").update(payload).eq("id", existingReview.id).select("id").single()
+    : await supabase.from("reviews").insert(payload).select("id").single();
 
-  if (error || !data) {
-    return { ok: false, message: error?.message || "Unable to save draft review." };
+  if (result.error || !result.data) {
+    return { ok: false, message: result.error?.message || "Unable to save draft review." };
   }
 
-  const statusError = await updateProjectStatusAfterReview(projectIdResult.data, "draft");
-  if (statusError) {
-    return { ok: false, message: `Review saved, but project status was not updated: ${statusError}` };
-  }
-
-  await writePanelAuditLog(profile.id, "panel_submitted_draft_review", data.id, {
+  await writePanelAuditLog(profile.id, "panel_submitted_draft_review", result.data.id, {
     project_id: projectIdResult.data,
   });
   revalidatePanelReviewPaths(projectIdResult.data);
@@ -189,25 +156,26 @@ export async function saveFinalReviewAction(
   }
 
   const supabase = await createSupabaseServerClient();
+  const existingReview = await getOwnReview(projectIdResult.data, profile.id);
+
+  if (!existingReview?.draft_submitted_at) {
+    return { ok: false, message: "Submit the draft review before the final review." };
+  }
+
   const { data, error } = await supabase
     .from("reviews")
-    .upsert(
+    .update(
       {
-        ...buildFinalReviewPayload(parsed.data, projectIdResult.data, profile.id),
-        submitted_at: new Date().toISOString(),
+        ...buildFinalReviewPayload(parsed.data),
+        final_submitted_at: new Date().toISOString(),
       },
-      { onConflict: "project_id,panel_member_id,review_type" },
     )
+    .eq("id", existingReview.id)
     .select("id")
     .single();
 
   if (error || !data) {
     return { ok: false, message: error?.message || "Unable to save final review." };
-  }
-
-  const statusError = await updateProjectStatusAfterReview(projectIdResult.data, "final");
-  if (statusError) {
-    return { ok: false, message: `Review saved, but project status was not updated: ${statusError}` };
   }
 
   await writePanelAuditLog(profile.id, "panel_submitted_final_review", data.id, {

@@ -23,7 +23,7 @@ export default async function FinalReviewPage({
     notFound();
   }
 
-  const existingReview = project.reviews.find((review) => review.review_type === "final") || null;
+  const existingReview = project.reviews[0] || null;
 
   return (
     <AppShell title="Final Review" profile={profile}>
@@ -40,4 +40,3 @@ export default async function FinalReviewPage({
     </AppShell>
   );
 }
-

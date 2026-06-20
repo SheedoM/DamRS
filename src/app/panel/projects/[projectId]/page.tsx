@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppShell } from "@/components/layout/app-shell";
 import { requireRole } from "@/lib/auth/require-role";
 import { getPanelProjectDetail } from "@/lib/panel/queries";
-import { getCombinedReviewGrade } from "@/lib/review/review.schema";
+import { getReviewTotal } from "@/lib/review/review.schema";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -44,9 +44,14 @@ export default async function PanelProjectDetailPage({
     notFound();
   }
 
-  const draftReview = project.reviews.find((review) => review.review_type === "draft");
-  const finalReview = project.reviews.find((review) => review.review_type === "final");
-  const combinedGrade = getCombinedReviewGrade(project.reviews);
+  const review = project.reviews[0] || null;
+  const draftScore = review
+    ? review.documentation_score + review.implementation_score + review.code_quality_score + review.innovation_score
+    : null;
+  const finalScore = review?.final_submitted_at
+    ? review.presentation_score + review.discussion_score
+    : null;
+  const totalScore = review?.final_submitted_at ? getReviewTotal(review) : null;
 
   return (
     <AppShell title="Project Review" profile={profile}>
@@ -138,10 +143,10 @@ export default async function PanelProjectDetailPage({
             <div className="rounded-md border border-slate-200 bg-slate-50 p-4 md:col-span-2">
               <p className="text-sm font-medium text-slate-700">Audit grade</p>
               <p className="mt-1 text-3xl font-semibold text-slate-950">
-                {combinedGrade.percentage || "Pending"}
+                {totalScore !== null ? `${totalScore.toFixed(2)}%` : "Pending"}
               </p>
               <p className="mt-2 text-sm text-slate-500">
-                Draft component: {componentScoreText(combinedGrade.draftScore, 80)} - Final component: {componentScoreText(combinedGrade.finalComponentScore, 20)}
+                Draft component: {componentScoreText(draftScore, 80)} - Final component: {componentScoreText(finalScore, 20)}
               </p>
             </div>
 
@@ -155,12 +160,12 @@ export default async function PanelProjectDetailPage({
               <p className="mt-2 text-sm text-slate-500">
                 Submitted: {formatDate(project.reviewStatus.draftSubmittedAt)}
               </p>
-              <p className="mt-1 text-sm text-slate-500">Score: {reviewScoreText(draftReview?.total_score, 80)}</p>
+              <p className="mt-1 text-sm text-slate-500">Score: {reviewScoreText(draftScore, 80)}</p>
               <Link
                 href={`/panel/projects/${project.id}/draft-review`}
                 className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-4")}
               >
-                {draftReview ? "Edit draft review" : "Start draft review"}
+                {review?.draft_submitted_at ? "Edit draft review" : "Start draft review"}
               </Link>
             </div>
 
@@ -174,12 +179,12 @@ export default async function PanelProjectDetailPage({
               <p className="mt-2 text-sm text-slate-500">
                 Submitted: {formatDate(project.reviewStatus.finalSubmittedAt)}
               </p>
-              <p className="mt-1 text-sm text-slate-500">Score: {reviewScoreText(finalReview?.total_score, 20)}</p>
+              <p className="mt-1 text-sm text-slate-500">Score: {reviewScoreText(finalScore, 20)}</p>
               <Link
                 href={`/panel/projects/${project.id}/final-review`}
                 className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-4")}
               >
-                {finalReview ? "Edit final review" : "Start final review"}
+                {review?.final_submitted_at ? "Edit final review" : "Start final review"}
               </Link>
             </div>
           </CardContent>

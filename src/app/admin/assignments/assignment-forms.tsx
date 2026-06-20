@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { assignPanelMemberAction, revokeAssignmentAction } from "../actions";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import type { AdminProjectRow } from "@/lib/admin/admin-projects";
 import type { Assignment, PanelMember } from "@/lib/admin/queries";
 
@@ -63,9 +64,23 @@ export function RevokeAssignmentForm({ assignment }: { assignment: Assignment })
       <input type="hidden" name="assignment_id" value={assignment.id} />
       <input type="hidden" name="project_id" value={assignment.project_id} />
       {!state.ok ? <Alert>{state.message}</Alert> : null}
-      <Button type="submit" variant="outline" size="sm" disabled={isPending || !assignment.is_active}>
-        {isPending ? "Revoking..." : assignment.is_active ? "Revoke" : "Revoked"}
-      </Button>
+      {assignment.is_active ? (
+        <ConfirmSubmitButton
+          title="Revoke panel access?"
+          message={`This will immediately remove ${assignment.panel_member_name}'s access to this project.`}
+          confirmLabel="Revoke access"
+          variant="outline"
+          size="sm"
+          pending={isPending}
+          pendingLabel="Revoking..."
+        >
+          Revoke
+        </ConfirmSubmitButton>
+      ) : (
+        <Button type="button" variant="outline" size="sm" disabled>
+          Revoked
+        </Button>
+      )}
     </form>
   );
 }

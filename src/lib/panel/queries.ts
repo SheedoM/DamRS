@@ -26,7 +26,8 @@ type RawAssignment = {
 type RawReview = {
   id: string;
   project_id: string;
-  review_type: string;
+  panel_member_id: string;
+  status: string;
   documentation_score: number;
   implementation_score: number;
   code_quality_score: number;
@@ -34,9 +35,11 @@ type RawReview = {
   presentation_score: number;
   discussion_score: number;
   total_score: number;
-  notes: string | null;
-  questions: string | null;
-  submitted_at: string | null;
+  draft_notes: string | null;
+  draft_questions: string | null;
+  draft_submitted_at: string | null;
+  final_notes: string | null;
+  final_submitted_at: string | null;
   updated_at: string;
 };
 
@@ -91,7 +94,7 @@ function toProjectListItem(
   if (!project) return null;
 
   const profile = firstRelation(project.profiles);
-  const projectReviews = reviews.filter((review) => review.project_id === project.id);
+  const projectReview = reviews.find((review) => review.project_id === project.id);
 
   return {
     id: project.id,
@@ -102,7 +105,7 @@ function toProjectListItem(
     team_leader_name: profile?.full_name || "Unknown student",
     submitted_at: project.submitted_at,
     assigned_at: assignment.assigned_at,
-    reviewStatus: getPanelProjectReviewStatus(projectReviews),
+    reviewStatus: getPanelProjectReviewStatus(projectReview || null),
   };
 }
 
@@ -113,7 +116,7 @@ async function getOwnReviewsForProjects(projectIds: string[], panelMemberId: str
   const { data } = await supabase
     .from("reviews")
     .select(
-      "id, project_id, review_type, documentation_score, implementation_score, code_quality_score, innovation_score, presentation_score, discussion_score, total_score, notes, questions, submitted_at, updated_at",
+      "id, project_id, panel_member_id, status, documentation_score, implementation_score, code_quality_score, innovation_score, presentation_score, discussion_score, total_score, draft_notes, draft_questions, draft_submitted_at, final_notes, final_submitted_at, updated_at",
     )
     .eq("panel_member_id", panelMemberId)
     .in("project_id", projectIds);
@@ -188,7 +191,7 @@ export async function getPanelProjectDetail(projectId: string, panelMemberId: st
     supabase
       .from("reviews")
       .select(
-        "id, project_id, review_type, documentation_score, implementation_score, code_quality_score, innovation_score, presentation_score, discussion_score, total_score, notes, questions, submitted_at, updated_at",
+        "id, project_id, panel_member_id, status, documentation_score, implementation_score, code_quality_score, innovation_score, presentation_score, discussion_score, total_score, draft_notes, draft_questions, draft_submitted_at, final_notes, final_submitted_at, updated_at",
       )
       .eq("project_id", projectId)
       .eq("panel_member_id", panelMemberId),
@@ -224,4 +227,3 @@ export async function getPanelProjectDetail(projectId: string, panelMemberId: st
     reviews: (reviews || []) as RawReview[],
   } as PanelProjectDetail;
 }
-

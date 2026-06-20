@@ -1,6 +1,7 @@
 import type { AdminProjectRow } from "./admin-projects";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSignedUrlForProjectFile } from "@/lib/project/storage";
+import { getOfficialProjectGrade, type OfficialProjectGrade } from "@/lib/review/review.schema";
 
 export type PanelMember = {
   id: string;
@@ -35,6 +36,60 @@ type RawAssignment = {
   projects: { title: string } | { title: string }[] | null;
 };
 
+type RawReview = {
+  id: string;
+  project_id: string;
+  panel_member_id: string;
+  status: string;
+  documentation_score: number;
+  implementation_score: number;
+  code_quality_score: number;
+  innovation_score: number;
+  presentation_score: number;
+  discussion_score: number;
+  total_score: number;
+  draft_notes: string | null;
+  draft_questions: string | null;
+  draft_submitted_at: string | null;
+  final_notes: string | null;
+  final_submitted_at: string | null;
+  updated_at: string;
+  profiles:
+    | { full_name: string; email: string }
+    | { full_name: string; email: string }[]
+    | null;
+};
+
+type RawGradeOverride = {
+  id: string;
+  project_id: string;
+  documentation_score: number;
+  implementation_score: number;
+  code_quality_score: number;
+  innovation_score: number;
+  presentation_score: number;
+  discussion_score: number;
+  total_score: number;
+  reason: string;
+  overridden_by: string;
+  created_at: string;
+  is_active: boolean;
+  profiles:
+    | { full_name: string; email: string }
+    | { full_name: string; email: string }[]
+    | null;
+};
+
+export type AdminReview = Omit<RawReview, "profiles"> & {
+  panel_member_name: string;
+  panel_member_email: string;
+};
+
+export type GradeOverride = Omit<RawGradeOverride, "profiles"> & {
+  overridden_by_name: string;
+  overridden_by_email: string;
+};
+
 export type AdminProjectDetail = AdminProjectRow & {
   abstract: string;
   technologies_used: string | null;
@@ -57,6 +112,10 @@ export type AdminProjectDetail = AdminProjectRow & {
     signedUrl: string | null;
   }[];
   assignments: Assignment[];
+  reviews: AdminReview[];
+  activeOverride: GradeOverride | null;
+  overrideHistory: GradeOverride[];
+  gradeSummary: OfficialProjectGrade;
 };
 
 type RawProject = {
@@ -104,6 +163,26 @@ function toAssignment(assignment: RawAssignment): Assignment {
   };
 }
 
+function toAdminReview(review: RawReview): AdminReview {
+  const profile = firstRelation(review.profiles);
+
+  return {
+    ...review,
+    panel_member_name: profile?.full_name || "Unknown panel member",
+    panel_member_email: profile?.email || "",
+  };
+}
+
+function toGradeOverride(override: RawGradeOverride): GradeOverride {
+  const profile = firstRelation(override.profiles);
+
+  return {
+    ...override,
+    overridden_by_name: profile?.full_name || "Unknown admin",
+    overridden_by_email: profile?.email || "",
+  };
+}
+
 export async function getAdminProjects() {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
@@ -130,7 +209,7 @@ export async function getAdminProjectDetail(projectId: string) {
 
   if (!project) return null;
 
-  const [{ data: teamMembers }, { data: files }, assignments] = await Promise.all([
+  const [{ data: teamMembers }, { data: files }, assignments, { data: reviews }, { data: overrides }] = await Promise.all([
     supabase
       .from("team_members")
       .select("id, full_name, student_id, email, role_in_team")
@@ -142,9 +221,31 @@ export async function getAdminProjectDetail(projectId: string) {
       .eq("project_id", projectId)
       .order("created_at", { ascending: false }),
     getAssignmentsForProject(projectId),
+    supabase
+      .from("reviews")
+      .select("id, project_id, panel_member_id, status, documentation_score, implementation_score, code_quality_score, innovation_score, presentation_score, discussion_score, total_score, draft_notes, draft_questions, draft_submitted_at, final_notes, final_submitted_at, updated_at, profiles!reviews_panel_member_id_fkey(full_name, email)")
+      .eq("project_id", projectId)
+      .order("updated_at", { ascending: false }),
+    supabase
+      .from("project_grade_overrides")
+      .select("id, project_id, documentation_score, implementation_score, code_quality_score, innovation_score, presentation_score, discussion_score, total_score, reason, overridden_by, created_at, is_active, profiles!project_grade_overrides_overridden_by_fkey(full_name, email)")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false }),
   ]);
 
   const row = toProjectRow(project as unknown as RawProject);
+  const mappedAssignments = assignments || [];
+  const mappedReviews = ((reviews || []) as unknown as RawReview[]).map(toAdminReview);
+  const overrideHistory = ((overrides || []) as unknown as RawGradeOverride[]).map(toGradeOverride);
+  const activeOverride = overrideHistory.find((override) => override.is_active) || null;
+  const activePanelMemberIds = mappedAssignments
+    .filter((assignment) => assignment.is_active && !assignment.revoked_at)
+    .map((assignment) => assignment.panel_member_id);
+  const gradeSummary = getOfficialProjectGrade({
+    activePanelMemberIds,
+    reviews: mappedReviews,
+    activeOverride,
+  });
   const filesWithSignedUrls = await Promise.all(
     (files || []).map(async (file) => ({
       ...file,
@@ -160,7 +261,11 @@ export async function getAdminProjectDetail(projectId: string) {
     demo_video_url: project.demo_video_url as string | null,
     team_members: teamMembers || [],
     files: filesWithSignedUrls,
-    assignments: assignments || [],
+    assignments: mappedAssignments,
+    reviews: mappedReviews,
+    activeOverride,
+    overrideHistory,
+    gradeSummary,
   } as AdminProjectDetail;
 }
 
