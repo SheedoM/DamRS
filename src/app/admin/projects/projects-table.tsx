@@ -9,8 +9,11 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getSortedRowModel,
   useReactTable,
+  type SortingState,
 } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -23,11 +26,32 @@ import {
   type AssignmentStatus,
   type SubmissionFilter,
 } from "@/lib/admin/admin-projects";
+import { BulkAssignForm } from "./bulk-assign-form";
+import type { PanelMember } from "@/lib/panel/queries";
 import { cn } from "@/lib/utils";
 
 const columnHelper = createColumnHelper<AdminProjectRow>();
 
 const columns = [
+  columnHelper.display({
+    id: "select",
+    header: ({ table }) => (
+      <input
+        type="checkbox"
+        checked={table.getIsAllPageRowsSelected()}
+        onChange={table.getToggleAllPageRowsSelectedHandler()}
+        className="rounded border-slate-300"
+      />
+    ),
+    cell: ({ row }) => (
+      <input
+        type="checkbox"
+        checked={row.getIsSelected()}
+        onChange={row.getToggleSelectedHandler()}
+        className="rounded border-slate-300"
+      />
+    ),
+  }),
   columnHelper.accessor("title", {
     header: "Project",
     cell: (info) => (
@@ -49,6 +73,7 @@ const columns = [
   }),
   columnHelper.accessor("active_assignment_count", {
     header: "Assignment",
+    enableSorting: true,
     cell: (info) => (
       <Badge tone={info.getValue() > 0 ? "success" : "warning"}>
         {getAssignmentStatus(info.getValue())}
@@ -58,6 +83,7 @@ const columns = [
   columnHelper.display({
     id: "reviews",
     header: "Reviews",
+    enableSorting: true,
     cell: (info) => (
       <span className="text-sm text-slate-600">
         {info.row.original.completed_final_review_count} / {info.row.original.required_review_count} final
@@ -92,9 +118,11 @@ function normalizeReview(value?: string): AdminReviewFilter {
 
 export function AdminProjectsTable({
   projects,
+  panelMembers,
   initialFilters = {},
 }: {
   projects: AdminProjectRow[];
+  panelMembers: PanelMember[];
   initialFilters?: {
     assignmentStatus?: string;
     reviewStatus?: string;
@@ -107,6 +135,8 @@ export function AdminProjectsTable({
   const [submission, setSubmission] = useState<SubmissionFilter>(normalizeSubmission(initialFilters.submission));
   const [assignment, setAssignment] = useState<AssignmentStatus | "all">(normalizeAssignment(initialFilters.assignmentStatus));
   const [review, setReview] = useState<AdminReviewFilter>(normalizeReview(initialFilters.reviewStatus));
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [rowSelection, setRowSelection] = useState({});
 
   const filteredProjects = useMemo(() => {
     return filterAdminProjects(projects, {
@@ -120,10 +150,15 @@ export function AdminProjectsTable({
   const table = useReactTable({
     data: filteredProjects,
     columns,
-    state: { globalFilter },
+    state: { globalFilter, sorting, rowSelection },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    getRowId: (row) => row.id,
     onGlobalFilterChange: setGlobalFilter,
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   return (
@@ -177,14 +212,33 @@ export function AdminProjectsTable({
         </select>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
         <table className="w-full min-w-[760px] text-left text-sm">
           <thead className="bg-slate-50 text-xs uppercase text-slate-500">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th key={header.id} className="px-4 py-3 font-semibold">
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    {header.isPlaceholder ? null : (
+                      <div
+                        className={cn(
+                          "flex items-center gap-1",
+                          header.column.getCanSort() && "cursor-pointer select-none hover:text-slate-700"
+                        )}
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {header.column.getCanSort() ? (
+                          header.column.getIsSorted() === "asc" ? (
+                            <ArrowUp className="h-3 w-3" />
+                          ) : header.column.getIsSorted() === "desc" ? (
+                            <ArrowDown className="h-3 w-3" />
+                          ) : (
+                            <ArrowUpDown className="h-3 w-3 opacity-30" />
+                          )
+                        ) : null}
+                      </div>
+                    )}
                   </th>
                 ))}
               </tr>
@@ -210,6 +264,20 @@ export function AdminProjectsTable({
           </tbody>
         </table>
       </div>
+      
+      {Object.keys(rowSelection).length > 0 && (
+        <div className="sticky bottom-4 flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-md mt-4">
+          <span className="text-sm font-medium text-slate-700">{Object.keys(rowSelection).length} projects selected</span>
+          <div className="flex items-center gap-3">
+            <BulkAssignForm 
+              selectedProjectIds={Object.keys(rowSelection)} 
+              panelMembers={panelMembers} 
+              onSuccess={() => setRowSelection({})}
+            />
+            <Button variant="ghost" size="sm" onClick={() => setRowSelection({})}>Cancel</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

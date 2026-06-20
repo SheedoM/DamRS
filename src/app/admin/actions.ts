@@ -22,7 +22,6 @@ import { writeAuditLog } from "@/lib/audit";
 const createPanelMemberSchema = z.object({
   full_name: z.string().trim().min(2),
   email: z.string().trim().email(),
-  password: z.string().min(8),
   department: z.string().trim().min(2),
 });
 
@@ -66,7 +65,6 @@ export async function createPanelMemberAction(
   const parsed = createPanelMemberSchema.safeParse({
     full_name: formData.get("full_name"),
     email: formData.get("email"),
-    password: formData.get("password"),
     department: formData.get("department"),
   });
 
@@ -84,9 +82,11 @@ export async function createPanelMemberAction(
     };
   }
 
+  const tempPassword = Math.random().toString(36).slice(-10) + "Aa1!";
+
   const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
     email: parsed.data.email,
-    password: parsed.data.password,
+    password: tempPassword,
     email_confirm: true,
     user_metadata: {
       full_name: parsed.data.full_name,
@@ -112,7 +112,7 @@ export async function createPanelMemberAction(
 
   await writeAuditLog(profile.id, "admin_created_panel_member", "profile", authUser.user.id);
   revalidatePath("/admin/panel-members");
-  return { ok: true, message: "Panel member account created." };
+  return { ok: true, message: `Panel member account created. Temporary password: ${tempPassword}` };
 }
 
 export async function assignPanelMemberAction(
@@ -163,8 +163,62 @@ export async function assignPanelMemberAction(
     project_id: parsed.data.project_id,
     panel_member_id: parsed.data.panel_member_id,
   });
-  revalidatePath("/", "layout");
+
+  revalidatePath("/admin/projects");
+  revalidatePath(`/admin/projects/${parsed.data.project_id}`);
   return { ok: true, message: "Panel member assigned." };
+}
+
+export async function bulkAssignPanelMemberAction(
+  _previousState: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const { profile } = await requireRole(["admin"]);
+  const projectIds = formData.get("project_ids")?.toString().split(",") || [];
+  const panelMemberId = formData.get("panel_member_id")?.toString();
+
+  if (!panelMemberId || projectIds.length === 0) {
+    return { ok: false, message: "Choose projects and a panel member." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  let assignedCount = 0;
+
+  for (const projectId of projectIds) {
+    const { data: existing } = await supabase
+      .from("panel_assignments")
+      .select("id")
+      .eq("project_id", projectId)
+      .eq("panel_member_id", panelMemberId)
+      .eq("is_active", true)
+      .is("revoked_at", null)
+      .maybeSingle();
+
+    if (!existing) {
+      const { data: assignment, error } = await supabase
+        .from("panel_assignments")
+        .insert({
+          project_id: projectId,
+          panel_member_id: panelMemberId,
+          assigned_by: profile.id,
+          is_active: true,
+        })
+        .select("id")
+        .single();
+
+      if (!error && assignment) {
+        await supabase.from("projects").update({ status: "assigned" }).eq("id", projectId);
+        await writeAuditLog(profile.id, "admin_assigned_panel_member", "panel_assignment", assignment.id, {
+          project_id: projectId,
+          panel_member_id: panelMemberId,
+        });
+        assignedCount++;
+      }
+    }
+  }
+
+  revalidatePath("/admin/projects");
+  return { ok: true, message: `Assigned ${assignedCount} project(s).` };
 }
 
 export async function revokeAssignmentAction(
