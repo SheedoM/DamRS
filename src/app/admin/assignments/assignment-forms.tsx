@@ -60,7 +60,7 @@ export function RevokeAssignmentForm({ assignment }: { assignment: Assignment })
   const [state, formAction, isPending] = useActionState(revokeAssignmentAction, initialState);
 
   return (
-    <form action={formAction} className="space-y-2">
+    <form action={formAction} className="contents">
       <input type="hidden" name="assignment_id" value={assignment.id} />
       <input type="hidden" name="project_id" value={assignment.project_id} />
       {!state.ok ? <Alert>{state.message}</Alert> : null}

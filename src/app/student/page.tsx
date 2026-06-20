@@ -39,30 +39,35 @@ export default async function StudentDashboardPage() {
         ? `Submitted ${new Date(projectData.project.submitted_at).toLocaleDateString()}`
         : "Create and complete your project submission.",
       icon: CheckCircle2,
+      href: projectData ? "/student/project/status" : "/student/project/new",
     },
     {
       title: "Deadline",
       value: submissionWindow ? new Date(submissionWindow.closes_at).toLocaleDateString() : "Closed",
       detail: submissionWindow ? "Active submission window is configured." : "No active submission window.",
       icon: CalendarClock,
+      href: projectData ? "/student/project/status" : "/student/project/new",
     },
     {
       title: "Project status",
       value: projectData ? projectData.project.title : "No project",
       detail: projectData ? projectData.project.department : "One team leader account can create one project.",
       icon: FileText,
+      href: projectData ? "/student/project" : "/student/project/new",
     },
     {
       title: "Uploaded files",
       value: projectData ? `${projectData.files.length}` : "0",
       detail: "Required: PDF and ZIP. Presentation is optional.",
       icon: FileArchive,
+      href: projectData ? "/student/project" : "/student/project/new",
     },
     {
       title: "Missing items",
       value: projectData ? `${missing.length}` : "Project",
       detail: missing.length > 0 ? "Open project status for details." : "Ready when all requirements are complete.",
       icon: Upload,
+      href: projectData ? "/student/project/status" : "/student/project/new",
     },
   ];
 

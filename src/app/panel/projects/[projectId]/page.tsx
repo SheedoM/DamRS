@@ -9,19 +9,11 @@ import { AppShell } from "@/components/layout/app-shell";
 import { requireRole } from "@/lib/auth/require-role";
 import { getPanelProjectDetail } from "@/lib/panel/queries";
 import { getReviewTotal } from "@/lib/review/review.schema";
-import { cn } from "@/lib/utils";
+import { cn, formatDate, formatFileSize } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-function formatDate(value: string | null) {
-  return value ? new Date(value).toLocaleString() : "Not available";
-}
 
-function formatFileSize(size: number) {
-  if (size < 1024) return `${size} B`;
-  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-}
 
 function componentScoreText(value: number | null, max: number) {
   return value !== null ? `${value.toFixed(2)} / ${max}` : "Pending";

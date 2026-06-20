@@ -15,7 +15,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { buttonVariants } from "@/components/ui/button";
-import { getAssignmentStatus, type AdminProjectRow } from "@/lib/admin/admin-projects";
+import {
+  filterAdminProjects,
+  getAssignmentStatus,
+  type AdminProjectRow,
+  type AdminReviewFilter,
+  type AssignmentStatus,
+  type SubmissionFilter,
+} from "@/lib/admin/admin-projects";
 import { cn } from "@/lib/utils";
 
 const columnHelper = createColumnHelper<AdminProjectRow>();
@@ -49,6 +56,15 @@ const columns = [
     ),
   }),
   columnHelper.display({
+    id: "reviews",
+    header: "Reviews",
+    cell: (info) => (
+      <span className="text-sm text-slate-600">
+        {info.row.original.completed_final_review_count} / {info.row.original.required_review_count} final
+      </span>
+    ),
+  }),
+  columnHelper.display({
     id: "actions",
     header: "",
     cell: (info) => (
@@ -62,18 +78,44 @@ const columns = [
   }),
 ];
 
-export function AdminProjectsTable({ projects }: { projects: AdminProjectRow[] }) {
+function normalizeSubmission(value?: string): SubmissionFilter {
+  return value === "submitted" || value === "draft" ? value : "all";
+}
+
+function normalizeAssignment(value?: string): AssignmentStatus | "all" {
+  return value === "assigned" || value === "unassigned" ? value : "all";
+}
+
+function normalizeReview(value?: string): AdminReviewFilter {
+  return value === "final-complete" || value === "final-pending" || value === "draft-pending" ? value : "all";
+}
+
+export function AdminProjectsTable({
+  projects,
+  initialFilters = {},
+}: {
+  projects: AdminProjectRow[];
+  initialFilters?: {
+    assignmentStatus?: string;
+    reviewStatus?: string;
+    status?: string;
+    submission?: string;
+  };
+}) {
   const [globalFilter, setGlobalFilter] = useState("");
-  const [status, setStatus] = useState("");
-  const [assignment, setAssignment] = useState("");
+  const [status, setStatus] = useState(initialFilters.status || "");
+  const [submission, setSubmission] = useState<SubmissionFilter>(normalizeSubmission(initialFilters.submission));
+  const [assignment, setAssignment] = useState<AssignmentStatus | "all">(normalizeAssignment(initialFilters.assignmentStatus));
+  const [review, setReview] = useState<AdminReviewFilter>(normalizeReview(initialFilters.reviewStatus));
 
   const filteredProjects = useMemo(() => {
-    return projects.filter((project) => {
-      if (status && project.status !== status) return false;
-      if (assignment && getAssignmentStatus(project.active_assignment_count) !== assignment) return false;
-      return true;
+    return filterAdminProjects(projects, {
+      status: status || undefined,
+      submission,
+      assignmentStatus: assignment,
+      reviewStatus: review,
     });
-  }, [assignment, projects, status]);
+  }, [assignment, projects, review, status, submission]);
 
   const table = useReactTable({
     data: filteredProjects,
@@ -86,12 +128,21 @@ export function AdminProjectsTable({ projects }: { projects: AdminProjectRow[] }
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-5">
         <Input
           value={globalFilter}
           onChange={(event) => setGlobalFilter(event.target.value)}
           placeholder="Search projects, departments, supervisors..."
         />
+        <select
+          value={submission}
+          onChange={(event) => setSubmission(normalizeSubmission(event.target.value))}
+          className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
+        >
+          <option value="all">All submissions</option>
+          <option value="submitted">Submitted</option>
+          <option value="draft">Draft</option>
+        </select>
         <select
           value={status}
           onChange={(event) => setStatus(event.target.value)}
@@ -107,12 +158,22 @@ export function AdminProjectsTable({ projects }: { projects: AdminProjectRow[] }
         </select>
         <select
           value={assignment}
-          onChange={(event) => setAssignment(event.target.value)}
+          onChange={(event) => setAssignment(normalizeAssignment(event.target.value))}
           className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
         >
-          <option value="">All assignments</option>
+          <option value="all">All assignments</option>
           <option value="assigned">Assigned</option>
           <option value="unassigned">Unassigned</option>
+        </select>
+        <select
+          value={review}
+          onChange={(event) => setReview(normalizeReview(event.target.value))}
+          className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
+        >
+          <option value="all">All reviews</option>
+          <option value="final-complete">Final complete</option>
+          <option value="final-pending">Final pending</option>
+          <option value="draft-pending">Draft pending</option>
         </select>
       </div>
 

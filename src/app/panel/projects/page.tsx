@@ -6,34 +6,47 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppShell } from "@/components/layout/app-shell";
 import { requireRole } from "@/lib/auth/require-role";
 import { getPanelProjects } from "@/lib/panel/queries";
-import { cn } from "@/lib/utils";
+import { filterPanelProjects, getPanelProjectReviewBadge, type PanelProjectReviewFilter } from "@/lib/panel/panel-projects";
+import { cn, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-function formatDate(value: string | null) {
-  return value ? new Date(value).toLocaleString() : "Not available";
+
+
+function normalizeReviewFilter(value?: string): PanelProjectReviewFilter {
+  if (value === "reviewed" || value === "pending-draft" || value === "pending-final") return value;
+  return "all";
 }
 
-function ReviewBadge({ submitted, label }: { submitted: boolean; label: string }) {
-  return (
-    <Badge tone={submitted ? "success" : "warning"}>
-      {label}: {submitted ? "submitted" : "pending"}
-    </Badge>
-  );
+function filterTitle(filter: PanelProjectReviewFilter) {
+  if (filter === "reviewed") return "Reviewed projects";
+  if (filter === "pending-draft") return "Projects pending draft review";
+  if (filter === "pending-final") return "Projects pending final review";
+  return "Projects assigned to you";
 }
 
-export default async function PanelProjectsPage() {
+export default async function PanelProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ review?: string }>;
+}) {
   const { profile } = await requireRole(["panel_member"]);
+  const params = await searchParams;
+  const reviewFilter = normalizeReviewFilter(params.review);
   const projects = await getPanelProjects(profile.id);
+  const filteredProjects = filterPanelProjects(projects, { review: reviewFilter });
 
   return (
     <AppShell title="Assigned Projects" profile={profile}>
       <Card>
         <CardHeader>
-          <CardTitle>Projects assigned to you</CardTitle>
+          <CardTitle>{filterTitle(reviewFilter)}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {projects.length > 0 ? projects.map((project) => (
+          {filteredProjects.length > 0 ? filteredProjects.map((project) => {
+            const reviewBadge = getPanelProjectReviewBadge(project.reviewStatus);
+
+            return (
             <div
               key={project.id}
               className="flex flex-col gap-4 rounded-md border border-slate-200 p-4 md:flex-row md:items-center md:justify-between"
@@ -46,9 +59,7 @@ export default async function PanelProjectsPage() {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Badge tone="info">{project.status.replaceAll("_", " ")}</Badge>
-                  <ReviewBadge submitted={project.reviewStatus.draftSubmitted} label="Draft" />
-                  <ReviewBadge submitted={project.reviewStatus.finalSubmitted} label="Final" />
+                  <Badge tone={reviewBadge.tone}>{reviewBadge.label}</Badge>
                 </div>
                 <p className="text-xs text-slate-500">Assigned {formatDate(project.assigned_at)}</p>
               </div>
@@ -59,12 +70,12 @@ export default async function PanelProjectsPage() {
                 Open
               </Link>
             </div>
-          )) : (
-            <p className="text-sm text-slate-500">No active project assignments yet.</p>
+            );
+          }) : (
+            <p className="text-sm text-slate-500">No projects match this view.</p>
           )}
         </CardContent>
       </Card>
     </AppShell>
   );
 }
-

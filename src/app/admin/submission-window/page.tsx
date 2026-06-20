@@ -26,6 +26,11 @@ export default async function AdminSubmissionWindowPage({
   return (
     <AppShell title="Submission Window" profile={profile}>
       <div className="space-y-5">
+        <div className="flex items-center justify-between">
+          <Link href="/admin/submission-window?mode=create" className={cn(buttonVariants())}>
+            Create new window
+          </Link>
+        </div>
         <Card>
           <CardHeader className="flex flex-row items-start justify-between gap-4">
             <div>
@@ -51,16 +56,13 @@ export default async function AdminSubmissionWindowPage({
                 Create a submission window before students can submit projects.
               </p>
             )}
-            <div className="flex flex-wrap gap-3">
-              <Link href="/admin/submission-window?mode=create" className={cn(buttonVariants())}>
-                Create new window
-              </Link>
-              {windowData ? (
+            {windowData ? (
+              <div className="flex flex-wrap gap-3">
                 <Link href="/admin/submission-window?mode=edit" className={cn(buttonVariants({ variant: "outline" }))}>
                   Edit current window
                 </Link>
-              ) : null}
-            </div>
+              </div>
+            ) : null}
           </CardContent>
         </Card>
 

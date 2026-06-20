@@ -1,6 +1,7 @@
 import { createSignedUrlForProjectFile } from "@/lib/project/storage";
 import { getPanelDashboardStats, getPanelProjectReviewStatus, type ReviewStatus } from "@/lib/review/review.schema";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { firstRelation } from "@/lib/utils";
 
 type ProjectRelation = {
   id: string;
@@ -82,9 +83,7 @@ export type PanelProjectDetail = PanelProjectListItem & {
   reviews: PanelReview[];
 };
 
-function firstRelation<T>(value: T | T[] | null | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
+
 
 function toProjectListItem(
   assignment: RawAssignment,

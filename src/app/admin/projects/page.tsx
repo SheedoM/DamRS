@@ -5,13 +5,31 @@ import { getAdminProjects } from "@/lib/admin/queries";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminProjectsPage() {
+export default async function AdminProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    assignment?: string;
+    review?: string;
+    status?: string;
+    submission?: string;
+  }>;
+}) {
   const { profile } = await requireRole(["admin"]);
+  const params = await searchParams;
   const projects = await getAdminProjects();
 
   return (
     <AppShell title="Projects" profile={profile}>
-      <AdminProjectsTable projects={projects} />
+      <AdminProjectsTable
+        projects={projects}
+        initialFilters={{
+          assignmentStatus: params.assignment,
+          reviewStatus: params.review,
+          status: params.status,
+          submission: params.submission,
+        }}
+      />
     </AppShell>
   );
 }

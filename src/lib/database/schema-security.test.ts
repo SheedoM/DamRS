@@ -20,6 +20,12 @@ const unifiedReviewMigrationPath = join(
   "migrations",
   "0004_unified_reviews_and_overrides.sql",
 );
+const adminEnteredReviewMigrationPath = join(
+  process.cwd(),
+  "supabase",
+  "migrations",
+  "0005_admin_entered_review_fields.sql",
+);
 
 function readMigration() {
   return readFileSync(migrationPath, "utf8").toLowerCase();
@@ -31,6 +37,10 @@ function readReviewStatusMigration() {
 
 function readUnifiedReviewMigration() {
   return readFileSync(unifiedReviewMigrationPath, "utf8").toLowerCase();
+}
+
+function readAdminEnteredReviewMigration() {
+  return readFileSync(adminEnteredReviewMigrationPath, "utf8").toLowerCase();
 }
 
 describe("phase 2 schema migration", () => {
@@ -154,5 +164,17 @@ describe("phase 2 schema migration", () => {
     expect(sql).toContain("create or replace function public.recompute_project_review_status");
     expect(sql).toContain("create trigger reviews_recompute_project_status");
     expect(sql).not.toContain("new.review_type");
+  });
+
+  it("adds audit fields for admin-entered missing panel grades", () => {
+    expect(existsSync(adminEnteredReviewMigrationPath)).toBe(true);
+
+    const sql = readAdminEnteredReviewMigration();
+
+    expect(sql).toContain("alter table public.reviews add column if not exists admin_entered_by");
+    expect(sql).toContain("alter table public.reviews add column if not exists admin_entered_at");
+    expect(sql).toContain("alter table public.reviews add column if not exists admin_entry_reason");
+    expect(sql).toContain("reviews_admin_entry_requires_reason");
+    expect(sql).toContain("reviews_admin_entered_by_idx");
   });
 });

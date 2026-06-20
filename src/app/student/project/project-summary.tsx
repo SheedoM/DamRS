@@ -10,6 +10,7 @@ import {
   getMissingSubmissionRequirements,
   type RequiredProjectFileType,
 } from "@/lib/project/submission.schema";
+import { formatFileSize } from "@/lib/utils";
 import type { ProjectFile, StudentProject, TeamMember } from "@/lib/project/queries";
 import { cn } from "@/lib/utils";
 
@@ -29,11 +30,7 @@ const requiredUploads: {
   { fileType: "presentation_file", label: "Presentation file (optional)", accept: ".pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" },
 ];
 
-function formatFileSize(size: number) {
-  if (size < 1024) return `${size} B`;
-  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-}
+
 
 export function ProjectSummary({ project, teamMembers, files }: ProjectSummaryProps) {
   const missing = getMissingSubmissionRequirements({

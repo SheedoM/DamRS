@@ -12,11 +12,10 @@ import {
 } from "@/lib/review/review.schema";
 import { requireRole } from "@/lib/auth/require-role";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { ActionResult } from "@/lib/actions";
+import { writeAuditLog } from "@/lib/audit";
 
-type ActionResult = {
-  ok: boolean;
-  message: string;
-};
+
 
 const projectIdSchema = z.string().uuid();
 
@@ -50,22 +49,7 @@ async function getOwnReview(projectId: string, panelMemberId: string) {
   return data as { id: string; status: string; draft_submitted_at: string | null } | null;
 }
 
-async function writePanelAuditLog(
-  actorId: string,
-  action: string,
-  entityId: string,
-  metadata: Record<string, string>,
-) {
-  const supabase = await createSupabaseServerClient();
 
-  await supabase.from("audit_logs").insert({
-    actor_id: actorId,
-    action,
-    entity_type: "review",
-    entity_id: entityId,
-    metadata,
-  });
-}
 
 function revalidatePanelReviewPaths(projectId: string) {
   revalidatePath("/panel");
@@ -123,7 +107,7 @@ export async function saveDraftReviewAction(
     return { ok: false, message: result.error?.message || "Unable to save draft review." };
   }
 
-  await writePanelAuditLog(profile.id, "panel_submitted_draft_review", result.data.id, {
+  await writeAuditLog(profile.id, "panel_submitted_draft_review", "review", result.data.id, {
     project_id: projectIdResult.data,
   });
   revalidatePanelReviewPaths(projectIdResult.data);
@@ -178,7 +162,7 @@ export async function saveFinalReviewAction(
     return { ok: false, message: error?.message || "Unable to save final review." };
   }
 
-  await writePanelAuditLog(profile.id, "panel_submitted_final_review", data.id, {
+  await writeAuditLog(profile.id, "panel_submitted_final_review", "review", data.id, {
     project_id: projectIdResult.data,
   });
   revalidatePanelReviewPaths(projectIdResult.data);

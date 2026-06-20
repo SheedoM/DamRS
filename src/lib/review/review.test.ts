@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
   buildDraftReviewPayload,
   buildFinalReviewPayload,
+  canAdminEnterPanelGrade,
   calculateReviewTotal,
+  adminPanelGradeEntryFormSchema,
   draftReviewFormSchema,
   finalReviewFormSchema,
   getOfficialProjectGrade,
@@ -110,7 +112,7 @@ describe("unified review helpers", () => {
     });
   });
 
-  it("requires all active panel members to submit final reviews before official panel grade appears", () => {
+  it("shows one in-review display grade while panel grades are incomplete", () => {
     expect(
       getOfficialProjectGrade({
         activePanelMemberIds: ["p1", "p2"],
@@ -128,21 +130,17 @@ describe("unified review helpers", () => {
         ],
         activeOverride: null,
       }),
-    ).toEqual({
+    ).toMatchObject({
       completedReviewCount: 1,
       requiredReviewCount: 2,
-      isPanelComplete: false,
-      panelAverage: null,
-      panelAveragePercentage: null,
-      provisionalAverage: 90,
-      provisionalAveragePercentage: "90.00%",
-      officialGrade: null,
-      officialPercentage: null,
-      officialSource: null,
+      displayGrade: 90,
+      displayPercentage: "90.00%",
+      status: "In review",
+      source: "panel_average",
     });
   });
 
-  it("averages completed reviews after every active panel member submits final review", () => {
+  it("shows an official panel-average display grade after every active panel member submits final review", () => {
     expect(
       getOfficialProjectGrade({
         activePanelMemberIds: ["p1", "p2"],
@@ -169,11 +167,18 @@ describe("unified review helpers", () => {
           },
         ],
         activeOverride: null,
-      }).officialPercentage,
-    ).toBe("86.00%");
+      }),
+    ).toMatchObject({
+      completedReviewCount: 2,
+      requiredReviewCount: 2,
+      displayGrade: 86,
+      displayPercentage: "86.00%",
+      status: "Official",
+      source: "panel_average",
+    });
   });
 
-  it("uses dean override as the official grade while preserving panel average", () => {
+  it("uses dean override as the single display grade", () => {
     expect(
       getOfficialProjectGrade({
         activePanelMemberIds: ["p1", "p2"],
@@ -209,11 +214,92 @@ describe("unified review helpers", () => {
         },
       }),
     ).toMatchObject({
-      panelAverage: 86,
-      panelAveragePercentage: "86.00%",
-      officialGrade: 92,
-      officialPercentage: "92.00%",
-      officialSource: "override",
+      completedReviewCount: 2,
+      requiredReviewCount: 2,
+      displayGrade: 92,
+      displayPercentage: "92.00%",
+      status: "Dean override",
+      source: "dean_override",
+    });
+  });
+
+  it("counts admin-entered final grades toward the official panel average", () => {
+    expect(
+      getOfficialProjectGrade({
+        activePanelMemberIds: ["p1", "p2"],
+        reviews: [
+          {
+            panel_member_id: "p1",
+            status: "final_reviewed",
+            documentation_score: 18,
+            implementation_score: 23,
+            code_quality_score: 19,
+            innovation_score: 14,
+            presentation_score: 9,
+            discussion_score: 7,
+          },
+          {
+            panel_member_id: "p2",
+            status: "final_reviewed",
+            documentation_score: 20,
+            implementation_score: 24,
+            code_quality_score: 20,
+            innovation_score: 15,
+            presentation_score: 10,
+            discussion_score: 9,
+            admin_entered_by: "admin-1",
+          },
+        ],
+        activeOverride: null,
+      }),
+    ).toMatchObject({
+      completedReviewCount: 2,
+      requiredReviewCount: 2,
+      displayGrade: 94,
+      displayPercentage: "94.00%",
+      status: "Official",
+      source: "panel_average",
+    });
+  });
+
+  it("validates admin-entered panel grade reason and rubric limits", () => {
+    const result = adminPanelGradeEntryFormSchema.safeParse({
+      documentation_score: "20",
+      implementation_score: "25",
+      code_quality_score: "20",
+      innovation_score: "15",
+      presentation_score: "10",
+      discussion_score: "10",
+      reason: "Late panel member submission recorded by dean.",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("blocks admin-filled panel grades for unassigned or already-final-reviewed panel members", () => {
+    expect(
+      canAdminEnterPanelGrade({
+        panelMemberId: "p3",
+        activePanelMemberIds: ["p1", "p2"],
+        existingReview: null,
+      }),
+    ).toEqual({
+      ok: false,
+      message: "This panel member is not actively assigned to the project.",
+    });
+
+    expect(
+      canAdminEnterPanelGrade({
+        panelMemberId: "p1",
+        activePanelMemberIds: ["p1", "p2"],
+        existingReview: {
+          status: "final_reviewed",
+          final_submitted_at: "2026-06-20T12:00:00.000Z",
+        },
+      }),
+    ).toEqual({
+      ok: false,
+      message: "This panel member already has a final grade. Use dean override instead.",
     });
   });
 
@@ -279,4 +365,3 @@ describe("unified review helpers", () => {
     });
   });
 });
-

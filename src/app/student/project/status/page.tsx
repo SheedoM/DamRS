@@ -9,15 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth/require-role";
 import { getMissingSubmissionRequirements } from "@/lib/project/submission.schema";
 import { getStudentProject } from "@/lib/project/queries";
-import { cn } from "@/lib/utils";
+import { cn, formatFileSize } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-function formatFileSize(size: number) {
-  if (size < 1024) return `${size} B`;
-  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-}
+
 
 function getStatusTone(status: string) {
   return status === "draft" ? "warning" : "success";

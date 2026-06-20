@@ -16,24 +16,28 @@ export default async function PanelDashboardPage() {
       value: String(stats.assignedProjects),
       detail: "Projects currently assigned to you.",
       icon: FileSearch,
+      href: "/panel/projects",
     },
     {
       title: "Reviewed projects",
       value: String(stats.reviewedProjects),
       detail: "Projects with both draft and final reviews submitted.",
       icon: ShieldCheck,
+      href: "/panel/projects?review=reviewed",
     },
     {
       title: "Pending draft",
       value: String(stats.pendingDraftReviews),
       detail: "Assigned projects missing your pre-discussion review.",
       icon: ClipboardPenLine,
+      href: "/panel/projects?review=pending-draft",
     },
     {
       title: "Pending final",
       value: String(stats.pendingFinalReviews),
       detail: "Assigned projects missing your final review.",
       icon: ListTodo,
+      href: "/panel/projects?review=pending-final",
     },
   ];
 

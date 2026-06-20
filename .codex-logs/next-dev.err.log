@@ -1,0 +1,345 @@
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '927806766'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '927806766'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '927806766'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '1249639297'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '1249639297'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '2339228044'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '2339228044'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '927806766'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '927806766'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '1249639297'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '927806766'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '927806766'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '3079326054'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '3079326054'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '3079326054'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '3079326054'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:51:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '3079326054'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:43:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '2703350885'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:43:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '2703350885'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:43:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '2703350885'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:43:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '2703350885'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:43:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '2703350885'
+}
+⨯ ReferenceError: firstRelation is not defined
+    at toAssignment (src\lib\admin\queries.ts:177:19)
+    at Array.map (<anonymous>)
+    at getAssignmentsForProject (src\lib\admin\queries.ts:321:55)
+    at async getAdminProjectDetail (src\lib\admin\queries.ts:242:105)
+    at async AdminProjectDetailPage (src\app\admin\projects\[projectId]\page.tsx:43:45)
+  175 |
+  176 | function toAssignment(assignment: RawAssignment): Assignment {
+> 177 |   const profile = firstRelation(assignment.profiles);
+      |                   ^
+  178 |   const project = firstRelation(assignment.projects);
+  179 |
+  180 |   return { {
+  digest: '2703350885'
+}

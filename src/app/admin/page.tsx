@@ -14,14 +14,18 @@ export default async function AdminDashboardPage() {
   const incompleteCount = projects.filter((project) => project.status === "draft").length;
   const unassignedCount = projects.filter((project) => project.active_assignment_count === 0).length;
   const assignedCount = projects.filter((project) => project.active_assignment_count > 0).length;
+  const finalCompleteCount = projects.filter(
+    (project) => project.required_review_count > 0
+      && project.completed_final_review_count === project.required_review_count,
+  ).length;
 
   const cards = [
-    { title: "Total projects", value: String(projects.length), detail: "All projects visible to admin.", icon: Files },
-    { title: "Submitted", value: String(submittedCount), detail: "Projects no longer in draft.", icon: ListChecks },
-    { title: "Incomplete", value: String(incompleteCount), detail: "Draft projects still missing final submission.", icon: FileWarning },
-    { title: "Unassigned", value: String(unassignedCount), detail: "Projects with no active panel assignment.", icon: Users },
-    { title: "Assigned", value: String(assignedCount), detail: "Projects with at least one active panel member.", icon: ClipboardCheck },
-    { title: "Final reviews", value: "Phase 5", detail: "Panel review counts arrive with review workflow.", icon: UserCheck },
+    { title: "Total projects", value: String(projects.length), detail: "All projects visible to admin.", icon: Files, href: "/admin/projects" },
+    { title: "Submitted", value: String(submittedCount), detail: "Projects no longer in draft.", icon: ListChecks, href: "/admin/projects?submission=submitted" },
+    { title: "Incomplete", value: String(incompleteCount), detail: "Draft projects still missing final submission.", icon: FileWarning, href: "/admin/projects?submission=draft" },
+    { title: "Unassigned", value: String(unassignedCount), detail: "Projects with no active panel assignment.", icon: Users, href: "/admin/projects?assignment=unassigned" },
+    { title: "Assigned", value: String(assignedCount), detail: "Projects with at least one active panel member.", icon: ClipboardCheck, href: "/admin/projects?assignment=assigned" },
+    { title: "Final reviews", value: String(finalCompleteCount), detail: "Projects with all active final grades submitted.", icon: UserCheck, href: "/admin/projects?review=final-complete" },
   ];
 
   return (

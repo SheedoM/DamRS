@@ -5,14 +5,19 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireRole } from "@/lib/auth/require-role";
-import { buildGradeOverridePayload, gradeOverrideFormSchema } from "@/lib/review/review.schema";
+import {
+  adminPanelGradeEntryFormSchema,
+  buildAdminPanelGradeEntryPayload,
+  buildGradeOverridePayload,
+  canAdminEnterPanelGrade,
+  gradeOverrideFormSchema,
+} from "@/lib/review/review.schema";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { ActionResult } from "@/lib/actions";
+import { writeAuditLog } from "@/lib/audit";
 
-type ActionResult = {
-  ok: boolean;
-  message: string;
-};
+
 
 const createPanelMemberSchema = z.object({
   full_name: z.string().trim().min(2),
@@ -46,24 +51,18 @@ const gradeOverrideActionSchema = gradeOverrideFormSchema.extend({
   project_id: z.string().uuid(),
 });
 
-async function writeAuditLog(action: string, entityType: string, entityId: string, metadata = {}) {
-  const { profile } = await requireRole(["admin"]);
-  const supabase = await createSupabaseServerClient();
+const adminPanelGradeEntryActionSchema = adminPanelGradeEntryFormSchema.extend({
+  project_id: z.string().uuid(),
+  panel_member_id: z.string().uuid(),
+});
 
-  await supabase.from("audit_logs").insert({
-    actor_id: profile.id,
-    action,
-    entity_type: entityType,
-    entity_id: entityId,
-    metadata,
-  });
-}
+
 
 export async function createPanelMemberAction(
   _previousState: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireRole(["admin"]);
+  const { profile } = await requireRole(["admin"]);
   const parsed = createPanelMemberSchema.safeParse({
     full_name: formData.get("full_name"),
     email: formData.get("email"),
@@ -111,7 +110,7 @@ export async function createPanelMemberAction(
     return { ok: false, message: profileError.message };
   }
 
-  await writeAuditLog("admin_created_panel_member", "profile", authUser.user.id);
+  await writeAuditLog(profile.id, "admin_created_panel_member", "profile", authUser.user.id);
   revalidatePath("/admin/panel-members");
   return { ok: true, message: "Panel member account created." };
 }
@@ -160,7 +159,7 @@ export async function assignPanelMemberAction(
   }
 
   await supabase.from("projects").update({ status: "assigned" }).eq("id", parsed.data.project_id);
-  await writeAuditLog("admin_assigned_panel", "panel_assignment", assignment.id, {
+  await writeAuditLog(profile.id, "admin_assigned_panel", "panel_assignment", assignment.id, {
     project_id: parsed.data.project_id,
     panel_member_id: parsed.data.panel_member_id,
   });
@@ -175,7 +174,7 @@ export async function revokeAssignmentAction(
   _previousState: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireRole(["admin"]);
+  const { profile } = await requireRole(["admin"]);
   const parsed = revokeAssignmentSchema.safeParse({
     assignment_id: formData.get("assignment_id"),
     project_id: formData.get("project_id"),
@@ -198,7 +197,7 @@ export async function revokeAssignmentAction(
     return { ok: false, message: error.message };
   }
 
-  await writeAuditLog("admin_revoked_panel", "panel_assignment", parsed.data.assignment_id, {
+  await writeAuditLog(profile.id, "admin_revoked_panel", "panel_assignment", parsed.data.assignment_id, {
     project_id: parsed.data.project_id,
   });
   revalidatePath("/admin");
@@ -293,7 +292,7 @@ export async function saveSubmissionWindowAction(
     return { ok: false, message: result.error?.message || "Unable to save submission window." };
   }
 
-  await writeAuditLog("admin_updated_submission_window", "submission_window", result.data.id, {
+  await writeAuditLog(profile.id, "admin_updated_submission_window", "submission_window", result.data.id, {
     cycle_id: cycleId,
   });
   revalidatePath("/admin");
@@ -357,6 +356,7 @@ export async function saveGradeOverrideAction(
   }
 
   await writeAuditLog(
+    profile.id,
     previousOverride ? "admin_replaced_grade_override" : "admin_created_grade_override",
     "project_grade_override",
     override.id,
@@ -369,4 +369,91 @@ export async function saveGradeOverrideAction(
   revalidatePath("/admin/projects");
   revalidatePath(`/admin/projects/${parsed.data.project_id}`);
   return { ok: true, message: "Official grade override saved." };
+}
+
+export async function enterMissingPanelGradeAction(
+  _previousState: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const { profile } = await requireRole(["admin"]);
+  const parsed = adminPanelGradeEntryActionSchema.safeParse({
+    project_id: formData.get("project_id"),
+    panel_member_id: formData.get("panel_member_id"),
+    documentation_score: formData.get("documentation_score"),
+    implementation_score: formData.get("implementation_score"),
+    code_quality_score: formData.get("code_quality_score"),
+    innovation_score: formData.get("innovation_score"),
+    presentation_score: formData.get("presentation_score"),
+    discussion_score: formData.get("discussion_score"),
+    reason: formData.get("reason"),
+  });
+
+  if (!parsed.success) {
+    return { ok: false, message: parsed.error.issues[0]?.message || "Invalid panel grade." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data: assignments } = await supabase
+    .from("panel_assignments")
+    .select("panel_member_id")
+    .eq("project_id", parsed.data.project_id)
+    .eq("is_active", true)
+    .is("revoked_at", null);
+
+  const activePanelMemberIds = (assignments || []).map((assignment) => assignment.panel_member_id as string);
+  const { data: existingReview } = await supabase
+    .from("reviews")
+    .select("id, status, draft_submitted_at, final_submitted_at")
+    .eq("project_id", parsed.data.project_id)
+    .eq("panel_member_id", parsed.data.panel_member_id)
+    .maybeSingle();
+
+  const eligibility = canAdminEnterPanelGrade({
+    panelMemberId: parsed.data.panel_member_id,
+    activePanelMemberIds,
+    existingReview: existingReview as { status: string | null; final_submitted_at?: string | null } | null,
+  });
+
+  if (!eligibility.ok) {
+    return { ok: false, message: eligibility.message };
+  }
+
+  const now = new Date().toISOString();
+  const { reason, ...scores } = buildAdminPanelGradeEntryPayload(parsed.data);
+  const payload = {
+    ...scores,
+    project_id: parsed.data.project_id,
+    panel_member_id: parsed.data.panel_member_id,
+    status: "final_reviewed",
+    draft_submitted_at: existingReview?.draft_submitted_at || now,
+    final_submitted_at: now,
+    final_notes: reason,
+    admin_entered_by: profile.id,
+    admin_entered_at: now,
+    admin_entry_reason: reason,
+  };
+
+  const result = existingReview
+    ? await supabase.from("reviews").update(payload).eq("id", existingReview.id).select("id").single()
+    : await supabase.from("reviews").insert(payload).select("id").single();
+
+  if (result.error || !result.data) {
+    return { ok: false, message: result.error?.message || "Unable to enter missing panel grade." };
+  }
+
+  await writeAuditLog(profile.id, "admin_entered_missing_panel_grade", "review", result.data.id, {
+    project_id: parsed.data.project_id,
+    panel_member_id: parsed.data.panel_member_id,
+  });
+  revalidatePath("/admin");
+  revalidatePath("/admin/projects");
+  revalidatePath(`/admin/projects/${parsed.data.project_id}`);
+  revalidatePath("/admin/assignments");
+  revalidatePath("/panel");
+  revalidatePath("/panel/projects");
+  revalidatePath(`/panel/projects/${parsed.data.project_id}`);
+  revalidatePath("/student");
+  revalidatePath("/student/project");
+  revalidatePath("/student/project/status");
+  return { ok: true, message: "Missing panel grade entered." };
 }

@@ -13,11 +13,10 @@ import {
 } from "@/lib/project/submission.schema";
 import { buildProjectStoragePath, getBucketForFileType } from "@/lib/project/storage";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { ActionResult } from "@/lib/actions";
+import { writeAuditLog } from "@/lib/audit";
 
-type ActionResult = {
-  ok: boolean;
-  message: string;
-};
+
 
 const fileUploadSchema = z.object({
   projectId: z.string().uuid(),
@@ -70,18 +69,7 @@ function parseProjectForm(formData: FormData) {
   });
 }
 
-async function writeAuditLog(action: string, entityType: string, entityId: string, metadata = {}) {
-  const supabase = await createSupabaseServerClient();
-  const { profile } = await requireRole(["student"]);
 
-  await supabase.from("audit_logs").insert({
-    actor_id: profile.id,
-    action,
-    entity_type: entityType,
-    entity_id: entityId,
-    metadata,
-  });
-}
 
 export async function createProjectAction(
   _previousState: ActionResult,
@@ -138,7 +126,7 @@ export async function createProjectAction(
     return { ok: false, message: teamError.message };
   }
 
-  await writeAuditLog("student_created_project", "project", createdProject.id);
+  await writeAuditLog(profile.id, "student_created_project", "project", createdProject.id);
   revalidatePath("/student");
   revalidatePath("/student/project");
   redirect("/student/project");
@@ -148,7 +136,7 @@ export async function updateProjectAction(
   _previousState: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireRole(["student"]);
+  const { profile } = await requireRole(["student"]);
   const projectId = String(formData.get("project_id") || "");
   const parsed = parseProjectForm(formData);
 
@@ -190,8 +178,7 @@ export async function updateProjectAction(
   if (teamError) {
     return { ok: false, message: teamError.message };
   }
-
-  await writeAuditLog("student_updated_project", "project", projectId);
+  await writeAuditLog(profile.id, "student_updated_project", "project", projectId);
   revalidatePath("/student");
   revalidatePath("/student/project");
   redirect("/student/project");
@@ -265,7 +252,7 @@ export async function uploadProjectFileAction(
     return { ok: false, message: metadataError.message };
   }
 
-  await writeAuditLog("student_uploaded_project_file", "project", project.id as string, {
+  await writeAuditLog(profile.id, "student_uploaded_project_file", "project", project.id as string, {
     file_type: fileType,
     file_name: file.name,
   });
@@ -278,7 +265,7 @@ export async function submitProjectAction(
   _previousState: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireRole(["student"]);
+  const { profile } = await requireRole(["student"]);
   const parsed = submitProjectSchema.safeParse({
     projectId: formData.get("project_id"),
   });
@@ -335,7 +322,7 @@ export async function submitProjectAction(
     return { ok: false, message: submitError.message };
   }
 
-  await writeAuditLog("student_submitted_project", "project", parsed.data.projectId);
+  await writeAuditLog(profile.id, "student_submitted_project", "project", parsed.data.projectId);
   revalidatePath("/student");
   revalidatePath("/student/project");
   revalidatePath("/student/project/status");

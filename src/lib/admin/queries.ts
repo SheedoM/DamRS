@@ -2,6 +2,7 @@ import type { AdminProjectRow } from "./admin-projects";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSignedUrlForProjectFile } from "@/lib/project/storage";
 import { getOfficialProjectGrade, type OfficialProjectGrade } from "@/lib/review/review.schema";
+import { firstRelation } from "@/lib/utils";
 
 export type PanelMember = {
   id: string;
@@ -53,8 +54,15 @@ type RawReview = {
   draft_submitted_at: string | null;
   final_notes: string | null;
   final_submitted_at: string | null;
+  admin_entered_by: string | null;
+  admin_entered_at: string | null;
+  admin_entry_reason: string | null;
   updated_at: string;
   profiles:
+    | { full_name: string; email: string }
+    | { full_name: string; email: string }[]
+    | null;
+  admin_profiles?:
     | { full_name: string; email: string }
     | { full_name: string; email: string }[]
     | null;
@@ -80,9 +88,11 @@ type RawGradeOverride = {
     | null;
 };
 
-export type AdminReview = Omit<RawReview, "profiles"> & {
+export type AdminReview = Omit<RawReview, "profiles" | "admin_profiles"> & {
   panel_member_name: string;
   panel_member_email: string;
+  admin_entered_by_name: string | null;
+  admin_entered_by_email: string | null;
 };
 
 export type GradeOverride = Omit<RawGradeOverride, "profiles"> & {
@@ -126,10 +136,27 @@ type RawProject = {
   supervisor_name: string;
   submitted_at: string | null;
   profiles: { full_name: string } | null;
-  panel_assignments: { id: string }[] | null;
+  panel_assignments: { id: string; panel_member_id: string }[] | null;
+  reviews: {
+    id: string;
+    panel_member_id: string;
+    status: string | null;
+    draft_submitted_at: string | null;
+    final_submitted_at: string | null;
+  }[] | null;
 };
 
 function toProjectRow(project: RawProject): AdminProjectRow {
+  const activePanelMemberIds = (project.panel_assignments || []).map((assignment) => assignment.panel_member_id);
+  const activePanelSet = new Set(activePanelMemberIds);
+  const activeReviews = (project.reviews || []).filter((review) => activePanelSet.has(review.panel_member_id));
+  const completedDraftReviewCount = activeReviews.filter(
+    (review) => Boolean(review.draft_submitted_at) || review.status === "final_reviewed",
+  ).length;
+  const completedFinalReviewCount = activeReviews.filter(
+    (review) => review.status === "final_reviewed" && Boolean(review.final_submitted_at),
+  ).length;
+
   return {
     id: project.id,
     title: project.title,
@@ -138,13 +165,14 @@ function toProjectRow(project: RawProject): AdminProjectRow {
     supervisor_name: project.supervisor_name,
     team_leader_name: project.profiles?.full_name || "Unknown student",
     active_assignment_count: project.panel_assignments?.length || 0,
+    required_review_count: activePanelMemberIds.length,
+    completed_draft_review_count: completedDraftReviewCount,
+    completed_final_review_count: completedFinalReviewCount,
     submitted_at: project.submitted_at,
   };
 }
 
-function firstRelation<T>(value: T | T[] | null | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
+
 
 function toAssignment(assignment: RawAssignment): Assignment {
   const profile = firstRelation(assignment.profiles);
@@ -165,11 +193,14 @@ function toAssignment(assignment: RawAssignment): Assignment {
 
 function toAdminReview(review: RawReview): AdminReview {
   const profile = firstRelation(review.profiles);
+  const adminProfile = firstRelation(review.admin_profiles);
 
   return {
     ...review,
     panel_member_name: profile?.full_name || "Unknown panel member",
     panel_member_email: profile?.email || "",
+    admin_entered_by_name: adminProfile?.full_name || null,
+    admin_entered_by_email: adminProfile?.email || null,
   };
 }
 
@@ -188,7 +219,7 @@ export async function getAdminProjects() {
   const { data } = await supabase
     .from("projects")
     .select(
-      "id, title, status, department, supervisor_name, submitted_at, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(id)",
+      "id, title, status, department, supervisor_name, submitted_at, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(id, panel_member_id), reviews!left(id, panel_member_id, status, draft_submitted_at, final_submitted_at)",
     )
     .is("panel_assignments.revoked_at", null)
     .eq("panel_assignments.is_active", true)
@@ -202,7 +233,7 @@ export async function getAdminProjectDetail(projectId: string) {
   const { data: project } = await supabase
     .from("projects")
     .select(
-      "id, title, abstract, status, department, supervisor_name, technologies_used, github_url, demo_video_url, submitted_at, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(id)",
+      "id, title, abstract, status, department, supervisor_name, technologies_used, github_url, demo_video_url, submitted_at, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(id, panel_member_id), reviews!left(id, panel_member_id, status, draft_submitted_at, final_submitted_at)",
     )
     .eq("id", projectId)
     .single();
@@ -223,7 +254,7 @@ export async function getAdminProjectDetail(projectId: string) {
     getAssignmentsForProject(projectId),
     supabase
       .from("reviews")
-      .select("id, project_id, panel_member_id, status, documentation_score, implementation_score, code_quality_score, innovation_score, presentation_score, discussion_score, total_score, draft_notes, draft_questions, draft_submitted_at, final_notes, final_submitted_at, updated_at, profiles!reviews_panel_member_id_fkey(full_name, email)")
+      .select("id, project_id, panel_member_id, status, documentation_score, implementation_score, code_quality_score, innovation_score, presentation_score, discussion_score, total_score, draft_notes, draft_questions, draft_submitted_at, final_notes, final_submitted_at, admin_entered_by, admin_entered_at, admin_entry_reason, updated_at, profiles!reviews_panel_member_id_fkey(full_name, email), admin_profiles:profiles!reviews_admin_entered_by_fkey(full_name, email)")
       .eq("project_id", projectId)
       .order("updated_at", { ascending: false }),
     supabase

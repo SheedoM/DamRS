@@ -52,9 +52,14 @@ export const gradeOverrideFormSchema = z.object({
   reason: z.string().trim().min(5, "Override reason is required."),
 });
 
+export const adminPanelGradeEntryFormSchema = gradeOverrideFormSchema.extend({
+  reason: z.string().trim().min(5, "Reason is required for an admin-entered panel grade."),
+});
+
 export type DraftReviewFormValues = z.infer<typeof draftReviewFormSchema>;
 export type FinalReviewFormValues = z.infer<typeof finalReviewFormSchema>;
 export type GradeOverrideFormValues = z.infer<typeof gradeOverrideFormSchema>;
+export type AdminPanelGradeEntryFormValues = z.infer<typeof adminPanelGradeEntryFormSchema>;
 
 export type DraftReviewPayload = Pick<
   ReviewScores,
@@ -88,6 +93,7 @@ export type UnifiedReviewGradeInput = Partial<ReviewScores> & {
   status: string | null;
   draft_submitted_at?: string | null;
   final_submitted_at?: string | null;
+  admin_entered_by?: string | null;
 };
 
 export type GradeOverrideInput = Partial<ReviewScores>;
@@ -95,14 +101,11 @@ export type GradeOverrideInput = Partial<ReviewScores>;
 export type OfficialProjectGrade = {
   completedReviewCount: number;
   requiredReviewCount: number;
-  isPanelComplete: boolean;
-  panelAverage: number | null;
-  panelAveragePercentage: string | null;
-  provisionalAverage: number | null;
-  provisionalAveragePercentage: string | null;
-  officialGrade: number | null;
-  officialPercentage: string | null;
-  officialSource: "panel" | "override" | null;
+  allPanelReviewsSubmitted: boolean;
+  displayGrade: number | null;
+  displayPercentage: string | null;
+  status: "Pending" | "In review" | "Official" | "Dean override";
+  source: "none" | "panel_average" | "dean_override";
 };
 
 function optionalText(value: string | null | undefined) {
@@ -183,6 +186,36 @@ export function buildGradeOverridePayload(form: GradeOverrideFormValues): Review
   };
 }
 
+export function buildAdminPanelGradeEntryPayload(form: AdminPanelGradeEntryFormValues): ReviewScores & { reason: string } {
+  return buildGradeOverridePayload(form);
+}
+
+export function canAdminEnterPanelGrade({
+  panelMemberId,
+  activePanelMemberIds,
+  existingReview,
+}: {
+  panelMemberId: string;
+  activePanelMemberIds: string[];
+  existingReview: { status: string | null; final_submitted_at?: string | null } | null;
+}) {
+  if (!activePanelMemberIds.includes(panelMemberId)) {
+    return {
+      ok: false,
+      message: "This panel member is not actively assigned to the project.",
+    } as const;
+  }
+
+  if (existingReview?.status === "final_reviewed" && existingReview.final_submitted_at) {
+    return {
+      ok: false,
+      message: "This panel member already has a final grade. Use dean override instead.",
+    } as const;
+  }
+
+  return { ok: true, message: "" } as const;
+}
+
 export function getReviewTotal(review: Partial<ReviewScores>) {
   return calculateReviewTotal(normalizeScores(review));
 }
@@ -215,22 +248,31 @@ export function getOfficialProjectGrade({
   const completedScores = completedReviews.map((review) => getReviewTotal(review));
   const provisionalAverage = average(completedScores);
   const requiredReviewCount = activePanelMemberIds.length;
-  const isPanelComplete = requiredReviewCount > 0 && completedReviews.length === requiredReviewCount;
-  const panelAverage = isPanelComplete ? provisionalAverage : null;
+  const allPanelReviewsSubmitted = requiredReviewCount > 0 && completedReviews.length === requiredReviewCount;
+  const panelAverage = allPanelReviewsSubmitted ? provisionalAverage : null;
   const overrideGrade = activeOverride ? getReviewTotal(activeOverride) : null;
-  const officialGrade = overrideGrade ?? panelAverage;
+  const displayGrade = overrideGrade ?? panelAverage ?? provisionalAverage;
+  const status = overrideGrade !== null
+    ? "Dean override"
+    : panelAverage !== null
+      ? "Official"
+      : provisionalAverage !== null
+        ? "In review"
+        : "Pending";
+  const source = overrideGrade !== null
+    ? "dean_override"
+    : displayGrade !== null
+      ? "panel_average"
+      : "none";
 
   return {
     completedReviewCount: completedReviews.length,
     requiredReviewCount,
-    isPanelComplete,
-    panelAverage,
-    panelAveragePercentage: formatPercentage(panelAverage),
-    provisionalAverage,
-    provisionalAveragePercentage: formatPercentage(provisionalAverage),
-    officialGrade,
-    officialPercentage: formatPercentage(officialGrade),
-    officialSource: overrideGrade !== null ? "override" : panelAverage !== null ? "panel" : null,
+    allPanelReviewsSubmitted,
+    displayGrade,
+    displayPercentage: formatPercentage(displayGrade),
+    status,
+    source,
   };
 }
 
@@ -265,4 +307,3 @@ export function getPanelDashboardStats(
     pendingFinalReviews: projects.filter((project) => !project.reviewStatus.finalSubmitted).length,
   };
 }
-
