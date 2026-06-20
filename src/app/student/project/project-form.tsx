@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Plus, Trash2 } from "lucide-react";
 
@@ -39,7 +39,7 @@ export function ProjectForm({ mode, project, teamMembers = [] }: ProjectFormProp
   const {
     register,
     control,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<ProjectFormInput, unknown, ProjectFormData>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
@@ -66,6 +66,16 @@ export function ProjectForm({ mode, project, teamMembers = [] }: ProjectFormProp
     control,
     name: "team_members",
   });
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
 
   return (
     <form action={formAction} className="space-y-6">

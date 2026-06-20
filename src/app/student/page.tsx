@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth/require-role";
 import { getActiveSubmissionWindow, getStudentProject } from "@/lib/project/queries";
 import { getMissingSubmissionRequirements } from "@/lib/project/submission.schema";
+import { getStudentNotifications } from "@/lib/project/student-notifications";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,8 @@ export default async function StudentDashboardPage() {
     getStudentProject(profile.id),
     getActiveSubmissionWindow(),
   ]);
+
+  const notifications = projectData ? await getStudentNotifications(projectData.project.id) : [];
 
   const missing = projectData
     ? getMissingSubmissionRequirements({
@@ -74,6 +77,17 @@ export default async function StudentDashboardPage() {
   return (
     <AppShell title="Student Dashboard" profile={profile}>
       <div className="space-y-5">
+        {notifications.length > 0 ? (
+          <Card className="border-[var(--brand-blue)] bg-[rgba(52,126,224,0.04)]">
+            <CardContent className="pt-5 space-y-2">
+              <h2 className="text-sm font-semibold text-slate-950">Recent updates</h2>
+              {notifications.map((n, i) => (
+                <p key={i} className="text-sm text-slate-600">{n.message}</p>
+              ))}
+            </CardContent>
+          </Card>
+        ) : null}
+
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {cards.map((card) => (
             <DashboardCard key={card.title} {...card} />
