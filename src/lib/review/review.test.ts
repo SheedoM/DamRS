@@ -6,17 +6,17 @@ import {
   calculateReviewTotal,
   draftReviewFormSchema,
   finalReviewFormSchema,
-  getCombinedReviewGrade,
+  getOfficialProjectGrade,
   getPanelDashboardStats,
   getPanelProjectReviewStatus,
-  getProjectStatusAfterReview,
+  getProjectStatusFromReviewProgress,
 } from "./review.schema";
 
 const projectId = "11111111-1111-4111-8111-111111111111";
 const panelMemberId = "22222222-2222-4222-8222-222222222222";
 
-describe("review helpers", () => {
-  it("calculates a total score from rubric fields", () => {
+describe("unified review helpers", () => {
+  it("calculates one review total out of 100", () => {
     expect(
       calculateReviewTotal({
         documentation_score: 18,
@@ -42,7 +42,7 @@ describe("review helpers", () => {
     expect(result.success).toBe(false);
   });
 
-  it("builds a draft review payload and zeroes final-only scores", () => {
+  it("builds a draft review payload for the unified review row", () => {
     expect(
       buildDraftReviewPayload(
         {
@@ -59,41 +59,28 @@ describe("review helpers", () => {
     ).toMatchObject({
       project_id: projectId,
       panel_member_id: panelMemberId,
-      review_type: "draft",
+      status: "draft_reviewed",
       documentation_score: 20,
       implementation_score: 22,
       code_quality_score: 18,
       innovation_score: 12,
-      presentation_score: 0,
-      discussion_score: 0,
-      notes: "Strong documentation.",
-      questions: null,
+      draft_notes: "Strong documentation.",
+      draft_questions: null,
     });
   });
 
-  it("builds a final review payload without questions and zeroes draft-only scores", () => {
+  it("builds a final review payload without questions", () => {
     expect(
-      buildFinalReviewPayload(
-        {
-          presentation_score: 9,
-          discussion_score: 10,
-          notes: "",
-        },
-        projectId,
-        panelMemberId,
-      ),
+      buildFinalReviewPayload({
+        presentation_score: 9,
+        discussion_score: 10,
+        notes: "",
+      }),
     ).toMatchObject({
-      project_id: projectId,
-      panel_member_id: panelMemberId,
-      review_type: "final",
-      documentation_score: 0,
-      implementation_score: 0,
-      code_quality_score: 0,
-      innovation_score: 0,
+      status: "final_reviewed",
       presentation_score: 9,
       discussion_score: 10,
-      notes: null,
-      questions: null,
+      final_notes: null,
     });
   });
 
@@ -107,77 +94,13 @@ describe("review helpers", () => {
     expect(result.success).toBe(false);
   });
 
-  it("combines draft and final review components into a 100 point percentage", () => {
+  it("summarizes unified draft and final review status", () => {
     expect(
-      getCombinedReviewGrade([
-        {
-          review_type: "draft",
-          submitted_at: "2026-06-20T08:00:00.000Z",
-          documentation_score: 18,
-          implementation_score: 23,
-          code_quality_score: 19,
-          innovation_score: 14,
-          presentation_score: 0,
-          discussion_score: 0,
-        },
-        {
-          review_type: "final",
-          submitted_at: "2026-06-20T12:00:00.000Z",
-          documentation_score: 0,
-          implementation_score: 0,
-          code_quality_score: 0,
-          innovation_score: 0,
-          presentation_score: 9,
-          discussion_score: 8,
-        },
-      ]),
-    ).toEqual({
-      draftScore: 74,
-      finalComponentScore: 17,
-      totalScore: 91,
-      percentage: "91.00%",
-      isComplete: true,
-    });
-  });
-
-  it("keeps the combined grade unavailable until both review parts are submitted", () => {
-    expect(
-      getCombinedReviewGrade([
-        {
-          review_type: "draft",
-          submitted_at: "2026-06-20T08:00:00.000Z",
-          documentation_score: 18,
-          implementation_score: 23,
-          code_quality_score: 19,
-          innovation_score: 14,
-          presentation_score: 0,
-          discussion_score: 0,
-        },
-      ]),
-    ).toMatchObject({
-      draftScore: 74,
-      finalComponentScore: null,
-      totalScore: null,
-      percentage: null,
-      isComplete: false,
-    });
-  });
-
-  it("derives project status after review submission", () => {
-    expect(getProjectStatusAfterReview("draft", "draft")).toBe("draft_reviewed");
-    expect(getProjectStatusAfterReview("assigned", "draft")).toBe("draft_reviewed");
-    expect(getProjectStatusAfterReview("submitted", "final")).toBe("final_reviewed");
-    expect(getProjectStatusAfterReview("draft_reviewed", "final")).toBe("final_reviewed");
-    expect(getProjectStatusAfterReview("final_reviewed", "draft")).toBe("final_reviewed");
-    expect(getProjectStatusAfterReview("completed", "final")).toBe("completed");
-  });
-
-  it("summarizes draft and final review status", () => {
-    expect(
-      getPanelProjectReviewStatus([
-        { review_type: "draft", submitted_at: "2026-06-20T08:00:00.000Z" },
-        { review_type: "final", submitted_at: null },
-      ]),
+      getPanelProjectReviewStatus({
+        status: "draft_reviewed",
+        draft_submitted_at: "2026-06-20T08:00:00.000Z",
+        final_submitted_at: null,
+      }),
     ).toEqual({
       draftSubmitted: true,
       draftSubmittedAt: "2026-06-20T08:00:00.000Z",
@@ -187,7 +110,146 @@ describe("review helpers", () => {
     });
   });
 
-  it("builds panel dashboard stats from review summaries", () => {
+  it("requires all active panel members to submit final reviews before official panel grade appears", () => {
+    expect(
+      getOfficialProjectGrade({
+        activePanelMemberIds: ["p1", "p2"],
+        reviews: [
+          {
+            panel_member_id: "p1",
+            status: "final_reviewed",
+            documentation_score: 18,
+            implementation_score: 23,
+            code_quality_score: 19,
+            innovation_score: 14,
+            presentation_score: 9,
+            discussion_score: 7,
+          },
+        ],
+        activeOverride: null,
+      }),
+    ).toEqual({
+      completedReviewCount: 1,
+      requiredReviewCount: 2,
+      isPanelComplete: false,
+      panelAverage: null,
+      panelAveragePercentage: null,
+      provisionalAverage: 90,
+      provisionalAveragePercentage: "90.00%",
+      officialGrade: null,
+      officialPercentage: null,
+      officialSource: null,
+    });
+  });
+
+  it("averages completed reviews after every active panel member submits final review", () => {
+    expect(
+      getOfficialProjectGrade({
+        activePanelMemberIds: ["p1", "p2"],
+        reviews: [
+          {
+            panel_member_id: "p1",
+            status: "final_reviewed",
+            documentation_score: 18,
+            implementation_score: 23,
+            code_quality_score: 19,
+            innovation_score: 14,
+            presentation_score: 9,
+            discussion_score: 7,
+          },
+          {
+            panel_member_id: "p2",
+            status: "final_reviewed",
+            documentation_score: 17,
+            implementation_score: 21,
+            code_quality_score: 17,
+            innovation_score: 12,
+            presentation_score: 8,
+            discussion_score: 7,
+          },
+        ],
+        activeOverride: null,
+      }).officialPercentage,
+    ).toBe("86.00%");
+  });
+
+  it("uses dean override as the official grade while preserving panel average", () => {
+    expect(
+      getOfficialProjectGrade({
+        activePanelMemberIds: ["p1", "p2"],
+        reviews: [
+          {
+            panel_member_id: "p1",
+            status: "final_reviewed",
+            documentation_score: 18,
+            implementation_score: 23,
+            code_quality_score: 19,
+            innovation_score: 14,
+            presentation_score: 9,
+            discussion_score: 7,
+          },
+          {
+            panel_member_id: "p2",
+            status: "final_reviewed",
+            documentation_score: 17,
+            implementation_score: 21,
+            code_quality_score: 17,
+            innovation_score: 12,
+            presentation_score: 8,
+            discussion_score: 7,
+          },
+        ],
+        activeOverride: {
+          documentation_score: 20,
+          implementation_score: 23,
+          code_quality_score: 20,
+          innovation_score: 14,
+          presentation_score: 8,
+          discussion_score: 7,
+        },
+      }),
+    ).toMatchObject({
+      panelAverage: 86,
+      panelAveragePercentage: "86.00%",
+      officialGrade: 92,
+      officialPercentage: "92.00%",
+      officialSource: "override",
+    });
+  });
+
+  it("recomputes project status from active assignment review progress", () => {
+    expect(
+      getProjectStatusFromReviewProgress({
+        currentStatus: "assigned",
+        activePanelMemberIds: ["p1", "p2"],
+        reviews: [{ panel_member_id: "p1", status: "draft_reviewed" }],
+      }),
+    ).toBe("assigned");
+
+    expect(
+      getProjectStatusFromReviewProgress({
+        currentStatus: "assigned",
+        activePanelMemberIds: ["p1", "p2"],
+        reviews: [
+          { panel_member_id: "p1", status: "draft_reviewed" },
+          { panel_member_id: "p2", status: "draft_reviewed" },
+        ],
+      }),
+    ).toBe("draft_reviewed");
+
+    expect(
+      getProjectStatusFromReviewProgress({
+        currentStatus: "draft_reviewed",
+        activePanelMemberIds: ["p1", "p2"],
+        reviews: [
+          { panel_member_id: "p1", status: "final_reviewed" },
+          { panel_member_id: "p2", status: "final_reviewed" },
+        ],
+      }),
+    ).toBe("final_reviewed");
+  });
+
+  it("builds panel dashboard stats from unified review summaries", () => {
     expect(
       getPanelDashboardStats([
         {
@@ -201,8 +263,8 @@ describe("review helpers", () => {
         },
         {
           reviewStatus: {
-            draftSubmitted: false,
-            draftSubmittedAt: null,
+            draftSubmitted: true,
+            draftSubmittedAt: "2026-06-20T08:00:00.000Z",
             finalSubmitted: false,
             finalSubmittedAt: null,
             fullyReviewed: false,
@@ -212,8 +274,9 @@ describe("review helpers", () => {
     ).toEqual({
       assignedProjects: 2,
       reviewedProjects: 1,
-      pendingDraftReviews: 1,
+      pendingDraftReviews: 0,
       pendingFinalReviews: 1,
     });
   });
 });
+

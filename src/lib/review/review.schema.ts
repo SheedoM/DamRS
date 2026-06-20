@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-export const reviewTypes = ["draft", "final"] as const;
+export const reviewStatuses = ["draft_reviewed", "final_reviewed"] as const;
 
-export type ReviewType = (typeof reviewTypes)[number];
+export type ReviewStatusValue = (typeof reviewStatuses)[number];
 
-export const reviewTypeSchema = z.enum(reviewTypes);
+export const reviewStatusSchema = z.enum(reviewStatuses);
 
 export const reviewScoreLimits = {
   documentation_score: 20,
@@ -42,15 +42,37 @@ export const finalReviewFormSchema = z.object({
   notes: textSchema,
 });
 
+export const gradeOverrideFormSchema = z.object({
+  documentation_score: scoreSchema("Documentation", reviewScoreLimits.documentation_score),
+  implementation_score: scoreSchema("Implementation", reviewScoreLimits.implementation_score),
+  code_quality_score: scoreSchema("Code quality", reviewScoreLimits.code_quality_score),
+  innovation_score: scoreSchema("Innovation", reviewScoreLimits.innovation_score),
+  presentation_score: scoreSchema("Presentation", reviewScoreLimits.presentation_score),
+  discussion_score: scoreSchema("Discussion", reviewScoreLimits.discussion_score),
+  reason: z.string().trim().min(5, "Override reason is required."),
+});
+
 export type DraftReviewFormValues = z.infer<typeof draftReviewFormSchema>;
 export type FinalReviewFormValues = z.infer<typeof finalReviewFormSchema>;
+export type GradeOverrideFormValues = z.infer<typeof gradeOverrideFormSchema>;
 
-export type ReviewPayload = ReviewScores & {
+export type DraftReviewPayload = Pick<
+  ReviewScores,
+  "documentation_score" | "implementation_score" | "code_quality_score" | "innovation_score"
+> & {
   project_id: string;
   panel_member_id: string;
-  review_type: ReviewType;
-  notes: string | null;
-  questions: string | null;
+  status: "draft_reviewed";
+  draft_notes: string | null;
+  draft_questions: string | null;
+};
+
+export type FinalReviewPayload = Pick<
+  ReviewScores,
+  "presentation_score" | "discussion_score"
+> & {
+  status: "final_reviewed";
+  final_notes: string | null;
 };
 
 export type ReviewStatus = {
@@ -61,22 +83,35 @@ export type ReviewStatus = {
   fullyReviewed: boolean;
 };
 
-export type CombinedReviewGrade = {
-  draftScore: number | null;
-  finalComponentScore: number | null;
-  totalScore: number | null;
-  percentage: string | null;
-  isComplete: boolean;
+export type UnifiedReviewGradeInput = Partial<ReviewScores> & {
+  panel_member_id: string;
+  status: string | null;
+  draft_submitted_at?: string | null;
+  final_submitted_at?: string | null;
 };
 
-type ReviewGradeInput = Partial<ReviewScores> & {
-  review_type: string;
-  submitted_at: string | null;
+export type GradeOverrideInput = Partial<ReviewScores>;
+
+export type OfficialProjectGrade = {
+  completedReviewCount: number;
+  requiredReviewCount: number;
+  isPanelComplete: boolean;
+  panelAverage: number | null;
+  panelAveragePercentage: string | null;
+  provisionalAverage: number | null;
+  provisionalAveragePercentage: string | null;
+  officialGrade: number | null;
+  officialPercentage: string | null;
+  officialSource: "panel" | "override" | null;
 };
 
 function optionalText(value: string | null | undefined) {
   const trimmed = value?.trim() || "";
   return trimmed.length > 0 ? trimmed : null;
+}
+
+function formatPercentage(value: number | null) {
+  return value === null ? null : `${value.toFixed(2)}%`;
 }
 
 export function calculateReviewTotal(scores: ReviewScores) {
@@ -92,95 +127,132 @@ export function calculateReviewTotal(scores: ReviewScores) {
   );
 }
 
+function normalizeScores(input: Partial<ReviewScores>): ReviewScores {
+  return {
+    documentation_score: Number(input.documentation_score || 0),
+    implementation_score: Number(input.implementation_score || 0),
+    code_quality_score: Number(input.code_quality_score || 0),
+    innovation_score: Number(input.innovation_score || 0),
+    presentation_score: Number(input.presentation_score || 0),
+    discussion_score: Number(input.discussion_score || 0),
+  };
+}
+
+function average(values: number[]) {
+  if (values.length === 0) return null;
+
+  return Number((values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(2));
+}
+
 export function buildDraftReviewPayload(
   form: DraftReviewFormValues,
   projectId: string,
   panelMemberId: string,
-): ReviewPayload {
+): DraftReviewPayload {
   return {
     project_id: projectId,
     panel_member_id: panelMemberId,
-    review_type: "draft",
+    status: "draft_reviewed",
     documentation_score: form.documentation_score,
     implementation_score: form.implementation_score,
     code_quality_score: form.code_quality_score,
     innovation_score: form.innovation_score,
-    presentation_score: 0,
-    discussion_score: 0,
-    notes: optionalText(form.notes),
-    questions: optionalText(form.questions),
+    draft_notes: optionalText(form.notes),
+    draft_questions: optionalText(form.questions),
   };
 }
 
-export function buildFinalReviewPayload(
-  form: FinalReviewFormValues,
-  projectId: string,
-  panelMemberId: string,
-): ReviewPayload {
+export function buildFinalReviewPayload(form: FinalReviewFormValues): FinalReviewPayload {
   return {
-    project_id: projectId,
-    panel_member_id: panelMemberId,
-    review_type: "final",
-    documentation_score: 0,
-    implementation_score: 0,
-    code_quality_score: 0,
-    innovation_score: 0,
+    status: "final_reviewed",
     presentation_score: form.presentation_score,
     discussion_score: form.discussion_score,
-    notes: optionalText(form.notes),
-    questions: null,
+    final_notes: optionalText(form.notes),
   };
 }
 
-function scoreFromReview(review: ReviewGradeInput) {
-  return calculateReviewTotal({
-    documentation_score: Number(review.documentation_score || 0),
-    implementation_score: Number(review.implementation_score || 0),
-    code_quality_score: Number(review.code_quality_score || 0),
-    innovation_score: Number(review.innovation_score || 0),
-    presentation_score: Number(review.presentation_score || 0),
-    discussion_score: Number(review.discussion_score || 0),
-  });
-}
-
-export function getCombinedReviewGrade(reviews: ReviewGradeInput[]): CombinedReviewGrade {
-  const draft = reviews.find((review) => review.review_type === "draft" && review.submitted_at);
-  const final = reviews.find((review) => review.review_type === "final" && review.submitted_at);
-  const draftScore = draft ? scoreFromReview(draft) : null;
-  const finalComponentScore = final ? scoreFromReview(final) : null;
-  const totalScore = draftScore !== null && finalComponentScore !== null
-    ? Number((draftScore + finalComponentScore).toFixed(2))
-    : null;
-
+export function buildGradeOverridePayload(form: GradeOverrideFormValues): ReviewScores & { reason: string } {
   return {
-    draftScore,
-    finalComponentScore,
-    totalScore,
-    percentage: totalScore !== null ? `${totalScore.toFixed(2)}%` : null,
-    isComplete: totalScore !== null,
+    documentation_score: form.documentation_score,
+    implementation_score: form.implementation_score,
+    code_quality_score: form.code_quality_score,
+    innovation_score: form.innovation_score,
+    presentation_score: form.presentation_score,
+    discussion_score: form.discussion_score,
+    reason: form.reason.trim(),
   };
 }
 
-export function getProjectStatusAfterReview(currentStatus: string, reviewType: ReviewType) {
-  if (currentStatus === "completed") return "completed";
-  if (currentStatus === "final_reviewed") return "final_reviewed";
-  if (reviewType === "final") return "final_reviewed";
-  return "draft_reviewed";
+export function getReviewTotal(review: Partial<ReviewScores>) {
+  return calculateReviewTotal(normalizeScores(review));
 }
 
 export function getPanelProjectReviewStatus(
-  reviews: { review_type: string; submitted_at: string | null }[],
+  review: { status: string | null; draft_submitted_at?: string | null; final_submitted_at?: string | null } | null,
 ): ReviewStatus {
-  const draft = reviews.find((review) => review.review_type === "draft" && review.submitted_at);
-  const final = reviews.find((review) => review.review_type === "final" && review.submitted_at);
+  return {
+    draftSubmitted: Boolean(review?.draft_submitted_at),
+    draftSubmittedAt: review?.draft_submitted_at || null,
+    finalSubmitted: review?.status === "final_reviewed" && Boolean(review.final_submitted_at),
+    finalSubmittedAt: review?.final_submitted_at || null,
+    fullyReviewed: review?.status === "final_reviewed" && Boolean(review.final_submitted_at),
+  };
+}
+
+export function getOfficialProjectGrade({
+  activePanelMemberIds,
+  reviews,
+  activeOverride,
+}: {
+  activePanelMemberIds: string[];
+  reviews: UnifiedReviewGradeInput[];
+  activeOverride: GradeOverrideInput | null;
+}): OfficialProjectGrade {
+  const activePanelSet = new Set(activePanelMemberIds);
+  const completedReviews = reviews.filter(
+    (review) => activePanelSet.has(review.panel_member_id) && review.status === "final_reviewed",
+  );
+  const completedScores = completedReviews.map((review) => getReviewTotal(review));
+  const provisionalAverage = average(completedScores);
+  const requiredReviewCount = activePanelMemberIds.length;
+  const isPanelComplete = requiredReviewCount > 0 && completedReviews.length === requiredReviewCount;
+  const panelAverage = isPanelComplete ? provisionalAverage : null;
+  const overrideGrade = activeOverride ? getReviewTotal(activeOverride) : null;
+  const officialGrade = overrideGrade ?? panelAverage;
 
   return {
-    draftSubmitted: Boolean(draft),
-    draftSubmittedAt: draft?.submitted_at || null,
-    finalSubmitted: Boolean(final),
-    finalSubmittedAt: final?.submitted_at || null,
-    fullyReviewed: Boolean(draft && final),
+    completedReviewCount: completedReviews.length,
+    requiredReviewCount,
+    isPanelComplete,
+    panelAverage,
+    panelAveragePercentage: formatPercentage(panelAverage),
+    provisionalAverage,
+    provisionalAveragePercentage: formatPercentage(provisionalAverage),
+    officialGrade,
+    officialPercentage: formatPercentage(officialGrade),
+    officialSource: overrideGrade !== null ? "override" : panelAverage !== null ? "panel" : null,
   };
+}
+
+export function getProjectStatusFromReviewProgress({
+  currentStatus,
+  activePanelMemberIds,
+  reviews,
+}: {
+  currentStatus: string;
+  activePanelMemberIds: string[];
+  reviews: { panel_member_id: string; status: string | null }[];
+}) {
+  if (currentStatus === "completed") return "completed";
+  if (activePanelMemberIds.length === 0) return currentStatus === "draft" ? "draft" : "submitted";
+
+  const reviewByPanelMember = new Map(reviews.map((review) => [review.panel_member_id, review.status]));
+  const statuses = activePanelMemberIds.map((panelMemberId) => reviewByPanelMember.get(panelMemberId) || null);
+
+  if (statuses.every((status) => status === "final_reviewed")) return "final_reviewed";
+  if (statuses.every((status) => status === "draft_reviewed" || status === "final_reviewed")) return "draft_reviewed";
+
+  return "assigned";
 }
 
 export function getPanelDashboardStats(
@@ -193,3 +265,4 @@ export function getPanelDashboardStats(
     pendingFinalReviews: projects.filter((project) => !project.reviewStatus.finalSubmitted).length,
   };
 }
+
