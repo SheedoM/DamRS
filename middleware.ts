@@ -9,7 +9,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
-  let response = NextResponse.next({ request });
+  // We need a mutable response so setAll can attach refreshed session cookies.
+  // Using a single response object and mutating it in-place is the pattern
+  // recommended by @supabase/ssr for Next.js middleware.
+  const response = NextResponse.next({ request });
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -17,15 +20,17 @@ export async function middleware(request: NextRequest) {
         return request.cookies.getAll();
       },
       setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
+        // Write refreshed cookies to both request (for downstream Server Components)
+        // and response (so the browser receives the updated session token).
         cookiesToSet.forEach(({ name, value, options }) => {
+          request.cookies.set(name, value);
           response.cookies.set(name, value, options);
         });
       },
     },
   });
 
+  // Calling getUser() triggers a token refresh if needed and populates cookies.
   await supabase.auth.getUser();
 
   return response;
