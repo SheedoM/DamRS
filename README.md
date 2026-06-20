@@ -44,6 +44,42 @@ supabase/migrations/0001_profiles.sql
 
 You can paste it into the Supabase SQL editor or run it with the Supabase CLI after linking the project.
 
+Then apply the Phase 2 schema and security migration:
+
+```text
+supabase/migrations/0002_core_schema_rls_storage.sql
+```
+
+Run Phase 1 first, then Phase 2. Phase 2 depends on `profiles`, `user_role`, and the `set_updated_at` helper from Phase 1.
+
+## Supabase API Security Settings
+
+For this app, use these Supabase Data API settings:
+
+```text
+Enable Data API                 ON
+Automatically expose new tables OFF
+Enable automatic RLS            ON
+```
+
+The migrations explicitly grant authenticated access to the required tables and functions. Row Level Security still controls which rows each user can read or write.
+
+## Storage Buckets
+
+Phase 2 creates these private Supabase Storage buckets:
+
+- `project-documents`
+- `project-source-code`
+- `project-presentations`
+
+The buckets are not public. Storage object paths must follow this pattern:
+
+```text
+cycle-id/project-id/file-name.ext
+```
+
+Storage policies derive `project_id` from the second path segment and enforce the same project access rules as the database.
+
 ## First Admin
 
 1. Create the first admin user in Supabase Auth.
@@ -81,10 +117,11 @@ Role routing:
 
 ```bash
 npm test
+npm run lint
 npm run build
 ```
 
-## Phase 1 Scope
+## Current Scope
 
 Included:
 
@@ -94,12 +131,15 @@ Included:
 - Damietta University and FCAI branding
 - PWA manifest foundation
 - Initial `profiles` schema and RLS
+- Full Phase 2 database schema
+- Private Storage buckets and policies
+- RLS policies for students, admins, and assigned panel members
 
 Not included yet:
 
-- Project submissions
-- File uploads
-- Panel assignments
-- Reviews and grades
+- Project submission UI
+- File upload UI
+- Panel assignment UI
+- Review and grade UI
 - Reports and Excel exports
 - Full offline service worker
