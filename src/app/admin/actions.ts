@@ -163,10 +163,7 @@ export async function assignPanelMemberAction(
     project_id: parsed.data.project_id,
     panel_member_id: parsed.data.panel_member_id,
   });
-  revalidatePath("/admin");
-  revalidatePath("/admin/projects");
-  revalidatePath(`/admin/projects/${parsed.data.project_id}`);
-  revalidatePath("/admin/assignments");
+  revalidatePath("/", "layout");
   return { ok: true, message: "Panel member assigned." };
 }
 
@@ -200,10 +197,7 @@ export async function revokeAssignmentAction(
   await writeAuditLog(profile.id, "admin_revoked_panel", "panel_assignment", parsed.data.assignment_id, {
     project_id: parsed.data.project_id,
   });
-  revalidatePath("/admin");
-  revalidatePath("/admin/projects");
-  revalidatePath(`/admin/projects/${parsed.data.project_id}`);
-  revalidatePath("/admin/assignments");
+  revalidatePath("/", "layout");
   return { ok: true, message: "Assignment revoked." };
 }
 
@@ -295,8 +289,7 @@ export async function saveSubmissionWindowAction(
   await writeAuditLog(profile.id, "admin_updated_submission_window", "submission_window", result.data.id, {
     cycle_id: cycleId,
   });
-  revalidatePath("/admin");
-  revalidatePath("/admin/submission-window");
+  revalidatePath("/", "layout");
   redirect("/admin/submission-window");
 }
 
@@ -352,6 +345,12 @@ export async function saveGradeOverrideAction(
     .single();
 
   if (error || !override) {
+    if (previousOverride) {
+      await supabase
+        .from("project_grade_overrides")
+        .update({ is_active: true })
+        .eq("id", previousOverride.id);
+    }
     return { ok: false, message: error?.message || "Unable to save grade override." };
   }
 
@@ -365,9 +364,7 @@ export async function saveGradeOverrideAction(
       previous_override_id: previousOverride?.id || null,
     },
   );
-  revalidatePath("/admin");
-  revalidatePath("/admin/projects");
-  revalidatePath(`/admin/projects/${parsed.data.project_id}`);
+  revalidatePath("/", "layout");
   return { ok: true, message: "Official grade override saved." };
 }
 
@@ -445,15 +442,6 @@ export async function enterMissingPanelGradeAction(
     project_id: parsed.data.project_id,
     panel_member_id: parsed.data.panel_member_id,
   });
-  revalidatePath("/admin");
-  revalidatePath("/admin/projects");
-  revalidatePath(`/admin/projects/${parsed.data.project_id}`);
-  revalidatePath("/admin/assignments");
-  revalidatePath("/panel");
-  revalidatePath("/panel/projects");
-  revalidatePath(`/panel/projects/${parsed.data.project_id}`);
-  revalidatePath("/student");
-  revalidatePath("/student/project");
-  revalidatePath("/student/project/status");
+  revalidatePath("/", "layout");
   return { ok: true, message: "Missing panel grade entered." };
 }

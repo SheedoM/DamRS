@@ -52,16 +52,7 @@ async function getOwnReview(projectId: string, panelMemberId: string) {
 
 
 function revalidatePanelReviewPaths(projectId: string) {
-  revalidatePath("/panel");
-  revalidatePath("/panel/projects");
-  revalidatePath(`/panel/projects/${projectId}`);
-  revalidatePath(`/panel/projects/${projectId}/draft-review`);
-  revalidatePath(`/panel/projects/${projectId}/final-review`);
-  revalidatePath("/admin/projects");
-  revalidatePath(`/admin/projects/${projectId}`);
-  revalidatePath("/student");
-  revalidatePath("/student/project");
-  revalidatePath("/student/project/status");
+  revalidatePath("/", "layout");
 }
 
 export async function saveDraftReviewAction(

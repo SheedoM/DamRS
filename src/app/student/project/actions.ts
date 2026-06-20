@@ -36,7 +36,7 @@ async function getOpenActiveCycleId() {
     .lte("opens_at", new Date().toISOString())
     .or(`closes_at.gte.${new Date().toISOString()},allow_late_submission.eq.true`)
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (error || !data) {
     return null;
@@ -127,8 +127,7 @@ export async function createProjectAction(
   }
 
   await writeAuditLog(profile.id, "student_created_project", "project", createdProject.id);
-  revalidatePath("/student");
-  revalidatePath("/student/project");
+  revalidatePath("/", "layout");
   redirect("/student/project");
 }
 
@@ -150,13 +149,16 @@ export async function updateProjectAction(
 
   const supabase = await createSupabaseServerClient();
   const { team_members, ...project } = parsed.data;
-  const { error: projectError } = await supabase
+  const { data: updatedProject, error: projectError } = await supabase
     .from("projects")
     .update(project)
-    .eq("id", projectId);
+    .eq("id", projectId)
+    .eq("team_leader_id", profile.id)
+    .select("id")
+    .single();
 
-  if (projectError) {
-    return { ok: false, message: projectError.message };
+  if (projectError || !updatedProject) {
+    return { ok: false, message: "Project not found or access denied." };
   }
 
   const { error: deleteError } = await supabase
@@ -179,8 +181,7 @@ export async function updateProjectAction(
     return { ok: false, message: teamError.message };
   }
   await writeAuditLog(profile.id, "student_updated_project", "project", projectId);
-  revalidatePath("/student");
-  revalidatePath("/student/project");
+  revalidatePath("/", "layout");
   redirect("/student/project");
 }
 
@@ -256,8 +257,7 @@ export async function uploadProjectFileAction(
     file_type: fileType,
     file_name: file.name,
   });
-  revalidatePath("/student/project");
-  revalidatePath("/student/project/status");
+  revalidatePath("/", "layout");
   return { ok: true, message: "File uploaded." };
 }
 
@@ -323,8 +323,6 @@ export async function submitProjectAction(
   }
 
   await writeAuditLog(profile.id, "student_submitted_project", "project", parsed.data.projectId);
-  revalidatePath("/student");
-  revalidatePath("/student/project");
-  revalidatePath("/student/project/status");
+  revalidatePath("/", "layout");
   redirect("/student/project/status");
 }

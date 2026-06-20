@@ -1,3 +1,4 @@
+import { isRedirectError } from "next/dist/client/components/redirect";
 import { redirect } from "next/navigation";
 
 import { Alert } from "@/components/ui/alert";
@@ -24,7 +25,7 @@ export default async function Home() {
 
     redirect(getDashboardPathForRole(result.profile.role));
   } catch (error) {
-    if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+    if (isRedirectError(error)) {
       throw error;
     }
 

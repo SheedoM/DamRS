@@ -18,7 +18,7 @@ export function getBucketForProjectFileType(fileType: unknown) {
     : null;
 }
 
-export const SIGNED_FILE_URL_EXPIRES_IN_SECONDS = 10 * 60;
+export const SIGNED_FILE_URL_EXPIRES_IN_SECONDS = 60 * 60;
 
 type SignedUrlClient = {
   storage: {

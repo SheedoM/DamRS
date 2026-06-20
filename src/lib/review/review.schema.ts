@@ -132,12 +132,12 @@ export function calculateReviewTotal(scores: ReviewScores) {
 
 function normalizeScores(input: Partial<ReviewScores>): ReviewScores {
   return {
-    documentation_score: Number(input.documentation_score || 0),
-    implementation_score: Number(input.implementation_score || 0),
-    code_quality_score: Number(input.code_quality_score || 0),
-    innovation_score: Number(input.innovation_score || 0),
-    presentation_score: Number(input.presentation_score || 0),
-    discussion_score: Number(input.discussion_score || 0),
+    documentation_score: Number(input.documentation_score ?? 0),
+    implementation_score: Number(input.implementation_score ?? 0),
+    code_quality_score: Number(input.code_quality_score ?? 0),
+    innovation_score: Number(input.innovation_score ?? 0),
+    presentation_score: Number(input.presentation_score ?? 0),
+    discussion_score: Number(input.discussion_score ?? 0),
   };
 }
 
