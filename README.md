@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GP Review
 
-## Getting Started
+Damietta University FCAI Graduation Project Audit System.
 
-First, run the development server:
+This is the Phase 1 auth foundation for a PWA-based graduation project submission and review system. It uses real Supabase Auth from day one and routes users to dashboards based on `public.profiles.role`.
+
+## Stack
+
+- Next.js App Router
+- React
+- TypeScript
+- Tailwind CSS
+- Supabase Auth
+- Supabase Postgres with RLS
+- shadcn/ui-style local components
+- Vitest
+
+## Local Setup
+
+Install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create local environment values:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+copy .env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Set:
 
-## Learn More
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
 
-To learn more about Next.js, take a look at the following resources:
+Apply the Phase 1 SQL migration in Supabase:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```text
+supabase/migrations/0001_profiles.sql
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+You can paste it into the Supabase SQL editor or run it with the Supabase CLI after linking the project.
 
-## Deploy on Vercel
+## First Admin
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Create the first admin user in Supabase Auth.
+2. Copy that user's UUID.
+3. Insert the first profile from the Supabase SQL editor:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```sql
+insert into public.profiles (id, full_name, email, role, department)
+values (
+  'AUTH_USER_UUID_HERE',
+  'Admin User',
+  'admin@example.com',
+  'admin',
+  'Faculty of Computers and Artificial Intelligence'
+);
+```
+
+After the first admin profile exists, that admin can create and manage additional profiles in later phases.
+
+## Routes
+
+- `/login`
+- `/logout`
+- `/admin`
+- `/student`
+- `/panel`
+
+Role routing:
+
+- `admin` -> `/admin`
+- `student` -> `/student`
+- `panel_member` -> `/panel`
+
+## Verification
+
+```bash
+npm test
+npm run build
+```
+
+## Phase 1 Scope
+
+Included:
+
+- Real Supabase login foundation
+- Profile-based role routing
+- Protected admin, student, and panel dashboards
+- Damietta University and FCAI branding
+- PWA manifest foundation
+- Initial `profiles` schema and RLS
+
+Not included yet:
+
+- Project submissions
+- File uploads
+- Panel assignments
+- Reviews and grades
+- Reports and Excel exports
+- Full offline service worker
