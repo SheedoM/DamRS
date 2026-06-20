@@ -8,9 +8,19 @@ const migrationPath = join(
   "migrations",
   "0002_core_schema_rls_storage.sql",
 );
+const reviewStatusMigrationPath = join(
+  process.cwd(),
+  "supabase",
+  "migrations",
+  "0003_review_status_sync.sql",
+);
 
 function readMigration() {
   return readFileSync(migrationPath, "utf8").toLowerCase();
+}
+
+function readReviewStatusMigration() {
+  return readFileSync(reviewStatusMigrationPath, "utf8").toLowerCase();
 }
 
 describe("phase 2 schema migration", () => {
@@ -94,5 +104,22 @@ describe("phase 2 schema migration", () => {
     expect(sql).toContain("grant usage on schema public to authenticated");
     expect(sql).toContain("grant select, insert, update, delete on public.projects to authenticated");
     expect(sql).toContain("grant select, insert on public.audit_logs to authenticated");
+  });
+
+  it("syncs project status when draft or final reviews are submitted", () => {
+    expect(existsSync(reviewStatusMigrationPath)).toBe(true);
+
+    const sql = readReviewStatusMigration();
+
+    expect(sql).toContain("create or replace function public.sync_project_status_after_review");
+    expect(sql).toContain("create trigger reviews_sync_project_status");
+    expect(sql).toContain("after insert or update of review_type, submitted_at on public.reviews");
+    expect(sql).toContain("new.review_type = 'final'");
+    expect(sql).toContain("status = 'final_reviewed'");
+    expect(sql).toContain("new.review_type = 'draft'");
+    expect(sql).toContain("status = 'draft_reviewed'");
+    expect(sql).toContain("submitted_at = coalesce(submitted_at, now())");
+    expect(sql).toContain("backfill final reviews");
+    expect(sql).toContain("backfill draft reviews");
   });
 });

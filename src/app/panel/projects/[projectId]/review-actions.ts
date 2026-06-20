@@ -81,7 +81,7 @@ async function updateProjectStatusAfterReview(projectId: string, reviewType: Rev
 
   const { data: project, error: projectError } = await adminClient
     .from("projects")
-    .select("status")
+    .select("status, submitted_at")
     .eq("id", projectId)
     .single();
 
@@ -97,7 +97,10 @@ async function updateProjectStatusAfterReview(projectId: string, reviewType: Rev
 
   const { error } = await adminClient
     .from("projects")
-    .update({ status: nextStatus })
+    .update({
+      status: nextStatus,
+      submitted_at: project.submitted_at || new Date().toISOString(),
+    })
     .eq("id", projectId);
 
   return error?.message || null;
