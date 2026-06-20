@@ -21,6 +21,7 @@ export function Topbar({ title, profile, role }: TopbarProps) {
           Graduation Project Audit System
         </p>
         <h1 className="text-xl font-semibold text-slate-950">{title}</h1>
+        </div>
       </div>
       <div className="flex items-center gap-3">
         <div className="text-right">

@@ -7014,3 +7014,869 @@ Import trace:
 
     at <unknown> (Error: ./src/components/layout/sidebar.tsx:9:5)
     at <unknown> (Error: (./src/components/layout/sidebar.tsx:9:5)
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/projects/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/projects/page.tsx 
+[browser] ./src/app/admin/projects/page.tsx:5:1
+Export getPanelMembers doesn't exist in target module
+  3 | import { requireRole } from "@/lib/auth/require-role";
+  4 | import { getAdminProjects } from "@/lib/admin/queries";
+> 5 | import { getPanelMembers } from "@/lib/panel/queries";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export const dynamic = "force-dynamic";
+  8 |
+
+The export getPanelMembers was not found in module [project]/src/lib/panel/queries.ts [app-rsc] (ecmascript).
+Did you mean to import getPanelProjects?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/projects/[projectId]/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/projects/[projectId]/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/assignments/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/assignments/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/projects/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/projects/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/projects/[projectId]/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/projects/[projectId]/page.tsx 
+[browser] ./src/app/admin/panel-members/create-panel-member-form.tsx:61:7
+Expression expected
+  59 |         </div>
+  60 |       </div>
+> 61 |       <Button type="submit" disabled={isPending}>
+     |       ^
+  62 |         {isPending ? "Creating..." : "Create panel member"}
+  63 |       </Button>
+  64 |     </form>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/app/admin/panel-members/create-panel-member-form.tsx
+    ./src/app/admin/panel-members/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/panel-members/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/panel-members/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/submission-window/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/submission-window/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/app/admin/projects/page.tsx:5:1
+Export getPanelMembers doesn't exist in target module
+  3 | import { requireRole } from "@/lib/auth/require-role";
+  4 | import { getAdminProjects } from "@/lib/admin/queries";
+> 5 | import { getPanelMembers } from "@/lib/panel/queries";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export const dynamic = "force-dynamic";
+  8 |
+
+The export getPanelMembers was not found in module [project]/src/lib/panel/queries.ts [app-rsc] (ecmascript).
+Did you mean to import getPanelProjects?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./src/app/admin/panel-members/create-panel-member-form.tsx:61:7
+Expression expected
+  59 |         </div>
+  60 |       </div>
+> 61 |       <Button type="submit" disabled={isPending}>
+     |       ^
+  62 |         {isPending ? "Creating..." : "Create panel member"}
+  63 |       </Button>
+  64 |     </form>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/app/admin/panel-members/create-panel-member-form.tsx
+    ./src/app/admin/panel-members/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/app/admin/projects/page.tsx:5:1
+Export getPanelMembers doesn't exist in target module
+  3 | import { requireRole } from "@/lib/auth/require-role";
+  4 | import { getAdminProjects } from "@/lib/admin/queries";
+> 5 | import { getPanelMembers } from "@/lib/panel/queries";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export const dynamic = "force-dynamic";
+  8 |
+
+The export getPanelMembers was not found in module [project]/src/lib/panel/queries.ts [app-rsc] (ecmascript).
+Did you mean to import getPanelProjects?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./src/app/admin/panel-members/create-panel-member-form.tsx:61:7
+Expression expected
+  59 |         </div>
+  60 |       </div>
+> 61 |       <Button type="submit" disabled={isPending}>
+     |       ^
+  62 |         {isPending ? "Creating..." : "Create panel member"}
+  63 |       </Button>
+  64 |     </form>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/app/admin/panel-members/create-panel-member-form.tsx
+    ./src/app/admin/panel-members/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/app/admin/projects/page.tsx:5:1
+Export getPanelMembers doesn't exist in target module
+  3 | import { requireRole } from "@/lib/auth/require-role";
+  4 | import { getAdminProjects } from "@/lib/admin/queries";
+> 5 | import { getPanelMembers } from "@/lib/panel/queries";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export const dynamic = "force-dynamic";
+  8 |
+
+The export getPanelMembers was not found in module [project]/src/lib/panel/queries.ts [app-rsc] (ecmascript).
+Did you mean to import getPanelProjects?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./src/app/admin/panel-members/create-panel-member-form.tsx:61:7
+Expression expected
+  59 |         </div>
+  60 |       </div>
+> 61 |       <Button type="submit" disabled={isPending}>
+     |       ^
+  62 |         {isPending ? "Creating..." : "Create panel member"}
+  63 |       </Button>
+  64 |     </form>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/app/admin/panel-members/create-panel-member-form.tsx
+    ./src/app/admin/panel-members/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/app/admin/projects/page.tsx:5:1
+Export getPanelMembers doesn't exist in target module
+  3 | import { requireRole } from "@/lib/auth/require-role";
+  4 | import { getAdminProjects } from "@/lib/admin/queries";
+> 5 | import { getPanelMembers } from "@/lib/panel/queries";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export const dynamic = "force-dynamic";
+  8 |
+
+The export getPanelMembers was not found in module [project]/src/lib/panel/queries.ts [app-rsc] (ecmascript).
+Did you mean to import getPanelProjects?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./src/app/admin/panel-members/create-panel-member-form.tsx:61:7
+Expression expected
+  59 |         </div>
+  60 |       </div>
+> 61 |       <Button type="submit" disabled={isPending}>
+     |       ^
+  62 |         {isPending ? "Creating..." : "Create panel member"}
+  63 |       </Button>
+  64 |     </form>
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/app/admin/panel-members/create-panel-member-form.tsx
+    ./src/app/admin/panel-members/page.tsx 
+[browser] Uncaught Error: ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/topbar.tsx:41:1)
+    at <unknown> (Error: (./src/components/layout/topbar.tsx:41:1)
+[browser] Uncaught Error: ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/topbar.tsx:41:1)
+    at <unknown> (Error: (./src/components/layout/topbar.tsx:41:1)
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/projects/page.tsx 
+[browser] ./src/app/admin/projects/page.tsx:5:1
+Export getPanelMembers doesn't exist in target module
+  3 | import { requireRole } from "@/lib/auth/require-role";
+  4 | import { getAdminProjects } from "@/lib/admin/queries";
+> 5 | import { getPanelMembers } from "@/lib/panel/queries";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export const dynamic = "force-dynamic";
+  8 |
+
+The export getPanelMembers was not found in module [project]/src/lib/panel/queries.ts [app-rsc] (ecmascript).
+Did you mean to import getPanelProjects?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/projects/[projectId]/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/assignments/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/projects/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/projects/[projectId]/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/panel-members/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/submission-window/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/app/admin/projects/page.tsx:5:1
+Export getPanelMembers doesn't exist in target module
+  3 | import { requireRole } from "@/lib/auth/require-role";
+  4 | import { getAdminProjects } from "@/lib/admin/queries";
+> 5 | import { getPanelMembers } from "@/lib/panel/queries";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export const dynamic = "force-dynamic";
+  8 |
+
+The export getPanelMembers was not found in module [project]/src/lib/panel/queries.ts [app-rsc] (ecmascript).
+Did you mean to import getPanelProjects?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/app/admin/projects/page.tsx:5:1
+Export getPanelMembers doesn't exist in target module
+  3 | import { requireRole } from "@/lib/auth/require-role";
+  4 | import { getAdminProjects } from "@/lib/admin/queries";
+> 5 | import { getPanelMembers } from "@/lib/panel/queries";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export const dynamic = "force-dynamic";
+  8 |
+
+The export getPanelMembers was not found in module [project]/src/lib/panel/queries.ts [app-rsc] (ecmascript).
+Did you mean to import getPanelProjects?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist. 
+[browser] Uncaught Error: ./src/app/admin/projects/page.tsx:5:1
+Export getPanelMembers doesn't exist in target module
+  3 | import { requireRole } from "@/lib/auth/require-role";
+  4 | import { getAdminProjects } from "@/lib/admin/queries";
+> 5 | import { getPanelMembers } from "@/lib/panel/queries";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export const dynamic = "force-dynamic";
+  8 |
+
+The export getPanelMembers was not found in module [project]/src/lib/panel/queries.ts [app-rsc] (ecmascript).
+Did you mean to import getPanelProjects?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+
+    at <unknown> (Error: ./src/app/admin/projects/page.tsx:5:1)
+    at <unknown> (Error: (./src/app/admin/projects/page.tsx:5:1)
+⨯ ./src/app/page.tsx:1:1
+Module not found: Can't resolve 'next/dist/client/components/redirect-status'
+[31m[1m>[0m [90m1 |[0m [36mimport[0m { isRedirectError } [36mfrom[0m [32m"next/dist/client/components/redirect-status"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m2 |[0m [36mimport[0m { redirect } [36mfrom[0m [32m"next/navigation"[0m;
+  [90m3 |[0m
+  [90m4 |[0m [36mimport[0m { [33mAlert[0m } [36mfrom[0m [32m"@/components/ui/alert"[0m;
+
+Import map: aliased to module 'next' with subpath '/dist/client/components/redirect-status' inside of [project]/
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/page.tsx:1:1
+Module not found: Can't resolve 'next/dist/client/components/redirect-status'
+[31m[1m>[0m [90m1 |[0m [36mimport[0m { isRedirectError } [36mfrom[0m [32m"next/dist/client/components/redirect-status"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m2 |[0m [36mimport[0m { redirect } [36mfrom[0m [32m"next/navigation"[0m;
+  [90m3 |[0m
+  [90m4 |[0m [36mimport[0m { [33mAlert[0m } [36mfrom[0m [32m"@/components/ui/alert"[0m;
+
+Import map: aliased to module 'next' with subpath '/dist/client/components/redirect-status' inside of [project]/
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[browser] Uncaught Error: ./src/app/page.tsx:1:1
+Module not found: Can't resolve 'next/dist/client/components/redirect-status'
+> 1 | import { isRedirectError } from "next/dist/client/components/redirect-status";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 | import { redirect } from "next/navigation";
+  3 |
+  4 | import { Alert } from "@/components/ui/alert";
+
+Import map: aliased to module 'next' with subpath '/dist/client/components/redirect-status' inside of [project]/
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (Error: ./src/app/page.tsx:1:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (Error: (./src/app/page.tsx:1:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)

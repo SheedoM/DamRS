@@ -16,6 +16,7 @@ import {
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -27,7 +28,7 @@ import {
   type SubmissionFilter,
 } from "@/lib/admin/admin-projects";
 import { BulkAssignForm } from "./bulk-assign-form";
-import type { PanelMember } from "@/lib/panel/queries";
+import type { PanelMember } from "@/lib/admin/queries";
 import { cn } from "@/lib/utils";
 
 const columnHelper = createColumnHelper<AdminProjectRow>();

@@ -1,4 +1,4 @@
-import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getOfficialProjectGrade } from "@/lib/review/review.schema";
 
 export type StudentReviewProgress = {

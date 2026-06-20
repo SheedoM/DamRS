@@ -6,10 +6,10 @@ import type { UserRole } from "@/lib/auth/roles";
 import { NavLink } from "./nav-link";
 
 export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeof LayoutDashboard }[]> = {
+  admin: [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Projects", href: "/admin/projects", icon: Files },
     { label: "Panel", href: "/admin/panel-members", icon: Users },
-    { label: "Assignments", href: "/admin/assignments", icon: Link2 },
     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
     { label: "Submission Window", href: "/admin/submission-window", icon: CalendarClock },
   ],

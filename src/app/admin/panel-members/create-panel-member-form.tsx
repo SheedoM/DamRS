@@ -52,7 +52,6 @@ export function CreatePanelMemberForm() {
           <Label htmlFor="email">Email</Label>
           <Input id="email" name="email" type="email" required />
         </div>
-        </div>
         <div className="space-y-2">
           <Label htmlFor="department">Department</Label>
           <Input id="department" name="department" defaultValue="Faculty of Computers and Artificial Intelligence" required />

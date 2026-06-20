@@ -3,7 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { bulkAssignPanelMemberAction } from "../actions";
 import { Button } from "@/components/ui/button";
-import type { PanelMember } from "@/lib/panel/queries";
+import type { PanelMember } from "@/lib/admin/queries";
 
 type BulkAssignFormProps = {
   selectedProjectIds: string[];

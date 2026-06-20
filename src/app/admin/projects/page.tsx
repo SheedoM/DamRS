@@ -1,8 +1,7 @@
 import { AdminProjectsTable } from "./projects-table";
 import { AppShell } from "@/components/layout/app-shell";
 import { requireRole } from "@/lib/auth/require-role";
-import { getAdminProjects } from "@/lib/admin/queries";
-import { getPanelMembers } from "@/lib/panel/queries";
+import { getAdminProjects, getPanelMembers } from "@/lib/admin/queries";
 
 export const dynamic = "force-dynamic";
 
