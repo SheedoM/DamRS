@@ -55,7 +55,7 @@ export default async function StudentDashboardPage() {
     {
       title: "Uploaded files",
       value: projectData ? `${projectData.files.length}` : "0",
-      detail: "Required: PDF, ZIP, and presentation.",
+      detail: "Required: PDF and ZIP. Presentation is optional.",
       icon: FileArchive,
     },
     {

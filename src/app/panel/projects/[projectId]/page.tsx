@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppShell } from "@/components/layout/app-shell";
 import { requireRole } from "@/lib/auth/require-role";
 import { getPanelProjectDetail } from "@/lib/panel/queries";
+import { getCombinedReviewGrade } from "@/lib/review/review.schema";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -22,8 +23,12 @@ function formatFileSize(size: number) {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function scoreText(value: number | null | undefined) {
-  return typeof value === "number" ? value.toFixed(2) : "Not submitted";
+function componentScoreText(value: number | null, max: number) {
+  return value !== null ? `${value.toFixed(2)} / ${max}` : "Pending";
+}
+
+function reviewScoreText(value: number | null | undefined, max: number) {
+  return typeof value === "number" ? `${value.toFixed(2)} / ${max}` : "Not submitted";
 }
 
 export default async function PanelProjectDetailPage({
@@ -41,6 +46,7 @@ export default async function PanelProjectDetailPage({
 
   const draftReview = project.reviews.find((review) => review.review_type === "draft");
   const finalReview = project.reviews.find((review) => review.review_type === "final");
+  const combinedGrade = getCombinedReviewGrade(project.reviews);
 
   return (
     <AppShell title="Project Review" profile={profile}>
@@ -129,6 +135,16 @@ export default async function PanelProjectDetailPage({
         <Card>
           <CardHeader><CardTitle>My reviews</CardTitle></CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-md border border-slate-200 bg-slate-50 p-4 md:col-span-2">
+              <p className="text-sm font-medium text-slate-700">Audit grade</p>
+              <p className="mt-1 text-3xl font-semibold text-slate-950">
+                {combinedGrade.percentage || "Pending"}
+              </p>
+              <p className="mt-2 text-sm text-slate-500">
+                Draft component: {componentScoreText(combinedGrade.draftScore, 80)} - Final component: {componentScoreText(combinedGrade.finalComponentScore, 20)}
+              </p>
+            </div>
+
             <div className="rounded-md border border-slate-200 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="font-semibold text-slate-950">Draft review</h3>
@@ -139,7 +155,7 @@ export default async function PanelProjectDetailPage({
               <p className="mt-2 text-sm text-slate-500">
                 Submitted: {formatDate(project.reviewStatus.draftSubmittedAt)}
               </p>
-              <p className="mt-1 text-sm text-slate-500">Score: {scoreText(draftReview?.total_score)}</p>
+              <p className="mt-1 text-sm text-slate-500">Score: {reviewScoreText(draftReview?.total_score, 80)}</p>
               <Link
                 href={`/panel/projects/${project.id}/draft-review`}
                 className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-4")}
@@ -158,7 +174,7 @@ export default async function PanelProjectDetailPage({
               <p className="mt-2 text-sm text-slate-500">
                 Submitted: {formatDate(project.reviewStatus.finalSubmittedAt)}
               </p>
-              <p className="mt-1 text-sm text-slate-500">Score: {scoreText(finalReview?.total_score)}</p>
+              <p className="mt-1 text-sm text-slate-500">Score: {reviewScoreText(finalReview?.total_score, 20)}</p>
               <Link
                 href={`/panel/projects/${project.id}/final-review`}
                 className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-4")}
@@ -172,4 +188,3 @@ export default async function PanelProjectDetailPage({
     </AppShell>
   );
 }
-

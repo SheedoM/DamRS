@@ -84,15 +84,17 @@ export function ReviewForm({ mode, projectId, existingReview }: ReviewFormProps)
             />
           </label>
 
-          <label className="space-y-2 block">
-            <span className="text-sm font-medium text-slate-700">Questions</span>
-            <textarea
-              name="questions"
-              rows={4}
-              defaultValue={existingReview?.questions || ""}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 outline-none focus:border-[var(--brand-blue)] focus:ring-2 focus:ring-[var(--brand-blue)]/20"
-            />
-          </label>
+          {isDraft ? (
+            <label className="space-y-2 block">
+              <span className="text-sm font-medium text-slate-700">Questions</span>
+              <textarea
+                name="questions"
+                rows={4}
+                defaultValue={existingReview?.questions || ""}
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 outline-none focus:border-[var(--brand-blue)] focus:ring-2 focus:ring-[var(--brand-blue)]/20"
+              />
+            </label>
+          ) : null}
 
           {!state.ok ? <Alert>{state.message}</Alert> : null}
 
@@ -104,4 +106,3 @@ export function ReviewForm({ mode, projectId, existingReview }: ReviewFormProps)
     </Card>
   );
 }
-

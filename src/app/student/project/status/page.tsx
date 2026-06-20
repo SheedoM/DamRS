@@ -19,6 +19,10 @@ function formatFileSize(size: number) {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function getStatusTone(status: string) {
+  return status === "draft" ? "warning" : "success";
+}
+
 export default async function StudentProjectStatusPage() {
   const { profile } = await requireRole(["student"]);
   const projectData = await getStudentProject(profile.id);
@@ -47,7 +51,7 @@ export default async function StudentProjectStatusPage() {
               {projectData.project.title}
             </h2>
           </div>
-          <Badge tone={projectData.project.status === "submitted" ? "success" : "warning"}>
+          <Badge tone={getStatusTone(projectData.project.status)}>
             {projectData.project.status.replaceAll("_", " ")}
           </Badge>
         </CardHeader>

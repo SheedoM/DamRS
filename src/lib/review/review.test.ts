@@ -6,8 +6,10 @@ import {
   calculateReviewTotal,
   draftReviewFormSchema,
   finalReviewFormSchema,
+  getCombinedReviewGrade,
   getPanelDashboardStats,
   getPanelProjectReviewStatus,
+  getProjectStatusAfterReview,
 } from "./review.schema";
 
 const projectId = "11111111-1111-4111-8111-111111111111";
@@ -69,14 +71,13 @@ describe("review helpers", () => {
     });
   });
 
-  it("builds a final review payload and zeroes draft-only scores", () => {
+  it("builds a final review payload without questions and zeroes draft-only scores", () => {
     expect(
       buildFinalReviewPayload(
         {
           presentation_score: 9,
           discussion_score: 10,
           notes: "",
-          questions: "Clarify deployment plan.",
         },
         projectId,
         panelMemberId,
@@ -92,7 +93,7 @@ describe("review helpers", () => {
       presentation_score: 9,
       discussion_score: 10,
       notes: null,
-      questions: "Clarify deployment plan.",
+      questions: null,
     });
   });
 
@@ -101,10 +102,74 @@ describe("review helpers", () => {
       presentation_score: "11",
       discussion_score: "10",
       notes: "",
-      questions: "",
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it("combines draft and final review components into a 100 point percentage", () => {
+    expect(
+      getCombinedReviewGrade([
+        {
+          review_type: "draft",
+          submitted_at: "2026-06-20T08:00:00.000Z",
+          documentation_score: 18,
+          implementation_score: 23,
+          code_quality_score: 19,
+          innovation_score: 14,
+          presentation_score: 0,
+          discussion_score: 0,
+        },
+        {
+          review_type: "final",
+          submitted_at: "2026-06-20T12:00:00.000Z",
+          documentation_score: 0,
+          implementation_score: 0,
+          code_quality_score: 0,
+          innovation_score: 0,
+          presentation_score: 9,
+          discussion_score: 8,
+        },
+      ]),
+    ).toEqual({
+      draftScore: 74,
+      finalComponentScore: 17,
+      totalScore: 91,
+      percentage: "91.00%",
+      isComplete: true,
+    });
+  });
+
+  it("keeps the combined grade unavailable until both review parts are submitted", () => {
+    expect(
+      getCombinedReviewGrade([
+        {
+          review_type: "draft",
+          submitted_at: "2026-06-20T08:00:00.000Z",
+          documentation_score: 18,
+          implementation_score: 23,
+          code_quality_score: 19,
+          innovation_score: 14,
+          presentation_score: 0,
+          discussion_score: 0,
+        },
+      ]),
+    ).toMatchObject({
+      draftScore: 74,
+      finalComponentScore: null,
+      totalScore: null,
+      percentage: null,
+      isComplete: false,
+    });
+  });
+
+  it("derives project status after review submission", () => {
+    expect(getProjectStatusAfterReview("draft", "draft")).toBe("draft_reviewed");
+    expect(getProjectStatusAfterReview("assigned", "draft")).toBe("draft_reviewed");
+    expect(getProjectStatusAfterReview("submitted", "final")).toBe("final_reviewed");
+    expect(getProjectStatusAfterReview("draft_reviewed", "final")).toBe("final_reviewed");
+    expect(getProjectStatusAfterReview("final_reviewed", "draft")).toBe("final_reviewed");
+    expect(getProjectStatusAfterReview("completed", "final")).toBe("completed");
   });
 
   it("summarizes draft and final review status", () => {
@@ -152,4 +217,3 @@ describe("review helpers", () => {
     });
   });
 });
-

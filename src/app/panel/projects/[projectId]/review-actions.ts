@@ -9,8 +9,11 @@ import {
   buildFinalReviewPayload,
   draftReviewFormSchema,
   finalReviewFormSchema,
+  getProjectStatusAfterReview,
+  type ReviewType,
 } from "@/lib/review/review.schema";
 import { requireRole } from "@/lib/auth/require-role";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type ActionResult = {
@@ -63,6 +66,41 @@ function revalidatePanelReviewPaths(projectId: string) {
   revalidatePath(`/panel/projects/${projectId}/final-review`);
   revalidatePath("/admin/projects");
   revalidatePath(`/admin/projects/${projectId}`);
+  revalidatePath("/student");
+  revalidatePath("/student/project");
+  revalidatePath("/student/project/status");
+}
+
+async function updateProjectStatusAfterReview(projectId: string, reviewType: ReviewType) {
+  let adminClient;
+  try {
+    adminClient = createSupabaseAdminClient();
+  } catch (error) {
+    return error instanceof Error ? error.message : "Supabase service role key is missing.";
+  }
+
+  const { data: project, error: projectError } = await adminClient
+    .from("projects")
+    .select("status")
+    .eq("id", projectId)
+    .single();
+
+  if (projectError || !project) {
+    return projectError?.message || "Unable to load project status.";
+  }
+
+  const nextStatus = getProjectStatusAfterReview(String(project.status), reviewType);
+
+  if (nextStatus === project.status) {
+    return null;
+  }
+
+  const { error } = await adminClient
+    .from("projects")
+    .update({ status: nextStatus })
+    .eq("id", projectId);
+
+  return error?.message || null;
 }
 
 export async function saveDraftReviewAction(
@@ -110,6 +148,11 @@ export async function saveDraftReviewAction(
     return { ok: false, message: error?.message || "Unable to save draft review." };
   }
 
+  const statusError = await updateProjectStatusAfterReview(projectIdResult.data, "draft");
+  if (statusError) {
+    return { ok: false, message: `Review saved, but project status was not updated: ${statusError}` };
+  }
+
   await writePanelAuditLog(profile.id, "panel_submitted_draft_review", data.id, {
     project_id: projectIdResult.data,
   });
@@ -132,7 +175,6 @@ export async function saveFinalReviewAction(
     presentation_score: formData.get("presentation_score"),
     discussion_score: formData.get("discussion_score"),
     notes: formData.get("notes") || "",
-    questions: formData.get("questions") || "",
   });
 
   if (!parsed.success) {
@@ -160,10 +202,14 @@ export async function saveFinalReviewAction(
     return { ok: false, message: error?.message || "Unable to save final review." };
   }
 
+  const statusError = await updateProjectStatusAfterReview(projectIdResult.data, "final");
+  if (statusError) {
+    return { ok: false, message: `Review saved, but project status was not updated: ${statusError}` };
+  }
+
   await writePanelAuditLog(profile.id, "panel_submitted_final_review", data.id, {
     project_id: projectIdResult.data,
   });
   revalidatePanelReviewPaths(projectIdResult.data);
   redirect(`/panel/projects/${projectIdResult.data}`);
 }
-
