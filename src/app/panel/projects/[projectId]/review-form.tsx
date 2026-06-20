@@ -1,0 +1,107 @@
+"use client";
+
+import { useActionState } from "react";
+
+import { saveDraftReviewAction, saveFinalReviewAction } from "./review-actions";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { PanelReview } from "@/lib/panel/queries";
+
+type ReviewFormProps = {
+  mode: "draft" | "final";
+  projectId: string;
+  existingReview: PanelReview | null;
+};
+
+const initialState = { ok: true, message: "" };
+
+function ScoreInput({
+  label,
+  name,
+  max,
+  defaultValue,
+}: {
+  label: string;
+  name: string;
+  max: number;
+  defaultValue: number;
+}) {
+  return (
+    <label className="space-y-2">
+      <span className="text-sm font-medium text-slate-700">{label}</span>
+      <input
+        name={name}
+        type="number"
+        min="0"
+        max={String(max)}
+        step="0.5"
+        defaultValue={defaultValue}
+        className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none focus:border-[var(--brand-blue)] focus:ring-2 focus:ring-[var(--brand-blue)]/20"
+      />
+      <span className="text-xs text-slate-500">Max {max}</span>
+    </label>
+  );
+}
+
+export function ReviewForm({ mode, projectId, existingReview }: ReviewFormProps) {
+  const action = mode === "draft" ? saveDraftReviewAction : saveFinalReviewAction;
+  const [state, formAction, isPending] = useActionState(action, initialState);
+  const isDraft = mode === "draft";
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{isDraft ? "Draft review" : "Final review"}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form action={formAction} className="space-y-5">
+          <input type="hidden" name="project_id" value={projectId} />
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {isDraft ? (
+              <>
+                <ScoreInput label="Documentation" name="documentation_score" max={20} defaultValue={existingReview?.documentation_score ?? 0} />
+                <ScoreInput label="Implementation" name="implementation_score" max={25} defaultValue={existingReview?.implementation_score ?? 0} />
+                <ScoreInput label="Code quality" name="code_quality_score" max={20} defaultValue={existingReview?.code_quality_score ?? 0} />
+                <ScoreInput label="Innovation" name="innovation_score" max={15} defaultValue={existingReview?.innovation_score ?? 0} />
+              </>
+            ) : (
+              <>
+                <ScoreInput label="Presentation" name="presentation_score" max={10} defaultValue={existingReview?.presentation_score ?? 0} />
+                <ScoreInput label="Discussion" name="discussion_score" max={10} defaultValue={existingReview?.discussion_score ?? 0} />
+              </>
+            )}
+          </div>
+
+          <label className="space-y-2 block">
+            <span className="text-sm font-medium text-slate-700">Notes</span>
+            <textarea
+              name="notes"
+              rows={5}
+              defaultValue={existingReview?.notes || ""}
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 outline-none focus:border-[var(--brand-blue)] focus:ring-2 focus:ring-[var(--brand-blue)]/20"
+            />
+          </label>
+
+          <label className="space-y-2 block">
+            <span className="text-sm font-medium text-slate-700">Questions</span>
+            <textarea
+              name="questions"
+              rows={4}
+              defaultValue={existingReview?.questions || ""}
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 outline-none focus:border-[var(--brand-blue)] focus:ring-2 focus:ring-[var(--brand-blue)]/20"
+            />
+          </label>
+
+          {!state.ok ? <Alert>{state.message}</Alert> : null}
+
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "Saving..." : existingReview ? "Update review" : "Submit review"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
