@@ -1,0 +1,24 @@
+{
+  "name": "Graduation Project Audit System",
+  "short_name": "GP Review",
+  "description": "Damietta FCAI graduation project submission and review system.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#123459",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/brand/fcai-logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/damietta-university.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}
