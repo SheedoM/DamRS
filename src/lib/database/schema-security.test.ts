@@ -14,6 +14,12 @@ const reviewStatusMigrationPath = join(
   "migrations",
   "0003_review_status_sync.sql",
 );
+const unifiedReviewMigrationPath = join(
+  process.cwd(),
+  "supabase",
+  "migrations",
+  "0004_unified_reviews_and_overrides.sql",
+);
 
 function readMigration() {
   return readFileSync(migrationPath, "utf8").toLowerCase();
@@ -21,6 +27,10 @@ function readMigration() {
 
 function readReviewStatusMigration() {
   return readFileSync(reviewStatusMigrationPath, "utf8").toLowerCase();
+}
+
+function readUnifiedReviewMigration() {
+  return readFileSync(unifiedReviewMigrationPath, "utf8").toLowerCase();
 }
 
 describe("phase 2 schema migration", () => {
@@ -121,5 +131,28 @@ describe("phase 2 schema migration", () => {
     expect(sql).toContain("submitted_at = coalesce(submitted_at, now())");
     expect(sql).toContain("backfill final reviews");
     expect(sql).toContain("backfill draft reviews");
+  });
+
+  it("migrates reviews to one row per panel member and adds dean overrides", () => {
+    expect(existsSync(unifiedReviewMigrationPath)).toBe(true);
+
+    const sql = readUnifiedReviewMigration();
+
+    expect(sql).toContain("create type public.review_status as enum");
+    expect(sql).toContain("alter table public.reviews add column if not exists status public.review_status");
+    expect(sql).toContain("draft_notes");
+    expect(sql).toContain("draft_questions");
+    expect(sql).toContain("draft_submitted_at");
+    expect(sql).toContain("final_notes");
+    expect(sql).toContain("final_submitted_at");
+    expect(sql).toContain("delete from public.reviews");
+    expect(sql).toContain("drop column if exists review_type");
+    expect(sql).toContain("reviews_one_per_panel_member_per_project");
+    expect(sql).toContain("create table if not exists public.project_grade_overrides");
+    expect(sql).toContain("alter table public.project_grade_overrides enable row level security");
+    expect(sql).toContain("admins can manage project grade overrides");
+    expect(sql).toContain("create or replace function public.recompute_project_review_status");
+    expect(sql).toContain("create trigger reviews_recompute_project_status");
+    expect(sql).not.toContain("new.review_type");
   });
 });
