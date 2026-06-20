@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSignedUrlForProjectFile } from "@/lib/project/storage";
 
 export type StudentProject = {
   id: string;
@@ -32,6 +33,7 @@ export type ProjectFile = {
   file_size: number;
   mime_type: string;
   created_at: string;
+  signedUrl: string | null;
 };
 
 export type SubmissionWindow = {
@@ -84,9 +86,16 @@ export async function getStudentProject(teamLeaderId: string) {
       .order("created_at", { ascending: false }),
   ]);
 
+  const filesWithSignedUrls = await Promise.all(
+    (files || []).map(async (file) => ({
+      ...file,
+      signedUrl: await createSignedUrlForProjectFile(supabase, file),
+    })),
+  );
+
   return {
     project: project as StudentProject,
     teamMembers: (teamMembers || []) as TeamMember[],
-    files: (files || []) as ProjectFile[],
+    files: filesWithSignedUrls as ProjectFile[],
   };
 }

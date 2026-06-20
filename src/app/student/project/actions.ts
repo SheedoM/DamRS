@@ -339,5 +339,5 @@ export async function submitProjectAction(
   revalidatePath("/student");
   revalidatePath("/student/project");
   revalidatePath("/student/project/status");
-  return { ok: true, message: "Project submitted." };
+  redirect("/student/project/status");
 }

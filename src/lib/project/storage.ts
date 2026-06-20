@@ -10,6 +10,51 @@ export function getBucketForFileType(fileType: RequiredProjectFileType) {
   return bucketByFileType[fileType];
 }
 
+export function getBucketForProjectFileType(fileType: unknown) {
+  if (typeof fileType !== "string") return null;
+
+  return Object.hasOwn(bucketByFileType, fileType)
+    ? bucketByFileType[fileType as RequiredProjectFileType]
+    : null;
+}
+
+export const SIGNED_FILE_URL_EXPIRES_IN_SECONDS = 10 * 60;
+
+type SignedUrlClient = {
+  storage: {
+    from: (bucket: string) => {
+      createSignedUrl: (
+        path: string,
+        expiresIn: number,
+      ) => Promise<{
+        data: { signedUrl: string } | null;
+        error: { message: string } | null;
+      }>;
+    };
+  };
+};
+
+export async function createSignedUrlForProjectFile(
+  supabase: SignedUrlClient,
+  file: { file_type: unknown; storage_path: string | null },
+) {
+  const bucket = getBucketForProjectFileType(file.file_type);
+
+  if (!bucket || !file.storage_path) {
+    return null;
+  }
+
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(file.storage_path, SIGNED_FILE_URL_EXPIRES_IN_SECONDS);
+
+  if (error || !data?.signedUrl) {
+    return null;
+  }
+
+  return data.signedUrl;
+}
+
 function sanitizeFileName(fileName: string) {
   const lastDot = fileName.lastIndexOf(".");
   const rawName = lastDot > 0 ? fileName.slice(0, lastDot) : fileName;

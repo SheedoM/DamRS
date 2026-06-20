@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { uploadProjectFileAction } from "./actions";
 import { Alert } from "@/components/ui/alert";
@@ -21,6 +22,16 @@ export function FileUploadForm({ projectId, fileType, label, accept }: FileUploa
   const [state, formAction, isPending] = useActionState(uploadProjectFileAction, initialState);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.ok && state.message) {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      router.refresh();
+    }
+  }, [router, state.message, state.ok]);
 
   return (
     <form ref={formRef} action={formAction} className="space-y-3 rounded-md border border-slate-200 p-4">

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, FileText } from "lucide-react";
 
 import { FileUploadForm } from "./file-upload-form";
 import { SubmitProjectForm } from "./submit-project-form";
@@ -26,7 +26,7 @@ const requiredUploads: {
 }[] = [
   { fileType: "documentation_pdf", label: "Documentation PDF", accept: "application/pdf" },
   { fileType: "source_code_zip", label: "Source code ZIP", accept: ".zip,application/zip,application/x-zip-compressed" },
-  { fileType: "presentation_file", label: "Presentation file", accept: ".pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" },
+  { fileType: "presentation_file", label: "Presentation file (optional)", accept: ".pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" },
 ];
 
 function formatFileSize(size: number) {
@@ -109,6 +109,19 @@ export function ProjectSummary({ project, teamMembers, files }: ProjectSummaryPr
                 <div key={file.id} className="rounded-md border border-slate-200 p-3">
                   <p className="font-medium text-slate-950">{file.file_name}</p>
                   <p className="text-sm text-slate-500">{file.file_type.replaceAll("_", " ")} - {formatFileSize(file.file_size)}</p>
+                  {file.signedUrl ? (
+                    <a
+                      href={file.signedUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-3")}
+                    >
+                      <FileText className="h-4 w-4" aria-hidden="true" />
+                      Open file
+                    </a>
+                  ) : (
+                    <p className="mt-2 text-xs text-amber-700">Preview link unavailable.</p>
+                  )}
                 </div>
               )) : <p className="text-sm text-slate-500">No files uploaded yet.</p>}
             </div>
@@ -119,7 +132,7 @@ export function ProjectSummary({ project, teamMembers, files }: ProjectSummaryPr
       {canEdit ? (
         <Card>
           <CardHeader>
-            <CardTitle>Required uploads</CardTitle>
+            <CardTitle>Uploads</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 lg:grid-cols-3">
             {requiredUploads.map((upload) => (

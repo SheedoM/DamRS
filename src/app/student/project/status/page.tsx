@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { FileText } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,12 @@ import { getStudentProject } from "@/lib/project/queries";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+
+function formatFileSize(size: number) {
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 export default async function StudentProjectStatusPage() {
   const { profile } = await requireRole(["student"]);
@@ -62,6 +69,34 @@ export default async function StudentProjectStatusPage() {
           ) : (
             <p className="text-sm text-emerald-700">All submission requirements are complete.</p>
           )}
+          <div className="rounded-md border border-slate-200 p-4">
+            <p className="text-sm font-medium text-slate-900">Uploaded files</p>
+            <div className="mt-3 space-y-3">
+              {projectData.files.length > 0 ? projectData.files.map((file) => (
+                <div key={file.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-slate-50 p-3">
+                  <div>
+                    <p className="font-medium text-slate-950">{file.file_name}</p>
+                    <p className="text-sm text-slate-500">
+                      {file.file_type.replaceAll("_", " ")} - {formatFileSize(file.file_size)}
+                    </p>
+                  </div>
+                  {file.signedUrl ? (
+                    <a
+                      href={file.signedUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+                    >
+                      <FileText className="h-4 w-4" aria-hidden="true" />
+                      Open file
+                    </a>
+                  ) : (
+                    <p className="text-xs text-amber-700">Preview link unavailable.</p>
+                  )}
+                </div>
+              )) : <p className="text-sm text-slate-500">No files uploaded yet.</p>}
+            </div>
+          </div>
           <Link href="/student/project" className={cn(buttonVariants({ variant: "outline" }))}>
             Back to project
           </Link>

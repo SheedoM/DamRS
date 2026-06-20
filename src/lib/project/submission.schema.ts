@@ -8,6 +8,13 @@ export const projectFileTypes = [
 
 export type RequiredProjectFileType = (typeof projectFileTypes)[number];
 
+export const requiredSubmissionFileTypes = [
+  "documentation_pdf",
+  "source_code_zip",
+] as const;
+
+type RequiredSubmissionFileType = (typeof requiredSubmissionFileTypes)[number];
+
 export const teamMemberSchema = z.object({
   full_name: z.string().trim().min(2, "Team member name is required."),
   student_id: z.string().trim().min(3, "Student ID is required."),
@@ -49,10 +56,9 @@ type SubmissionRequirementInput = {
   fileTypes: string[];
 };
 
-const requiredFileLabels: Record<RequiredProjectFileType, string> = {
+const requiredFileLabels: Record<RequiredSubmissionFileType, string> = {
   documentation_pdf: "Documentation PDF",
   source_code_zip: "Source code ZIP",
-  presentation_file: "Presentation file",
 };
 
 function isBlank(value: string | null) {
@@ -69,7 +75,7 @@ export function getMissingSubmissionRequirements(input: SubmissionRequirementInp
   if (isBlank(input.demo_video_url)) missing.push("Demo video URL");
   if (input.teamMemberCount < 1) missing.push("At least one team member");
 
-  for (const fileType of projectFileTypes) {
+  for (const fileType of requiredSubmissionFileTypes) {
     if (!input.fileTypes.includes(fileType)) {
       missing.push(requiredFileLabels[fileType]);
     }

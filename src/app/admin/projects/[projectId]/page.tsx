@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { FileText } from "lucide-react";
 
 import { AssignPanelMemberForm, RevokeAssignmentForm } from "../../assignments/assignment-forms";
 import { Badge } from "@/components/ui/badge";
@@ -85,6 +86,19 @@ export default async function AdminProjectDetailPage({
                   <p className="font-medium text-slate-950">{file.file_name}</p>
                   <p className="text-sm text-slate-500">{file.file_type.replaceAll("_", " ")} - {formatFileSize(file.file_size)}</p>
                   <p className="mt-1 break-all text-xs text-slate-400">{file.storage_path}</p>
+                  {file.signedUrl ? (
+                    <a
+                      href={file.signedUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-3")}
+                    >
+                      <FileText className="h-4 w-4" aria-hidden="true" />
+                      Open file
+                    </a>
+                  ) : (
+                    <p className="mt-2 text-xs text-amber-700">Preview link unavailable.</p>
+                  )}
                 </div>
               )) : <p className="text-sm text-slate-500">No files uploaded.</p>}
             </CardContent>

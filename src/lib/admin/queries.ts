@@ -1,5 +1,6 @@
 import type { AdminProjectRow } from "./admin-projects";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSignedUrlForProjectFile } from "@/lib/project/storage";
 
 export type PanelMember = {
   id: string;
@@ -53,6 +54,7 @@ export type AdminProjectDetail = AdminProjectRow & {
     storage_path: string;
     file_size: number;
     mime_type: string;
+    signedUrl: string | null;
   }[];
   assignments: Assignment[];
 };
@@ -143,6 +145,12 @@ export async function getAdminProjectDetail(projectId: string) {
   ]);
 
   const row = toProjectRow(project as unknown as RawProject);
+  const filesWithSignedUrls = await Promise.all(
+    (files || []).map(async (file) => ({
+      ...file,
+      signedUrl: await createSignedUrlForProjectFile(supabase, file),
+    })),
+  );
 
   return {
     ...row,
@@ -151,7 +159,7 @@ export async function getAdminProjectDetail(projectId: string) {
     github_url: project.github_url as string | null,
     demo_video_url: project.demo_video_url as string | null,
     team_members: teamMembers || [],
-    files: files || [],
+    files: filesWithSignedUrls,
     assignments: assignments || [],
   } as AdminProjectDetail;
 }
