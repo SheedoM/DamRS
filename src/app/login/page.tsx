@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
@@ -12,10 +11,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
+type LoginMode = "staff" | "student";
+
 export default function LoginPage() {
   const router = useRouter();
+  const [mode, setMode] = useState<LoginMode>("student");
+
+  // Staff fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // Student fields
+  const [studentId, setStudentId] = useState("");
+  const [nationalId, setNationalId] = useState("");
+  // Shared
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -26,13 +34,22 @@ export default function LoginPage() {
 
     try {
       const supabase = createSupabaseBrowserClient();
+
+      // For students, derive the internal email from the student ID.
+      const loginEmail = mode === "student" ? `${studentId.trim()}@damrs.edu` : email.trim();
+      const loginPassword = mode === "student" ? nationalId.trim() : password;
+
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: loginEmail,
+        password: loginPassword,
       });
 
       if (signInError) {
-        setError(signInError.message);
+        setError(
+          mode === "student"
+            ? "الرقم الجامعي أو الرقم القومي غير صحيح."
+            : signInError.message,
+        );
         return;
       }
 
@@ -88,49 +105,89 @@ export default function LoginPage() {
         <Card className="w-full max-w-md">
           <CardHeader>
             <div>
-              <p className="text-sm font-medium text-[var(--brand-blue)]">
-                تسجيل الدخول
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-950">
-                الدخول إلى لوحة التحكم
-              </h2>
+              <p className="text-sm font-medium text-[var(--brand-blue)]">تسجيل الدخول</p>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-950">الدخول إلى لوحة التحكم</h2>
+            </div>
+            {/* Mode toggle */}
+            <div className="mt-4 flex rounded-lg border border-slate-200 bg-slate-50 p-1">
+              <button
+                type="button"
+                onClick={() => { setMode("student"); setError(null); }}
+                className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${mode === "student" ? "bg-white text-slate-950 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+              >
+                طالب
+              </button>
+              <button
+                type="button"
+                onClick={() => { setMode("staff"); setError(null); }}
+                className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${mode === "staff" ? "bg-white text-slate-950 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+              >
+                إداري / عضو لجنة
+              </button>
             </div>
           </CardHeader>
           <CardContent>
             <form className="space-y-4" onSubmit={handleSubmit}>
               {error ? <Alert>{error}</Alert> : null}
-              <div className="space-y-2">
-                <Label htmlFor="email">البريد الإلكتروني</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">كلمة المرور</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  required
-                />
-              </div>
+
+              {mode === "student" ? (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="student_id">الرقم الجامعي</Label>
+                    <Input
+                      id="student_id"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="username"
+                      value={studentId}
+                      onChange={(e) => setStudentId(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="national_id">الرقم القومي</Label>
+                    <Input
+                      id="national_id"
+                      type="password"
+                      inputMode="numeric"
+                      autoComplete="current-password"
+                      value={nationalId}
+                      onChange={(e) => setNationalId(e.target.value)}
+                      required
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">البريد الإلكتروني</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">كلمة المرور</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      autoComplete="current-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                </>
+              )}
+
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? "جارٍ تسجيل الدخول..." : "تسجيل الدخول"}
               </Button>
             </form>
-            <p className="mt-4 text-center text-sm text-slate-500">
-              طالب جديد؟{" "}
-              <Link href="/register" className="font-semibold text-[var(--brand-blue)]">
-                إنشاء حساب
-              </Link>
-            </p>
           </CardContent>
         </Card>
       </section>

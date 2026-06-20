@@ -27,7 +27,6 @@ const createPanelMemberSchema = z.object({
 
 const createStudentSchema = z.object({
   full_name: z.string().trim().min(2),
-  email: z.string().trim().email(),
   student_id: z.string().trim().min(3),
   national_id: z.string().trim().regex(/^\d{14}$/),
 });
@@ -401,7 +400,6 @@ export async function createStudentAccountAction(
   const { profile } = await requireRole(["admin"]);
   const parsed = createStudentSchema.safeParse({
     full_name: formData.get("full_name"),
-    email: formData.get("email"),
     student_id: formData.get("student_id"),
     national_id: formData.get("national_id"),
   });
@@ -420,10 +418,14 @@ export async function createStudentAccountAction(
     };
   }
 
-  const tempPassword = Math.random().toString(36).slice(-10) + "Aa1!";
+  // Derive a stable email from the student ID — students never see this.
+  // Password is the national ID — simple, memorable, no temp password needed.
+  const derivedEmail = `${parsed.data.student_id}@damrs.edu`;
+  const password = parsed.data.national_id;
+
   const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
-    email: parsed.data.email,
-    password: tempPassword,
+    email: derivedEmail,
+    password,
     email_confirm: true,
     user_metadata: { full_name: parsed.data.full_name, role: "student" },
   });
@@ -435,13 +437,14 @@ export async function createStudentAccountAction(
   const { error: profileError } = await adminClient.from("profiles").insert({
     id: authUser.user.id,
     full_name: parsed.data.full_name,
-    email: parsed.data.email,
+    email: derivedEmail,
     role: "student",
     student_id: parsed.data.student_id,
     national_id: parsed.data.national_id,
   });
 
   if (profileError) {
+    await adminClient.auth.admin.deleteUser(authUser.user.id);
     return { ok: false, message: profileError.message };
   }
 
@@ -463,7 +466,7 @@ export async function createStudentAccountAction(
 
   await writeAuditLog(profile.id, "admin_created_student", "profile", authUser.user.id);
   revalidatePath("/admin/students");
-  return { ok: true, message: `تم إنشاء حساب الطالب. كلمة المرور المؤقتة: ${tempPassword}` };
+  return { ok: true, message: "تم إنشاء حساب الطالب بنجاح." };
 }
 
 export async function addEligibleStudentsAction(

@@ -13,39 +13,22 @@ const initialState = { ok: true, message: "" };
 
 export function CreateStudentForm() {
   const [state, formAction, isPending] = useActionState(createStudentAccountAction, initialState);
-  const [createdPassword, setCreatedPassword] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
   const [prevState, setPrevState] = useState(state);
-
   if (state !== prevState) {
     setPrevState(state);
     if (state.ok && state.message) {
-      const match = state.message.match(/كلمة المرور المؤقتة:\s*(\S+)/);
-      if (match) {
-        setCreatedPassword(match[1]);
-        setOpen(false);
-      }
+      setOpen(false);
     }
   }
 
   return (
     <div className="space-y-4">
       {!state.ok ? <Alert>{state.message}</Alert> : null}
-
-      {createdPassword ? (
-        <div className="rounded-lg border-2 border-amber-400 bg-amber-50 p-5">
-          <h3 className="font-semibold text-slate-950">تم إنشاء حساب الطالب</h3>
-          <p className="mt-2 text-sm text-slate-700">احفظ كلمة المرور المؤقتة الآن — لا يمكن استرجاعها لاحقًا.</p>
-          <div className="mt-3 flex items-center gap-2">
-            <code className="rounded bg-white px-3 py-2 font-mono text-sm border border-slate-200">{createdPassword}</code>
-            <Button type="button" variant="outline" size="sm" onClick={() => navigator.clipboard.writeText(createdPassword)}>
-              نسخ
-            </Button>
-          </div>
-          <Button type="button" variant="ghost" size="sm" className="mt-3" onClick={() => setCreatedPassword(null)}>
-            تم
-          </Button>
+      {state.ok && state.message ? (
+        <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+          {state.message}
         </div>
       ) : null}
 
@@ -57,16 +40,13 @@ export function CreateStudentForm() {
               <Input id="full_name" name="full_name" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
-              <Input id="email" name="email" type="email" required />
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="student_id">الرقم الجامعي</Label>
               <Input id="student_id" name="student_id" required />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="national_id">الرقم القومي</Label>
-              <Input id="national_id" name="national_id" inputMode="numeric" required />
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="national_id">الرقم القومي (يُستخدم كلمة مرور)</Label>
+              <Input id="national_id" name="national_id" inputMode="numeric" maxLength={14} required />
+              <p className="text-xs text-slate-500">سيتمكن الطالب من تسجيل الدخول باستخدام رقمه الجامعي والرقم القومي.</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
