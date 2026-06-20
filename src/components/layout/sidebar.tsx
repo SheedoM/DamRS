@@ -1,18 +1,17 @@
 import Image from "next/image";
-import Link from "next/link";
-import { CalendarClock, ClipboardCheck, Files, GraduationCap, LayoutDashboard, Link2, Users } from "lucide-react";
-
+import { CalendarClock, Files, GraduationCap, LayoutDashboard, Link2, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/lib/auth/roles";
 
-const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeof LayoutDashboard }[]> = {
-  admin: [
+import { NavLink } from "./nav-link";
+
+export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeof LayoutDashboard }[]> = {
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Projects", href: "/admin/projects", icon: Files },
     { label: "Panel", href: "/admin/panel-members", icon: Users },
     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+    { label: "Assignments", href: "/admin/assignments", icon: Link2 },
     { label: "Submission Window", href: "/admin/submission-window", icon: CalendarClock },
-    { label: "Reports", href: "/admin/reports", icon: ClipboardCheck },
   ],
   student: [
     { label: "Dashboard", href: "/student", icon: LayoutDashboard },
@@ -45,18 +44,9 @@ export function Sidebar({ role }: SidebarProps) {
           <p className="text-xs text-slate-500">Damietta FCAI</p>
         </div>
       </div>
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav aria-label="Main navigation" className="flex-1 space-y-1 px-3 py-4">
         {navigationByRole[role].map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-950",
-            )}
-          >
-            <item.icon className="h-4 w-4" aria-hidden="true" />
-            {item.label}
-          </Link>
+          <NavLink key={item.href} {...item} />
         ))}
       </nav>
     </aside>

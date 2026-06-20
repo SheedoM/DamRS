@@ -853,3 +853,14 @@
  GET /admin/projects/0d5d2d82-4730-47d6-b91d-e7e2ebcf8ccb 200 in 461ms (next.js: 72ms, application-code: 389ms)
  GET /admin/projects/0d5d2d82-4730-47d6-b91d-e7e2ebcf8ccb 200 in 209ms (next.js: 7ms, application-code: 202ms)
  GET /admin/projects/0d5d2d82-4730-47d6-b91d-e7e2ebcf8ccb 200 in 188ms (next.js: 7ms, application-code: 181ms)
+✓ Compiled in 442ms
+✓ Compiled in 535ms
+ GET /login 500 in 1084ms (next.js: 955ms, application-code: 129ms)
+ GET /admin/projects/0d5d2d82-4730-47d6-b91d-e7e2ebcf8ccb 500 in 1078ms (next.js: 1065ms, application-code: 13ms)
+ GET /login 500 in 44ms (next.js: 26ms, application-code: 17ms)
+ GET /login 500 in 58ms (next.js: 35ms, application-code: 23ms)
+ GET /admin/projects/0d5d2d82-4730-47d6-b91d-e7e2ebcf8ccb 500 in 71ms (next.js: 48ms, application-code: 22ms)
+ GET /login 500 in 25ms
+ GET /admin/projects/0d5d2d82-4730-47d6-b91d-e7e2ebcf8ccb 500 in 63ms (next.js: 50ms, application-code: 13ms)
+ GET /login 500 in 75ms (next.js: 43ms, application-code: 32ms)
+ GET /admin/projects/0d5d2d82-4730-47d6-b91d-e7e2ebcf8ccb 500 in 62ms (next.js: 41ms, application-code: 20ms)
