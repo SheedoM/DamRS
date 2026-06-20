@@ -34,7 +34,10 @@ Set:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-server-only-service-role-key
 ```
+
+`SUPABASE_SERVICE_ROLE_KEY` is required for the admin panel-member creation screen because creating Supabase Auth users must happen from trusted server code. Never expose this key in browser code.
 
 Apply the Phase 1 SQL migration in Supabase:
 
@@ -168,6 +171,11 @@ Then they can use:
 - `/student/project/new`
 - `/student/project/edit`
 - `/student/project/status`
+- `/admin/projects`
+- `/admin/projects/[projectId]`
+- `/admin/panel-members`
+- `/admin/assignments`
+- `/admin/submission-window`
 
 Role routing:
 
@@ -201,10 +209,26 @@ Included:
 - Required PDF, ZIP, and presentation uploads
 - Demo video URL capture
 - Final project submission with missing requirement checks
+- Admin project table with filters
+- Admin project detail view
+- Panel member Auth/profile creation
+- Panel assignment and revocation
+- Admin submission window settings
 
 Not included yet:
 
-- Panel assignment UI
 - Review and grade UI
 - Reports and Excel exports
 - Full offline service worker
+
+## Admin Workflow
+
+After Phase 4, admins can use:
+
+- `/admin/projects` to view and filter projects
+- `/admin/projects/[projectId]` to inspect a project, its team members, files, and assignments
+- `/admin/panel-members` to create panel member accounts
+- `/admin/assignments` to assign or revoke panel access
+- `/admin/submission-window` to create/update the active discussion cycle and submission window
+
+Revoked assignments set `is_active = false` and `revoked_at`, so the Phase 2 RLS policies immediately remove panel access.

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ClipboardCheck, Files, GraduationCap, LayoutDashboard, Users } from "lucide-react";
+import { CalendarClock, ClipboardCheck, Files, GraduationCap, LayoutDashboard, Link2, Users } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/lib/auth/roles";
@@ -10,6 +10,8 @@ const navigationByRole: Record<UserRole, { label: string; href: string; icon: ty
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Projects", href: "/admin/projects", icon: Files },
     { label: "Panel", href: "/admin/panel-members", icon: Users },
+    { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+    { label: "Submission Window", href: "/admin/submission-window", icon: CalendarClock },
     { label: "Reports", href: "/admin/reports", icon: ClipboardCheck },
   ],
   student: [

@@ -21,3 +21,15 @@ export function getPublicSupabaseEnv(): PublicSupabaseEnv {
 
   return parsed.data;
 }
+
+export function getSupabaseServiceRoleKey() {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!key) {
+    throw new Error(
+      "Supabase service role key is not configured. Set SUPABASE_SERVICE_ROLE_KEY on the server.",
+    );
+  }
+
+  return key;
+}
