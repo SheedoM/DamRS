@@ -24,10 +24,11 @@ const requiredUploads: {
   fileType: RequiredProjectFileType;
   label: string;
   accept: string;
+  maxSizeBytes: number;
 }[] = [
-  { fileType: "documentation_pdf", label: "Documentation PDF", accept: "application/pdf" },
-  { fileType: "source_code_zip", label: "Source code ZIP", accept: ".zip,application/zip,application/x-zip-compressed" },
-  { fileType: "presentation_file", label: "Presentation file (optional)", accept: ".pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" },
+  { fileType: "documentation_pdf", label: "Documentation PDF", accept: "application/pdf", maxSizeBytes: 50 * 1024 * 1024 },
+  { fileType: "source_code_zip", label: "Source code ZIP", accept: ".zip,application/zip,application/x-zip-compressed", maxSizeBytes: 100 * 1024 * 1024 },
+  { fileType: "presentation_file", label: "Presentation file (optional)", accept: ".pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation", maxSizeBytes: 50 * 1024 * 1024 },
 ];
 
 
@@ -63,7 +64,7 @@ export function ProjectSummary({ project, teamMembers, files }: ProjectSummaryPr
             <p><span className="font-medium text-slate-900">Supervisor:</span> {project.supervisor_name}</p>
             <p><span className="font-medium text-slate-900">Technologies:</span> {project.technologies_used || "Not specified"}</p>
             <p><span className="font-medium text-slate-900">GitHub:</span> {project.github_url ? <a className="text-[var(--brand-blue)]" href={project.github_url} target="_blank" rel="noreferrer">Open repository</a> : "Not provided"}</p>
-            <p><span className="font-medium text-slate-900">Video:</span> <a className="inline-flex items-center gap-1 text-[var(--brand-blue)]" href={project.demo_video_url || "#"} target="_blank" rel="noreferrer">Open demo <ExternalLink className="h-3 w-3" /></a></p>
+            <p><span className="font-medium text-slate-900">Video:</span> {project.demo_video_url ? <a className="inline-flex items-center gap-1 text-[var(--brand-blue)]" href={project.demo_video_url} target="_blank" rel="noreferrer">Open demo <ExternalLink className="h-3 w-3" /></a> : "Not provided"}</p>
           </div>
           <div className="flex flex-wrap gap-3">
             {canEdit ? (

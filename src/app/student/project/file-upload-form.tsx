@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAutoClearMessage } from "@/hooks/use-auto-clear-message";
@@ -9,22 +9,25 @@ import { uploadProjectFileAction } from "./actions";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import type { RequiredProjectFileType } from "@/lib/project/submission.schema";
+import { formatFileSize } from "@/lib/utils";
 
 type FileUploadFormProps = {
   projectId: string;
   fileType: RequiredProjectFileType;
   label: string;
   accept: string;
+  maxSizeBytes: number;
 };
 
 const initialState = { ok: true, message: "" };
 
-export function FileUploadForm({ projectId, fileType, label, accept }: FileUploadFormProps) {
+export function FileUploadForm({ projectId, fileType, label, accept, maxSizeBytes }: FileUploadFormProps) {
   const [state, formAction, isPending] = useActionState(uploadProjectFileAction, initialState);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const showSuccess = useAutoClearMessage(state.ok ? state.message : "");
+  const [fileSizeError, setFileSizeError] = useState<string | null>(null);
 
   useEffect(() => {
     if (state.ok && state.message) {
@@ -47,15 +50,22 @@ export function FileUploadForm({ projectId, fileType, label, accept }: FileUploa
         accept={accept}
         className="sr-only"
         onChange={() => {
-          if (fileInputRef.current?.files?.length) {
-            formRef.current?.requestSubmit();
+          const file = fileInputRef.current?.files?.[0];
+          if (!file) return;
+          if (file.size > maxSizeBytes) {
+            setFileSizeError(`File too large. Maximum is ${formatFileSize(maxSizeBytes)}.`);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+            return;
           }
+          setFileSizeError(null);
+          formRef.current?.requestSubmit();
         }}
       />
       <div>
         <p className="text-sm font-medium text-slate-900">{label}</p>
         <p className="mt-1 text-xs text-slate-500">Choose a file and it uploads immediately.</p>
       </div>
+      {fileSizeError ? <Alert>{fileSizeError}</Alert> : null}
       {!state.ok ? <Alert>{state.message}</Alert> : null}
       {showSuccess ? <p className="text-sm text-emerald-700">{state.message}</p> : null}
       <Button

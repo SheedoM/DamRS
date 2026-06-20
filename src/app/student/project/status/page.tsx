@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth/require-role";
 import { getMissingSubmissionRequirements } from "@/lib/project/submission.schema";
 import { getStudentProject } from "@/lib/project/queries";
+import { getStudentReviewProgress } from "@/lib/project/student-review-progress";
 import { cn, formatFileSize } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +23,7 @@ function getStatusTone(status: string) {
 export default async function StudentProjectStatusPage() {
   const { profile } = await requireRole(["student"]);
   const projectData = await getStudentProject(profile.id);
+  const progress = projectData ? await getStudentReviewProgress(projectData.project.id) : null;
 
   if (!projectData) {
     redirect("/student/project/new");
@@ -69,6 +71,44 @@ export default async function StudentProjectStatusPage() {
           ) : (
             <p className="text-sm text-emerald-700">All submission requirements are complete.</p>
           )}
+
+          {progress ? (
+            <div className="rounded-md border border-slate-200 p-4">
+              <p className="text-sm font-medium text-slate-900">Review Progress</p>
+              
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-sm font-medium text-slate-500">
+                <Badge tone={projectData.project.status === "draft" ? "info" : "success"}>Draft</Badge>
+                <span className="text-slate-300">→</span>
+                <Badge tone={projectData.project.status === "submitted" ? "info" : (["assigned", "draft_reviewed", "final_reviewed", "completed"].includes(projectData.project.status) ? "success" : "neutral")}>Submitted</Badge>
+                <span className="text-slate-300">→</span>
+                <Badge tone={projectData.project.status === "assigned" ? "info" : (["draft_reviewed", "final_reviewed", "completed"].includes(projectData.project.status) ? "success" : "neutral")}>Assigned</Badge>
+                <span className="text-slate-300">→</span>
+                <Badge tone={projectData.project.status === "draft_reviewed" ? "info" : (["final_reviewed", "completed"].includes(projectData.project.status) ? "success" : "neutral")}>Draft Reviewed</Badge>
+                <span className="text-slate-300">→</span>
+                <Badge tone={projectData.project.status === "final_reviewed" ? "info" : (projectData.project.status === "completed" ? "success" : "neutral")}>Final Reviewed</Badge>
+                <span className="text-slate-300">→</span>
+                <Badge tone={projectData.project.status === "completed" ? "success" : "neutral"}>Completed</Badge>
+              </div>
+
+              <div className="mt-6 space-y-4">
+                <p className="text-sm text-slate-600">
+                  Panel reviews: {progress.reviewCount} of {progress.totalPanelMembers} completed
+                </p>
+
+                {(projectData.project.status === "final_reviewed" || projectData.project.status === "completed") && progress.finalGrade !== null ? (
+                  <div className="rounded-md bg-slate-50 p-4 border border-slate-200">
+                    <p className="text-sm font-medium text-slate-700">Your Grade</p>
+                    <p className="mt-1 text-3xl font-semibold text-slate-950">
+                      {progress.gradePercentage}
+                    </p>
+                    <p className="mt-2 text-sm text-slate-500">
+                      Source: {progress.gradeSource === "dean_override" ? "Dean override" : "Panel average"}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
           <div className="rounded-md border border-slate-200 p-4">
             <p className="text-sm font-medium text-slate-900">Uploaded files</p>
             <div className="mt-3 space-y-3">

@@ -147,7 +147,17 @@ export function ProjectForm({ mode, project, teamMembers = [] }: ProjectFormProp
               </div>
               <div className="space-y-2">
                 <Label htmlFor={`team-${index}-role`}>Role</Label>
-                <Input id={`team-${index}-role`} {...register(`team_members.${index}.role_in_team`)} />
+                <select
+                  id={`team-${index}-role`}
+                  {...register(`team_members.${index}.role_in_team`)}
+                  className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="team_leader">Team leader</option>
+                  <option value="developer">Developer</option>
+                  <option value="designer">Designer</option>
+                  <option value="tester">Tester</option>
+                  <option value="member">Member</option>
+                </select>
                 <FieldError message={errors.team_members?.[index]?.role_in_team?.message} />
               </div>
               <Button
