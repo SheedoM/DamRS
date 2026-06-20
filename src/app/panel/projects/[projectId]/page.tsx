@@ -146,7 +146,7 @@ export default async function PanelProjectDetailPage({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="font-semibold text-slate-950">Draft review</h3>
                 <Badge tone={project.reviewStatus.draftSubmitted ? "success" : "warning"}>
-                  {project.reviewStatus.draftSubmitted ? "submitted" : "pending"}
+                  {project.reviewStatus.draftSubmitted ? "submitted" : "Draft pending"}
                 </Badge>
               </div>
               <p className="mt-2 text-sm text-slate-500">
@@ -165,7 +165,7 @@ export default async function PanelProjectDetailPage({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="font-semibold text-slate-950">Final review</h3>
                 <Badge tone={project.reviewStatus.finalSubmitted ? "success" : "warning"}>
-                  {project.reviewStatus.finalSubmitted ? "submitted" : "pending"}
+                  {project.reviewStatus.finalSubmitted ? "submitted" : "Final pending"}
                 </Badge>
               </div>
               <p className="mt-2 text-sm text-slate-500">

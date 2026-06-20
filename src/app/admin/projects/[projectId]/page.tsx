@@ -164,7 +164,7 @@ export default async function AdminProjectDetailPage({
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge tone={isActive ? "success" : "neutral"}>
-                          {isActive ? "active assignment" : "revoked assignment"}
+                          {isActive ? "Active" : "Revoked"}
                         </Badge>
                         <Badge tone={finalSubmitted ? "success" : review ? "warning" : "neutral"}>
                           {finalSubmitted ? "final reviewed" : review ? review.status.replaceAll("_", " ") : "pending"}

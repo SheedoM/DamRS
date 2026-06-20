@@ -880,3 +880,6 @@
  GET /admin/projects/0d5d2d82-4730-47d6-b91d-e7e2ebcf8ccb 500 in 35ms (next.js: 24ms, application-code: 12ms)
  GET /login 500 in 28ms (next.js: 16ms, application-code: 12ms)
  GET /admin/projects/0d5d2d82-4730-47d6-b91d-e7e2ebcf8ccb 500 in 44ms (next.js: 24ms, application-code: 20ms)
+ GET /login 500 in 17ms (next.js: 7ms, application-code: 10ms)
+ GET /login 500 in 28ms (next.js: 13ms, application-code: 15ms)
+ GET /login 500 in 21ms (next.js: 11ms, application-code: 10ms)
