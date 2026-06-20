@@ -1,7 +1,7 @@
 {
-  "name": "Graduation Project Audit System",
-  "short_name": "GP Review",
-  "description": "Damietta FCAI graduation project submission and review system.",
+  "name": "Damietta Review System",
+  "short_name": "DamRS",
+  "description": "Damietta Review System (DamRS) - نظام دمياط لمراجعة المشاريع.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8fafc",

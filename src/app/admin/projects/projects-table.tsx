@@ -29,7 +29,13 @@ import {
 } from "@/lib/admin/admin-projects";
 import { BulkAssignForm } from "./bulk-assign-form";
 import type { PanelMember } from "@/lib/admin/queries";
+import { programLabel, projectStatusLabel } from "@/lib/i18n/labels";
 import { cn } from "@/lib/utils";
+
+const assignmentStatusLabels: Record<AssignmentStatus, string> = {
+  assigned: "مُسند",
+  unassigned: "غير مُسند",
+};
 
 const columnHelper = createColumnHelper<AdminProjectRow>();
 
@@ -54,7 +60,7 @@ const columns = [
     ),
   }),
   columnHelper.accessor("title", {
-    header: "Project",
+    header: "المشروع",
     cell: (info) => (
       <div>
         <p className="font-medium text-slate-950">{info.getValue()}</p>
@@ -63,31 +69,32 @@ const columns = [
     ),
   }),
   columnHelper.accessor("status", {
-    header: "Status",
-    cell: (info) => <Badge tone={info.getValue() === "submitted" ? "success" : "info"}>{info.getValue().replaceAll("_", " ")}</Badge>,
+    header: "الحالة",
+    cell: (info) => <Badge tone={info.getValue() === "submitted" ? "success" : "info"}>{projectStatusLabel(info.getValue())}</Badge>,
   }),
-  columnHelper.accessor("department", {
-    header: "Department",
+  columnHelper.accessor("program", {
+    header: "البرنامج",
+    cell: (info) => programLabel(info.getValue()),
   }),
   columnHelper.accessor("supervisor_name", {
-    header: "Supervisor",
+    header: "المشرف",
   }),
   columnHelper.accessor("active_assignment_count", {
-    header: "Assignment",
+    header: "الإسناد",
     enableSorting: true,
     cell: (info) => (
       <Badge tone={info.getValue() > 0 ? "success" : "warning"}>
-        {getAssignmentStatus(info.getValue())}
+        {assignmentStatusLabels[getAssignmentStatus(info.getValue())]}
       </Badge>
     ),
   }),
   columnHelper.display({
     id: "reviews",
-    header: "Reviews",
+    header: "المراجعات",
     enableSorting: true,
     cell: (info) => (
       <span className="text-sm text-slate-600">
-        {info.row.original.completed_final_review_count} / {info.row.original.required_review_count} final
+        {info.row.original.completed_final_review_count} / {info.row.original.required_review_count} نهائية
       </span>
     ),
   }),
@@ -99,7 +106,7 @@ const columns = [
         href={`/admin/projects/${info.row.original.id}`}
         className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
       >
-        Open
+        فتح
       </Link>
     ),
   }),
@@ -168,48 +175,48 @@ export function AdminProjectsTable({
         <Input
           value={globalFilter}
           onChange={(event) => setGlobalFilter(event.target.value)}
-          placeholder="Search projects, departments, supervisors..."
+          placeholder="ابحث في المشاريع، البرامج، المشرفين..."
         />
         <select
           value={submission}
           onChange={(event) => setSubmission(normalizeSubmission(event.target.value))}
           className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
         >
-          <option value="all">All submissions</option>
-          <option value="submitted">Submitted</option>
-          <option value="draft">Draft</option>
+          <option value="all">كل حالات التسليم</option>
+          <option value="submitted">تم التسليم</option>
+          <option value="draft">مسودة</option>
         </select>
         <select
           value={status}
           onChange={(event) => setStatus(event.target.value)}
           className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
         >
-          <option value="">All statuses</option>
-          <option value="draft">Draft</option>
-          <option value="submitted">Submitted</option>
-          <option value="assigned">Assigned</option>
-          <option value="draft_reviewed">Draft reviewed</option>
-          <option value="final_reviewed">Final reviewed</option>
-          <option value="completed">Completed</option>
+          <option value="">كل الحالات</option>
+          <option value="draft">مسودة</option>
+          <option value="submitted">تم التسليم</option>
+          <option value="assigned">تم التعيين</option>
+          <option value="draft_reviewed">مراجعة مبدئية</option>
+          <option value="final_reviewed">مراجعة نهائية</option>
+          <option value="completed">مكتمل</option>
         </select>
         <select
           value={assignment}
           onChange={(event) => setAssignment(normalizeAssignment(event.target.value))}
           className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
         >
-          <option value="all">All assignments</option>
-          <option value="assigned">Assigned</option>
-          <option value="unassigned">Unassigned</option>
+          <option value="all">كل حالات الإسناد</option>
+          <option value="assigned">مُسند</option>
+          <option value="unassigned">غير مُسند</option>
         </select>
         <select
           value={review}
           onChange={(event) => setReview(normalizeReview(event.target.value))}
           className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
         >
-          <option value="all">All reviews</option>
-          <option value="final-complete">Final complete</option>
-          <option value="final-pending">Final pending</option>
-          <option value="draft-pending">Draft pending</option>
+          <option value="all">كل المراجعات</option>
+          <option value="final-complete">النهائية مكتملة</option>
+          <option value="final-pending">النهائية معلّقة</option>
+          <option value="draft-pending">المبدئية معلّقة</option>
         </select>
       </div>
 
@@ -258,7 +265,7 @@ export function AdminProjectsTable({
             {table.getRowModel().rows.length === 0 ? (
               <tr>
                 <td className="px-4 py-8 text-center text-slate-500" colSpan={columns.length}>
-                  No projects match the current filters.
+                  لا توجد مشاريع مطابقة للفلاتر الحالية.
                 </td>
               </tr>
             ) : null}
@@ -268,14 +275,14 @@ export function AdminProjectsTable({
       
       {Object.keys(rowSelection).length > 0 && (
         <div className="sticky bottom-4 flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-md mt-4">
-          <span className="text-sm font-medium text-slate-700">{Object.keys(rowSelection).length} projects selected</span>
+          <span className="text-sm font-medium text-slate-700">{Object.keys(rowSelection).length} مشروع محدد</span>
           <div className="flex items-center gap-3">
             <BulkAssignForm 
               selectedProjectIds={Object.keys(rowSelection)} 
               panelMembers={panelMembers} 
               onSuccess={() => setRowSelection({})}
             />
-            <Button variant="ghost" size="sm" onClick={() => setRowSelection({})}>Cancel</Button>
+            <Button variant="ghost" size="sm" onClick={() => setRowSelection({})}>إلغاء</Button>
           </div>
         </div>
       )}

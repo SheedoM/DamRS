@@ -4,7 +4,7 @@ export async function writeAuditLog(
   actorId: string,
   action: string,
   entityType: string,
-  entityId: string,
+  entityId: string | null,
   metadata: Record<string, unknown> = {},
 ) {
   const supabase = await createSupabaseServerClient();

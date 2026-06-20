@@ -15,8 +15,7 @@ export default async function Home() {
       <main className="flex min-h-dvh items-center justify-center bg-slate-50 px-4">
         <div className="w-full max-w-xl">
           <Alert>
-            Supabase is not configured. Create `.env.local` from `.env.example`, then
-            restart the development server.
+            لم يتم إعداد Supabase. أنشئ ملف `.env.local` من `.env.example` ثم أعد تشغيل خادم التطوير.
           </Alert>
         </div>
       </main>

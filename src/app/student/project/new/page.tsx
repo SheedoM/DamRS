@@ -5,14 +5,16 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Alert } from "@/components/ui/alert";
 import { requireRole } from "@/lib/auth/require-role";
 import { getActiveSubmissionWindow, getStudentProject } from "@/lib/project/queries";
+import { getAppSettings } from "@/lib/admin/app-settings";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewStudentProjectPage() {
   const { profile } = await requireRole(["student"]);
-  const [existingProject, submissionWindow] = await Promise.all([
+  const [existingProject, submissionWindow, settings] = await Promise.all([
     getStudentProject(profile.id),
     getActiveSubmissionWindow(),
+    getAppSettings(),
   ]);
 
   if (existingProject) {
@@ -20,11 +22,11 @@ export default async function NewStudentProjectPage() {
   }
 
   return (
-    <AppShell title="Create Project" profile={profile}>
+    <AppShell title="إنشاء مشروع" profile={profile}>
       {!submissionWindow ? (
-        <Alert>No active submission window is available right now.</Alert>
+        <Alert>لا توجد نافذة تسليم مفتوحة حاليًا.</Alert>
       ) : (
-        <ProjectForm mode="create" />
+        <ProjectForm mode="create" maxTeamMembers={settings.max_team_members} />
       )}
     </AppShell>
   );

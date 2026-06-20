@@ -17,13 +17,13 @@ export function SubmitProjectForm({ projectId }: { projectId: string }) {
       {!state.ok ? <Alert>{state.message}</Alert> : null}
       {state.ok && state.message ? <p className="text-sm text-emerald-700">{state.message}</p> : null}
       <ConfirmSubmitButton
-        title="Submit project?"
-        message="This will finalize your current project submission for admin assignment and panel review."
-        confirmLabel="Submit project"
+        title="تسليم المشروع؟"
+        message="سيؤدي هذا إلى تسليم مشروعك بشكل نهائي. بعد التسليم ينتهي دورك ولا يمكنك التعديل."
+        confirmLabel="تسليم المشروع"
         pending={isPending}
-        pendingLabel="Submitting..."
+        pendingLabel="جارٍ التسليم..."
       >
-        Submit project
+        تسليم المشروع
       </ConfirmSubmitButton>
     </form>
   );

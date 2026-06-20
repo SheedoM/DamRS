@@ -7,7 +7,7 @@ describe("submission window view state", () => {
     expect(getSubmissionWindowState(null)).toEqual({
       hasWindow: false,
       isOpen: false,
-      label: "No submission window",
+      label: "لا توجد نافذة تسليم",
     });
   });
 
@@ -20,7 +20,7 @@ describe("submission window view state", () => {
     ).toEqual({
       hasWindow: true,
       isOpen: true,
-      label: "Open",
+      label: "مفتوحة",
     });
   });
 
@@ -30,6 +30,6 @@ describe("submission window view state", () => {
         opens_at: "2026-06-20T08:00:00.000Z",
         closes_at: "2026-06-20T10:00:00.000Z",
       }, new Date("2026-06-20T11:00:00.000Z")).label,
-    ).toBe("Closed");
+    ).toBe("مغلقة");
   });
 });

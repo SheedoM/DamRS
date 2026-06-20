@@ -18,26 +18,25 @@ export default async function StudentProjectPage() {
   ]);
 
   return (
-    <AppShell title="My Project" profile={profile}>
+    <AppShell title="مشروعي" profile={profile}>
       {projectData ? (
         <ProjectSummary {...projectData} />
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>No project submission yet</CardTitle>
+            <CardTitle>لا يوجد مشروع بعد</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-slate-600">
-              Create your project submission, add team members, then upload the
-              required files before final submission.
+              أنشئ مشروعك، وأضف أعضاء الفريق، ثم ارفع الملفات المطلوبة قبل التسليم النهائي.
             </p>
             {submissionWindow ? (
               <Link href="/student/project/new" className={cn(buttonVariants())}>
-                Create project
+                إنشاء مشروع
               </Link>
             ) : (
               <p className="text-sm text-amber-700">
-                No active submission window is available right now.
+                لا توجد نافذة تسليم مفتوحة حاليًا.
               </p>
             )}
           </CardContent>

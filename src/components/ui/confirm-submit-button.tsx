@@ -18,7 +18,7 @@ export function ConfirmSubmitButton({
   title,
   message,
   confirmLabel,
-  cancelLabel = "Cancel",
+  cancelLabel = "إلغاء",
   pending = false,
   pendingLabel,
   disabled,

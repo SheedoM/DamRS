@@ -6,11 +6,11 @@ import { CheckCircle2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const TOAST_MESSAGES: Record<string, string> = {
-  "project-created": "Project created successfully",
-  "project-updated": "Project updated successfully",
-  "draft-saved": "Draft review saved successfully",
-  "final-saved": "Final review submitted successfully",
-  "window-saved": "Submission window updated successfully",
+  "project-created": "تم إنشاء المشروع بنجاح",
+  "project-updated": "تم تحديث المشروع بنجاح",
+  "draft-saved": "تم حفظ المراجعة المبدئية بنجاح",
+  "final-saved": "تم تسليم المراجعة النهائية بنجاح",
+  "window-saved": "تم تحديث نافذة التسليم بنجاح",
 };
 
 export function Toast() {
@@ -51,8 +51,8 @@ export function Toast() {
       <p className="text-sm font-medium">{message}</p>
       <button
         onClick={() => setVisible(false)}
-        className="ml-4 rounded-md p-1 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-        aria-label="Close notification"
+        className="ms-4 rounded-md p-1 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+        aria-label="إغلاق الإشعار"
       >
         <X className="h-4 w-4" aria-hidden="true" />
       </button>

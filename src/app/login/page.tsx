@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
@@ -41,7 +42,7 @@ export default function LoginPage() {
       setError(
         caughtError instanceof Error
           ? caughtError.message
-          : "Unable to sign in. Check the Supabase configuration.",
+          : "تعذّر تسجيل الدخول. تحقق من إعدادات Supabase.",
       );
     } finally {
       setIsSubmitting(false);
@@ -71,17 +72,16 @@ export default function LoginPage() {
         </div>
         <div className="my-16 max-w-xl">
           <p className="text-sm font-semibold uppercase tracking-wide text-[var(--brand-yellow)]">
-            Damietta University - FCAI
+            جامعة دمياط - كلية الحاسبات والمعلومات
           </p>
           <h1 className="mt-4 text-4xl font-semibold tracking-normal sm:text-5xl">
-            Graduation Project Audit System
+            نظام مراجعة مشاريع التخرج
           </h1>
           <p className="mt-5 text-base leading-7 text-blue-50">
-            Secure submission, assignment, and review foundation for graduation
-            project discussions.
+            منصّة آمنة لتسليم مشاريع التخرج وإسنادها ومراجعتها.
           </p>
         </div>
-        <p className="text-sm text-blue-100">GP Review</p>
+        <p className="text-sm text-blue-100">مراجعة مشاريع التخرج</p>
       </section>
 
       <section className="flex items-center justify-center px-4 py-10 sm:px-6">
@@ -89,10 +89,10 @@ export default function LoginPage() {
           <CardHeader>
             <div>
               <p className="text-sm font-medium text-[var(--brand-blue)]">
-                Sign in with Supabase Auth
+                تسجيل الدخول
               </p>
               <h2 className="mt-2 text-2xl font-semibold text-slate-950">
-                Access your dashboard
+                الدخول إلى لوحة التحكم
               </h2>
             </div>
           </CardHeader>
@@ -100,7 +100,7 @@ export default function LoginPage() {
             <form className="space-y-4" onSubmit={handleSubmit}>
               {error ? <Alert>{error}</Alert> : null}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">البريد الإلكتروني</Label>
                 <Input
                   id="email"
                   type="email"
@@ -111,7 +111,7 @@ export default function LoginPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">كلمة المرور</Label>
                 <Input
                   id="password"
                   type="password"
@@ -122,9 +122,15 @@ export default function LoginPage() {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Signing in..." : "Sign in"}
+                {isSubmitting ? "جارٍ تسجيل الدخول..." : "تسجيل الدخول"}
               </Button>
             </form>
+            <p className="mt-4 text-center text-sm text-slate-500">
+              طالب جديد؟{" "}
+              <Link href="/register" className="font-semibold text-[var(--brand-blue)]">
+                إنشاء حساب
+              </Link>
+            </p>
           </CardContent>
         </Card>
       </section>

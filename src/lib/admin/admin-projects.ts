@@ -7,6 +7,7 @@ export type AdminProjectRow = {
   title: string;
   status: string;
   department: string;
+  program: string | null;
   supervisor_name: string;
   team_leader_name: string;
   active_assignment_count: number;

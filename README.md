@@ -1,6 +1,6 @@
-# GP Review
+# DamRS - Damietta Review System
 
-Damietta University FCAI Graduation Project Audit System.
+Damietta Review System (نظام دمياط لمراجعة المشاريع) - FCAI Graduation Project Audit System.
 
 This is the Phase 1 auth foundation for a PWA-based graduation project submission and review system. It uses real Supabase Auth from day one and routes users to dashboards based on `public.profiles.role`.
 

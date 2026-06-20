@@ -17,7 +17,7 @@ describe("project submission validation", () => {
     const result = projectFormSchema.safeParse({
       title: "Smart Attendance System",
       abstract: "A graduation project that tracks attendance with computer vision.",
-      department: "Computer Science",
+      program: "computer_science",
       supervisor_name: "Dr. Example",
       technologies_used: "Next.js, Supabase, Python",
       github_url: "https://github.com/example/smart-attendance",
@@ -26,6 +26,7 @@ describe("project submission validation", () => {
         {
           full_name: "Student One",
           student_id: "20260001",
+          national_id: "29001011234567",
           email: "student.one@example.com",
           role_in_team: "team_leader",
         },
@@ -39,7 +40,7 @@ describe("project submission validation", () => {
     const missing = getMissingSubmissionRequirements({
       title: "Smart Attendance System",
       abstract: "",
-      department: "Computer Science",
+      program: "computer_science",
       supervisor_name: "",
       demo_video_url: "",
       teamMemberCount: 0,
@@ -47,11 +48,11 @@ describe("project submission validation", () => {
     });
 
     expect(missing).toEqual([
-      "Project abstract",
-      "Supervisor name",
-      "Demo video URL",
-      "At least one team member",
-      "Source code ZIP",
+      "ملخص المشروع",
+      "اسم المشرف",
+      "رابط فيديو العرض",
+      "عضو فريق واحد على الأقل",
+      "الكود المصدري (ZIP)",
     ]);
   });
 
@@ -59,7 +60,7 @@ describe("project submission validation", () => {
     const missing = getMissingSubmissionRequirements({
       title: "Smart Attendance System",
       abstract: "Complete abstract",
-      department: "Computer Science",
+      program: "computer_science",
       supervisor_name: "Dr. Example",
       demo_video_url: "https://drive.google.com/file/d/example",
       teamMemberCount: 3,

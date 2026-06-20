@@ -9,6 +9,7 @@ export type PanelMember = {
   full_name: string;
   email: string;
   department: string | null;
+  panel_member_type: string | null;
 };
 
 export type Assignment = {
@@ -20,6 +21,7 @@ export type Assignment = {
   is_active: boolean;
   panel_member_name: string;
   panel_member_email: string;
+  panel_member_type: string | null;
   project_title: string;
 };
 
@@ -31,8 +33,8 @@ type RawAssignment = {
   revoked_at: string | null;
   is_active: boolean;
   profiles:
-    | { full_name: string; email: string }
-    | { full_name: string; email: string }[]
+    | { full_name: string; email: string; panel_member_type: string | null }
+    | { full_name: string; email: string; panel_member_type: string | null }[]
     | null;
   projects: { title: string } | { title: string }[] | null;
 };
@@ -109,6 +111,7 @@ export type AdminProjectDetail = AdminProjectRow & {
     id: string;
     full_name: string;
     student_id: string;
+    national_id: string | null;
     email: string | null;
     role_in_team: string;
   }[];
@@ -132,7 +135,8 @@ type RawProject = {
   id: string;
   title: string;
   status: string;
-  department: string;
+  department: string | null;
+  program: string | null;
   supervisor_name: string;
   submitted_at: string | null;
   profiles: { full_name: string } | null;
@@ -161,9 +165,10 @@ function toProjectRow(project: RawProject): AdminProjectRow {
     id: project.id,
     title: project.title,
     status: project.status,
-    department: project.department,
+    department: project.department || "",
+    program: project.program,
     supervisor_name: project.supervisor_name,
-    team_leader_name: project.profiles?.full_name || "Unknown student",
+    team_leader_name: project.profiles?.full_name || "طالب غير معروف",
     active_assignment_count: project.panel_assignments?.length || 0,
     required_review_count: activePanelMemberIds.length,
     completed_draft_review_count: completedDraftReviewCount,
@@ -185,9 +190,10 @@ function toAssignment(assignment: RawAssignment): Assignment {
     assigned_at: assignment.assigned_at,
     revoked_at: assignment.revoked_at,
     is_active: assignment.is_active,
-    panel_member_name: profile?.full_name || "Unknown panel member",
+    panel_member_name: profile?.full_name || "عضو لجنة غير معروف",
     panel_member_email: profile?.email || "",
-    project_title: project?.title || "Unknown project",
+    panel_member_type: profile?.panel_member_type ?? null,
+    project_title: project?.title || "مشروع غير معروف",
   };
 }
 
@@ -197,7 +203,7 @@ function toAdminReview(review: RawReview): AdminReview {
 
   return {
     ...review,
-    panel_member_name: profile?.full_name || "Unknown panel member",
+    panel_member_name: profile?.full_name || "عضو لجنة غير معروف",
     panel_member_email: profile?.email || "",
     admin_entered_by_name: adminProfile?.full_name || null,
     admin_entered_by_email: adminProfile?.email || null,
@@ -209,7 +215,7 @@ function toGradeOverride(override: RawGradeOverride): GradeOverride {
 
   return {
     ...override,
-    overridden_by_name: profile?.full_name || "Unknown admin",
+    overridden_by_name: profile?.full_name || "مسؤول غير معروف",
     overridden_by_email: profile?.email || "",
   };
 }
@@ -219,7 +225,7 @@ export async function getAdminProjects() {
   const { data } = await supabase
     .from("projects")
     .select(
-      "id, title, status, department, supervisor_name, submitted_at, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(id, panel_member_id), reviews!left(id, panel_member_id, status, draft_submitted_at, final_submitted_at)",
+      "id, title, status, department, program, supervisor_name, submitted_at, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(id, panel_member_id), reviews!left(id, panel_member_id, status, draft_submitted_at, final_submitted_at)",
     )
     .is("panel_assignments.revoked_at", null)
     .eq("panel_assignments.is_active", true)
@@ -233,7 +239,7 @@ export async function getAdminProjectDetail(projectId: string) {
   const { data: project } = await supabase
     .from("projects")
     .select(
-      "id, title, abstract, status, department, supervisor_name, technologies_used, github_url, demo_video_url, submitted_at, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(id, panel_member_id), reviews!left(id, panel_member_id, status, draft_submitted_at, final_submitted_at)",
+      "id, title, abstract, status, department, program, supervisor_name, technologies_used, github_url, demo_video_url, submitted_at, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(id, panel_member_id), reviews!left(id, panel_member_id, status, draft_submitted_at, final_submitted_at)",
     )
     .eq("id", projectId)
     .single();
@@ -243,7 +249,7 @@ export async function getAdminProjectDetail(projectId: string) {
   const [{ data: teamMembers }, { data: files }, assignments, { data: reviews }, { data: overrides }] = await Promise.all([
     supabase
       .from("team_members")
-      .select("id, full_name, student_id, email, role_in_team")
+      .select("id, full_name, student_id, national_id, email, role_in_team")
       .eq("project_id", projectId)
       .order("created_at", { ascending: true }),
     supabase
@@ -304,7 +310,7 @@ export async function getPanelMembers() {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("profiles")
-    .select("id, full_name, email, department")
+    .select("id, full_name, email, department, panel_member_type")
     .eq("role", "panel_member")
     .order("full_name", { ascending: true });
 
@@ -315,7 +321,7 @@ export async function getAssignmentsForProject(projectId: string) {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("panel_assignments")
-    .select("id, project_id, panel_member_id, assigned_at, revoked_at, is_active, profiles!panel_assignments_panel_member_id_fkey(full_name, email), projects(title)")
+    .select("id, project_id, panel_member_id, assigned_at, revoked_at, is_active, profiles!panel_assignments_panel_member_id_fkey(full_name, email, panel_member_type), projects(title)")
     .eq("project_id", projectId)
     .order("assigned_at", { ascending: false });
 
@@ -326,7 +332,7 @@ export async function getAllAssignments() {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("panel_assignments")
-    .select("id, project_id, panel_member_id, assigned_at, revoked_at, is_active, profiles!panel_assignments_panel_member_id_fkey(full_name, email), projects(title)")
+    .select("id, project_id, panel_member_id, assigned_at, revoked_at, is_active, profiles!panel_assignments_panel_member_id_fkey(full_name, email, panel_member_type), projects(title)")
     .order("assigned_at", { ascending: false });
 
   return ((data || []) as unknown as RawAssignment[]).map(toAssignment);

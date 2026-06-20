@@ -1,17 +1,17 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type NavLinkProps = {
   href: string;
   label: string;
-  icon: LucideIcon;
+  children: ReactNode;
 };
 
-export function NavLink({ href, label, icon: Icon }: NavLinkProps) {
+export function NavLink({ href, label, children }: NavLinkProps) {
   const pathname = usePathname();
   const isActive = href === "/" ? pathname === href : pathname === href || pathname.startsWith(href + "/");
 
@@ -26,7 +26,7 @@ export function NavLink({ href, label, icon: Icon }: NavLinkProps) {
       )}
       aria-current={isActive ? "page" : undefined}
     >
-      <Icon className="h-4 w-4" aria-hidden="true" />
+      {children}
       {label}
     </Link>
   );

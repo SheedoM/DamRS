@@ -12,6 +12,7 @@ import {
   type RequiredProjectFileType,
 } from "@/lib/project/submission.schema";
 import { buildProjectStoragePath, getBucketForFileType } from "@/lib/project/storage";
+import { getAppSettings } from "@/lib/admin/app-settings";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions";
 import { writeAuditLog } from "@/lib/audit";
@@ -53,6 +54,7 @@ function parseProjectForm(formData: FormData) {
   const team_members = teamMemberIndexes.map((index) => ({
     full_name: String(formData.get(`team_members.${index}.full_name`) || ""),
     student_id: String(formData.get(`team_members.${index}.student_id`) || ""),
+    national_id: String(formData.get(`team_members.${index}.national_id`) || ""),
     email: String(formData.get(`team_members.${index}.email`) || ""),
     role_in_team: String(formData.get(`team_members.${index}.role_in_team`) || "member"),
   }));
@@ -60,7 +62,7 @@ function parseProjectForm(formData: FormData) {
   return projectFormSchema.safeParse({
     title: formData.get("title"),
     abstract: formData.get("abstract"),
-    department: formData.get("department"),
+    program: formData.get("program"),
     supervisor_name: formData.get("supervisor_name"),
     technologies_used: formData.get("technologies_used"),
     github_url: formData.get("github_url"),
@@ -79,12 +81,17 @@ export async function createProjectAction(
   const parsed = parseProjectForm(formData);
 
   if (!parsed.success) {
-    return { ok: false, message: parsed.error.issues[0]?.message || "Invalid project details." };
+    return { ok: false, message: parsed.error.issues[0]?.message || "بيانات المشروع غير صالحة." };
+  }
+
+  const { max_team_members } = await getAppSettings();
+  if (parsed.data.team_members.length > max_team_members) {
+    return { ok: false, message: `الحد الأقصى لعدد أعضاء الفريق هو ${max_team_members}.` };
   }
 
   const cycleId = await getOpenActiveCycleId();
   if (!cycleId) {
-    return { ok: false, message: "There is no open submission window right now." };
+    return { ok: false, message: "لا توجد نافذة تسليم مفتوحة حاليًا." };
   }
 
   const supabase = await createSupabaseServerClient();
@@ -112,7 +119,7 @@ export async function createProjectAction(
     .single();
 
   if (projectError || !createdProject) {
-    return { ok: false, message: projectError?.message || "Unable to create project." };
+    return { ok: false, message: projectError?.message || "تعذّر إنشاء المشروع." };
   }
 
   const { error: teamError } = await supabase.from("team_members").insert(
@@ -140,11 +147,16 @@ export async function updateProjectAction(
   const parsed = parseProjectForm(formData);
 
   if (!z.string().uuid().safeParse(projectId).success) {
-    return { ok: false, message: "Invalid project id." };
+    return { ok: false, message: "معرّف المشروع غير صالح." };
   }
 
   if (!parsed.success) {
-    return { ok: false, message: parsed.error.issues[0]?.message || "Invalid project details." };
+    return { ok: false, message: parsed.error.issues[0]?.message || "بيانات المشروع غير صالحة." };
+  }
+
+  const { max_team_members } = await getAppSettings();
+  if (parsed.data.team_members.length > max_team_members) {
+    return { ok: false, message: `الحد الأقصى لعدد أعضاء الفريق هو ${max_team_members}.` };
   }
 
   const supabase = await createSupabaseServerClient();
@@ -158,7 +170,7 @@ export async function updateProjectAction(
     .single();
 
   if (projectError || !updatedProject) {
-    return { ok: false, message: "Project not found or access denied." };
+    return { ok: false, message: "لم يتم العثور على المشروع أو لا تملك صلاحية الوصول." };
   }
 
   const { error: deleteError } = await supabase
@@ -196,12 +208,12 @@ export async function uploadProjectFileAction(
   });
 
   if (!parsed.success) {
-    return { ok: false, message: "Invalid file upload request." };
+    return { ok: false, message: "طلب رفع الملف غير صالح." };
   }
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, message: "Choose a file to upload." };
+    return { ok: false, message: "اختر ملفًا للرفع." };
   }
 
   const supabase = await createSupabaseServerClient();
@@ -212,7 +224,7 @@ export async function uploadProjectFileAction(
     .single();
 
   if (projectError || !project) {
-    return { ok: false, message: projectError?.message || "Project not found." };
+    return { ok: false, message: projectError?.message || "لم يتم العثور على المشروع." };
   }
 
   const fileType = parsed.data.fileType as RequiredProjectFileType;
@@ -258,7 +270,7 @@ export async function uploadProjectFileAction(
     file_name: file.name,
   });
   revalidatePath("/", "layout");
-  return { ok: true, message: "File uploaded." };
+  return { ok: true, message: "تم رفع الملف." };
 }
 
 export async function submitProjectAction(
@@ -271,18 +283,18 @@ export async function submitProjectAction(
   });
 
   if (!parsed.success) {
-    return { ok: false, message: "Invalid project id." };
+    return { ok: false, message: "معرّف المشروع غير صالح." };
   }
 
   const supabase = await createSupabaseServerClient();
   const { data: project, error: projectError } = await supabase
     .from("projects")
-    .select("id, title, abstract, department, supervisor_name, demo_video_url")
+    .select("id, title, abstract, program, supervisor_name, demo_video_url")
     .eq("id", parsed.data.projectId)
     .single();
 
   if (projectError || !project) {
-    return { ok: false, message: projectError?.message || "Project not found." };
+    return { ok: false, message: projectError?.message || "لم يتم العثور على المشروع." };
   }
 
   const [{ count: teamMemberCount }, { data: files }] = await Promise.all([
@@ -299,7 +311,7 @@ export async function submitProjectAction(
   const missing = getMissingSubmissionRequirements({
     title: project.title as string | null,
     abstract: project.abstract as string | null,
-    department: project.department as string | null,
+    program: project.program as string | null,
     supervisor_name: project.supervisor_name as string | null,
     demo_video_url: project.demo_video_url as string | null,
     teamMemberCount: teamMemberCount || 0,
@@ -307,7 +319,7 @@ export async function submitProjectAction(
   });
 
   if (missing.length > 0) {
-    return { ok: false, message: `Missing: ${missing.join(", ")}.` };
+    return { ok: false, message: `العناصر الناقصة: ${missing.join("، ")}.` };
   }
 
   const { error: submitError } = await supabase
@@ -324,5 +336,5 @@ export async function submitProjectAction(
 
   await writeAuditLog(profile.id, "student_submitted_project", "project", parsed.data.projectId);
   revalidatePath("/", "layout");
-  redirect("/student/project/status");
+  redirect("/student/project?success=submitted");
 }

@@ -53,7 +53,7 @@ export function FileUploadForm({ projectId, fileType, label, accept, maxSizeByte
           const file = fileInputRef.current?.files?.[0];
           if (!file) return;
           if (file.size > maxSizeBytes) {
-            setFileSizeError(`File too large. Maximum is ${formatFileSize(maxSizeBytes)}.`);
+            setFileSizeError(`حجم الملف كبير جدًا. الحد الأقصى ${formatFileSize(maxSizeBytes)}.`);
             if (fileInputRef.current) fileInputRef.current.value = "";
             return;
           }
@@ -63,7 +63,7 @@ export function FileUploadForm({ projectId, fileType, label, accept, maxSizeByte
       />
       <div>
         <p className="text-sm font-medium text-slate-900">{label}</p>
-        <p className="mt-1 text-xs text-slate-500">Choose a file and it uploads immediately.</p>
+        <p className="mt-1 text-xs text-slate-500">اختر ملفًا وسيتم رفعه فورًا.</p>
       </div>
       {fileSizeError ? <Alert>{fileSizeError}</Alert> : null}
       {!state.ok ? <Alert>{state.message}</Alert> : null}
@@ -75,7 +75,7 @@ export function FileUploadForm({ projectId, fileType, label, accept, maxSizeByte
         onClick={() => fileInputRef.current?.click()}
       >
         <Upload className="h-4 w-4" aria-hidden="true" />
-        {isPending ? "Uploading..." : "Upload"}
+        {isPending ? "جارٍ الرفع..." : "رفع"}
       </Button>
     </form>
   );

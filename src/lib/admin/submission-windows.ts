@@ -11,7 +11,7 @@ export function getSubmissionWindowState(
     return {
       hasWindow: false,
       isOpen: false,
-      label: "No submission window",
+      label: "لا توجد نافذة تسليم",
     };
   }
 
@@ -22,6 +22,6 @@ export function getSubmissionWindowState(
   return {
     hasWindow: true,
     isOpen,
-    label: isOpen ? "Open" : "Closed",
+    label: isOpen ? "مفتوحة" : "مغلقة",
   };
 }

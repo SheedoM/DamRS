@@ -42,40 +42,40 @@ export function SubmissionWindowForm({ mode, windowData }: SubmissionWindowFormP
       <input type="hidden" name="cycle_id" value={isCreateMode ? "" : windowData?.cycle_id || ""} />
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="cycle_name">Cycle name</Label>
-          <Input id="cycle_name" name="cycle_name" defaultValue={isCreateMode ? "" : windowData?.discussion_cycles?.name || ""} placeholder="Graduation Projects 2025/2026" required />
+          <Label htmlFor="cycle_name">اسم الدورة</Label>
+          <Input id="cycle_name" name="cycle_name" defaultValue={isCreateMode ? "" : windowData?.discussion_cycles?.name || ""} placeholder="مشاريع التخرج 2025/2026" required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="academic_year">Academic year</Label>
+          <Label htmlFor="academic_year">العام الدراسي</Label>
           <Input id="academic_year" name="academic_year" defaultValue={isCreateMode ? "" : "2025/2026"} placeholder="2025/2026" required />
         </div>
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="department">Department</Label>
-          <Input id="department" name="department" defaultValue="Faculty of Computers and Artificial Intelligence" required />
+          <Label htmlFor="department">القسم / الجهة</Label>
+          <Input id="department" name="department" defaultValue="كلية الحاسبات والمعلومات بدمياط" required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="opens_at">Opens at</Label>
+          <Label htmlFor="opens_at">يفتح في</Label>
           <Input id="opens_at" name="opens_at" type="datetime-local" defaultValue={isCreateMode ? "" : toLocalDateTime(windowData?.opens_at)} required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="closes_at">Closes at</Label>
+          <Label htmlFor="closes_at">يغلق في</Label>
           <Input id="closes_at" name="closes_at" type="datetime-local" defaultValue={isCreateMode ? "" : toLocalDateTime(windowData?.closes_at)} required />
         </div>
       </div>
       <label className="flex items-center gap-2 text-sm text-slate-700">
         <input type="checkbox" name="allow_late_submission" defaultChecked={!isCreateMode && (windowData?.allow_late_submission || false)} />
-        Allow late submission
+        السماح بالتسليم المتأخر
       </label>
       <label className="flex items-center gap-2 text-sm text-slate-700">
         <input type="checkbox" name="allow_edit_after_submit" defaultChecked={!isCreateMode && (windowData?.allow_edit_after_submit || false)} />
-        Allow edit after submit
+        السماح بالتعديل بعد التسليم
       </label>
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving..." : isCreateMode ? "Create submission window" : "Save changes"}
+          {isPending ? "جارٍ الحفظ..." : isCreateMode ? "إنشاء نافذة التسليم" : "حفظ التغييرات"}
         </Button>
-        <Link href="/admin/submission-window" className={cn(buttonVariants({ variant: "outline" }))}>
-          Cancel
+        <Link href="/admin" className={cn(buttonVariants({ variant: "outline" }))}>
+          إلغاء
         </Link>
       </div>
     </form>

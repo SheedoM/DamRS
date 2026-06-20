@@ -36,7 +36,7 @@ export function MobileNav({ role }: MobileNavProps) {
         className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-slate-700"
         onClick={() => setIsOpen(true)}
       >
-        <span className="sr-only">Open main menu</span>
+        <span className="sr-only">فتح القائمة الرئيسية</span>
         <Menu className="h-6 w-6" aria-hidden="true" />
       </button>
 
@@ -51,23 +51,24 @@ export function MobileNav({ role }: MobileNavProps) {
       {/* Drawer */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 transform bg-white transition-transform duration-300 ease-in-out",
-          isOpen ? "translate-x-0" : "-translate-x-full",
+          "fixed inset-y-0 right-0 z-50 w-72 transform bg-white transition-transform duration-300 ease-in-out",
+          isOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
         <div className="flex h-20 items-center justify-between border-b border-slate-200 px-5">
           <div className="flex items-center gap-3">
             <Image
               src="/brand/fcai-logo.jpg"
-              alt="FCAI Damietta logo"
+              alt="شعار كلية الحاسبات والمعلومات بدمياط"
               width={44}
               height={44}
               className="h-11 w-11 rounded-md object-cover"
               priority
             />
-            <div>
-              <p className="text-sm font-semibold text-slate-950">GP Review</p>
-              <p className="text-xs text-slate-500">Damietta FCAI</p>
+            <div className="flex flex-col justify-center text-start">
+              <p className="text-lg font-black tracking-tight text-blue-900">DamRS</p>
+              <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-500">Damietta Review System</p>
+              <p className="text-[11px] font-medium text-slate-700">نظام دمياط لمراجعة المشاريع</p>
             </div>
           </div>
           <button
@@ -75,13 +76,15 @@ export function MobileNav({ role }: MobileNavProps) {
             className="-m-2.5 rounded-md p-2.5 text-slate-700"
             onClick={() => setIsOpen(false)}
           >
-            <span className="sr-only">Close menu</span>
+            <span className="sr-only">إغلاق القائمة</span>
             <X className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
-        <nav aria-label="Mobile navigation" className="space-y-1 px-3 py-4" onClick={() => setIsOpen(false)}>
-          {navigationByRole[role].map((item) => (
-            <NavLink key={item.href} {...item} />
+        <nav aria-label="التنقل في الجوال" className="space-y-1 px-3 py-4" onClick={() => setIsOpen(false)}>
+          {navigationByRole[role].map(({ href, label, icon: Icon }) => (
+            <NavLink key={href} href={href} label={label}>
+              <Icon className="h-4 w-4" aria-hidden="true" />
+            </NavLink>
           ))}
         </nav>
       </div>
