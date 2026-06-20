@@ -1,0 +1,92 @@
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+export type StudentProject = {
+  id: string;
+  cycle_id: string;
+  title: string;
+  abstract: string;
+  department: string;
+  supervisor_name: string;
+  technologies_used: string | null;
+  github_url: string | null;
+  demo_video_url: string | null;
+  status: string;
+  submitted_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TeamMember = {
+  id: string;
+  full_name: string;
+  student_id: string;
+  email: string | null;
+  role_in_team: string;
+};
+
+export type ProjectFile = {
+  id: string;
+  file_type: string;
+  file_name: string;
+  storage_path: string;
+  file_size: number;
+  mime_type: string;
+  created_at: string;
+};
+
+export type SubmissionWindow = {
+  id: string;
+  cycle_id: string;
+  opens_at: string;
+  closes_at: string;
+  allow_late_submission: boolean;
+  allow_edit_after_submit: boolean;
+};
+
+export async function getActiveSubmissionWindow() {
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase
+    .from("submission_windows")
+    .select("id, cycle_id, opens_at, closes_at, allow_late_submission, allow_edit_after_submit, discussion_cycles!inner(name, is_active)")
+    .eq("discussion_cycles.is_active", true)
+    .limit(1)
+    .maybeSingle();
+
+  return data as SubmissionWindow | null;
+}
+
+export async function getStudentProject(teamLeaderId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data: project } = await supabase
+    .from("projects")
+    .select(
+      "id, cycle_id, title, abstract, department, supervisor_name, technologies_used, github_url, demo_video_url, status, submitted_at, created_at, updated_at",
+    )
+    .eq("team_leader_id", teamLeaderId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!project) {
+    return null;
+  }
+
+  const [{ data: teamMembers }, { data: files }] = await Promise.all([
+    supabase
+      .from("team_members")
+      .select("id, full_name, student_id, email, role_in_team")
+      .eq("project_id", project.id)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("project_files")
+      .select("id, file_type, file_name, storage_path, file_size, mime_type, created_at")
+      .eq("project_id", project.id)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  return {
+    project: project as StudentProject,
+    teamMembers: (teamMembers || []) as TeamMember[],
+    files: (files || []) as ProjectFile[],
+  };
+}

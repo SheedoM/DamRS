@@ -99,6 +99,64 @@ values (
 
 After the first admin profile exists, that admin can create and manage additional profiles in later phases.
 
+## Phase 3 Student Submission Prerequisites
+
+Until the admin cycle/window UI is built, create an active discussion cycle and open submission window from the Supabase SQL editor.
+
+Replace `ADMIN_PROFILE_UUID` with an admin profile id:
+
+```sql
+insert into public.discussion_cycles (
+  name,
+  academic_year,
+  department,
+  created_by,
+  is_active
+)
+values (
+  'Graduation Projects 2025/2026',
+  '2025/2026',
+  'Faculty of Computers and Artificial Intelligence',
+  'ADMIN_PROFILE_UUID',
+  true
+)
+returning id;
+```
+
+Copy the returned cycle id, then run:
+
+```sql
+insert into public.submission_windows (
+  cycle_id,
+  opens_at,
+  closes_at,
+  allow_late_submission,
+  allow_edit_after_submit,
+  created_by
+)
+values (
+  'CYCLE_UUID_FROM_PREVIOUS_QUERY',
+  now() - interval '1 day',
+  now() + interval '30 days',
+  false,
+  false,
+  'ADMIN_PROFILE_UUID'
+);
+```
+
+Students need:
+
+- A Supabase Auth user
+- A matching `public.profiles` row with `role = 'student'`
+- An active submission window
+
+Then they can use:
+
+- `/student/project`
+- `/student/project/new`
+- `/student/project/edit`
+- `/student/project/status`
+
 ## Routes
 
 - `/login`
@@ -106,6 +164,10 @@ After the first admin profile exists, that admin can create and manage additiona
 - `/admin`
 - `/student`
 - `/panel`
+- `/student/project`
+- `/student/project/new`
+- `/student/project/edit`
+- `/student/project/status`
 
 Role routing:
 
@@ -134,11 +196,14 @@ Included:
 - Full Phase 2 database schema
 - Private Storage buckets and policies
 - RLS policies for students, admins, and assigned panel members
+- Student project creation and editing
+- Team member management
+- Required PDF, ZIP, and presentation uploads
+- Demo video URL capture
+- Final project submission with missing requirement checks
 
 Not included yet:
 
-- Project submission UI
-- File upload UI
 - Panel assignment UI
 - Review and grade UI
 - Reports and Excel exports
