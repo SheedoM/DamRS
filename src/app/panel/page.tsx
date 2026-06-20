@@ -3,18 +3,39 @@ import { ClipboardPenLine, FileSearch, ListTodo, ShieldCheck } from "lucide-reac
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { AppShell } from "@/components/layout/app-shell";
 import { requireRole } from "@/lib/auth/require-role";
+import { getPanelDashboardData } from "@/lib/panel/queries";
 
 export const dynamic = "force-dynamic";
 
-const cards = [
-  { title: "Assigned projects", value: "Ready", detail: "RLS-backed assignments arrive in Phase 4.", icon: FileSearch },
-  { title: "Reviewed projects", value: "Ready", detail: "Review history arrives in Phase 5.", icon: ShieldCheck },
-  { title: "Draft reviews", value: "Ready", detail: "Pre-discussion review form is next panel scope.", icon: ClipboardPenLine },
-  { title: "Final reviews", value: "Ready", detail: "Final scoring form arrives after draft review.", icon: ListTodo },
-];
-
 export default async function PanelDashboardPage() {
   const { profile } = await requireRole(["panel_member"]);
+  const { stats } = await getPanelDashboardData(profile.id);
+  const cards = [
+    {
+      title: "Assigned projects",
+      value: String(stats.assignedProjects),
+      detail: "Projects currently assigned to you.",
+      icon: FileSearch,
+    },
+    {
+      title: "Reviewed projects",
+      value: String(stats.reviewedProjects),
+      detail: "Projects with both draft and final reviews submitted.",
+      icon: ShieldCheck,
+    },
+    {
+      title: "Pending draft",
+      value: String(stats.pendingDraftReviews),
+      detail: "Assigned projects missing your pre-discussion review.",
+      icon: ClipboardPenLine,
+    },
+    {
+      title: "Pending final",
+      value: String(stats.pendingFinalReviews),
+      detail: "Assigned projects missing your final review.",
+      icon: ListTodo,
+    },
+  ];
 
   return (
     <AppShell title="Panel Dashboard" profile={profile}>
