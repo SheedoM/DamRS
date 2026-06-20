@@ -43,6 +43,12 @@ export default async function PanelProjectsPage({
           <CardTitle>{filterTitle(reviewFilter)}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2 mb-4 border-b border-slate-200 pb-4">
+            <Link href="/panel/projects" className={cn(buttonVariants({ variant: reviewFilter === "all" ? "default" : "ghost", size: "sm" }))}>All</Link>
+            <Link href="/panel/projects?review=pending-draft" className={cn(buttonVariants({ variant: reviewFilter === "pending-draft" ? "default" : "ghost", size: "sm" }))}>Pending draft</Link>
+            <Link href="/panel/projects?review=pending-final" className={cn(buttonVariants({ variant: reviewFilter === "pending-final" ? "default" : "ghost", size: "sm" }))}>Pending final</Link>
+            <Link href="/panel/projects?review=reviewed" className={cn(buttonVariants({ variant: reviewFilter === "reviewed" ? "default" : "ghost", size: "sm" }))}>Reviewed</Link>
+          </div>
           {filteredProjects.length > 0 ? filteredProjects.map((project) => {
             const reviewBadge = getPanelProjectReviewBadge(project.reviewStatus);
 
@@ -53,7 +59,12 @@ export default async function PanelProjectsPage({
             >
               <div className="space-y-2">
                 <div>
-                  <h2 className="font-semibold text-slate-950">{project.title}</h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-semibold text-slate-950">{project.title}</h2>
+                    {project.assigned_at && (Date.now() - new Date(project.assigned_at).getTime()) < 48 * 60 * 60 * 1000 ? (
+                      <Badge tone="info">New</Badge>
+                    ) : null}
+                  </div>
                   <p className="text-sm text-slate-500">
                     {project.department} - {project.team_leader_name}
                   </p>

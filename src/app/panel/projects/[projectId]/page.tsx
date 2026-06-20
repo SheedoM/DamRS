@@ -140,6 +140,9 @@ export default async function PanelProjectDetailPage({
               <p className="mt-2 text-sm text-slate-500">
                 Draft component: {componentScoreText(draftScore, 80)} - Final component: {componentScoreText(finalScore, 20)}
               </p>
+              <Link href={`/panel/projects/${project.id}/review`} className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-4")}>
+                {review?.final_submitted_at ? "Edit reviews" : review?.draft_submitted_at ? "Continue to final review" : "Start review"}
+              </Link>
             </div>
 
             <div className="rounded-md border border-slate-200 p-4">
@@ -153,12 +156,6 @@ export default async function PanelProjectDetailPage({
                 Submitted: {formatDate(project.reviewStatus.draftSubmittedAt)}
               </p>
               <p className="mt-1 text-sm text-slate-500">Score: {reviewScoreText(draftScore, 80)}</p>
-              <Link
-                href={`/panel/projects/${project.id}/draft-review`}
-                className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-4")}
-              >
-                {review?.draft_submitted_at ? "Edit draft review" : "Start draft review"}
-              </Link>
             </div>
 
             <div className="rounded-md border border-slate-200 p-4">
@@ -172,12 +169,6 @@ export default async function PanelProjectDetailPage({
                 Submitted: {formatDate(project.reviewStatus.finalSubmittedAt)}
               </p>
               <p className="mt-1 text-sm text-slate-500">Score: {reviewScoreText(finalScore, 20)}</p>
-              <Link
-                href={`/panel/projects/${project.id}/final-review`}
-                className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-4")}
-              >
-                {review?.final_submitted_at ? "Edit final review" : "Start final review"}
-              </Link>
             </div>
           </CardContent>
         </Card>

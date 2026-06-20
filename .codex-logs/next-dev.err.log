@@ -5260,3 +5260,640 @@ Import trace:
 
     at <unknown> (Error: ./src/components/layout/sidebar.tsx:9:5)
     at <unknown> (Error: (./src/components/layout/sidebar.tsx:9:5)
+[browser] Uncaught Error: ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/sidebar.tsx:9:5)
+    at <unknown> (Error: (./src/components/layout/sidebar.tsx:9:5)
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/projects/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/projects/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/projects/[projectId]/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/projects/[projectId]/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/assignments/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/assignments/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/projects/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/projects/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/projects/[projectId]/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/projects/[projectId]/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/projects/[projectId]/draft-review/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/projects/[projectId]/draft-review/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/projects/[projectId]/final-review/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/panel/projects/[projectId]/final-review/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/panel-members/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/panel-members/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/submission-window/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/submission-window/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] ./src/components/layout/topbar.tsx:41:1
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  39 |     </header>
+  40 |   );
+> 41 | }
+     | ^
+  42 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/topbar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx 
+[browser] Uncaught Error: ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/sidebar.tsx:9:5)
+    at <unknown> (Error: (./src/components/layout/sidebar.tsx:9:5)
+[browser] Uncaught Error: ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/sidebar.tsx:9:5)
+    at <unknown> (Error: (./src/components/layout/sidebar.tsx:9:5)
+[browser] Uncaught Error: ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/sidebar.tsx:9:5)
+    at <unknown> (Error: (./src/components/layout/sidebar.tsx:9:5)
+[browser] Uncaught Error: ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/sidebar.tsx:9:5)
+    at <unknown> (Error: (./src/components/layout/sidebar.tsx:9:5)
+[browser] Uncaught Error: ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/sidebar.tsx:9:5)
+    at <unknown> (Error: (./src/components/layout/sidebar.tsx:9:5)
+[browser] Uncaught Error: ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/sidebar.tsx:9:5)
+    at <unknown> (Error: (./src/components/layout/sidebar.tsx:9:5)
+[browser] Uncaught Error: ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/sidebar.tsx:9:5)
+    at <unknown> (Error: (./src/components/layout/sidebar.tsx:9:5)
+[browser] Uncaught Error: ./src/components/layout/sidebar.tsx:9:5
+Unexpected token `{`. Expected identifier, string literal, numeric literal or [ for the computed key
+   7 |
+   8 | export const navigationByRole: Record<UserRole, { label: string; href: string; icon: typeo...
+>  9 |     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+     |     ^
+  10 |     { label: "Projects", href: "/admin/projects", icon: Files },
+  11 |     { label: "Panel", href: "/admin/panel-members", icon: Users },
+  12 |     { label: "Assignments", href: "/admin/assignments", icon: Link2 },
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/sidebar.tsx
+    ./src/components/layout/app-shell.tsx
+    ./src/app/admin/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/sidebar.tsx:9:5)
+    at <unknown> (Error: (./src/components/layout/sidebar.tsx:9:5)
