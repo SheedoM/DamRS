@@ -102,7 +102,7 @@ export async function saveDraftReviewAction(
     project_id: projectIdResult.data,
   });
   revalidatePanelReviewPaths(projectIdResult.data);
-  redirect(`/panel/projects/${projectIdResult.data}`);
+  redirect(`/panel/projects/${projectIdResult.data}?success=draft-saved`);
 }
 
 export async function saveFinalReviewAction(
@@ -157,5 +157,5 @@ export async function saveFinalReviewAction(
     project_id: projectIdResult.data,
   });
   revalidatePanelReviewPaths(projectIdResult.data);
-  redirect(`/panel/projects/${projectIdResult.data}`);
+  redirect(`/panel/projects/${projectIdResult.data}?success=final-saved`);
 }

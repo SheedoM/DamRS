@@ -128,7 +128,7 @@ export async function createProjectAction(
 
   await writeAuditLog(profile.id, "student_created_project", "project", createdProject.id);
   revalidatePath("/", "layout");
-  redirect("/student/project");
+  redirect("/student/project?success=project-created");
 }
 
 export async function updateProjectAction(
@@ -182,7 +182,7 @@ export async function updateProjectAction(
   }
   await writeAuditLog(profile.id, "student_updated_project", "project", projectId);
   revalidatePath("/", "layout");
-  redirect("/student/project");
+  redirect("/student/project?success=project-updated");
 }
 
 export async function uploadProjectFileAction(

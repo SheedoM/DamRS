@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import { Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useAutoClearMessage } from "@/hooks/use-auto-clear-message";
 
 import { uploadProjectFileAction } from "./actions";
 import { Alert } from "@/components/ui/alert";
@@ -23,6 +24,7 @@ export function FileUploadForm({ projectId, fileType, label, accept }: FileUploa
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
+  const showSuccess = useAutoClearMessage(state.ok ? state.message : "");
 
   useEffect(() => {
     if (state.ok && state.message) {
@@ -55,7 +57,7 @@ export function FileUploadForm({ projectId, fileType, label, accept }: FileUploa
         <p className="mt-1 text-xs text-slate-500">Choose a file and it uploads immediately.</p>
       </div>
       {!state.ok ? <Alert>{state.message}</Alert> : null}
-      {state.ok && state.message ? <p className="text-sm text-emerald-700">{state.message}</p> : null}
+      {showSuccess ? <p className="text-sm text-emerald-700">{state.message}</p> : null}
       <Button
         type="button"
         variant="outline"

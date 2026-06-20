@@ -290,7 +290,7 @@ export async function saveSubmissionWindowAction(
     cycle_id: cycleId,
   });
   revalidatePath("/", "layout");
-  redirect("/admin/submission-window");
+  redirect("/admin/submission-window?success=window-saved");
 }
 
 export async function saveGradeOverrideAction(

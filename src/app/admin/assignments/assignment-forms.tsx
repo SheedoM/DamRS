@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import type { AdminProjectRow } from "@/lib/admin/admin-projects";
 import type { Assignment, PanelMember } from "@/lib/admin/queries";
+import { useAutoClearMessage } from "@/hooks/use-auto-clear-message";
 
 const initialState = { ok: true, message: "" };
 
@@ -21,11 +22,12 @@ export function AssignPanelMemberForm({
   projectId?: string;
 }) {
   const [state, formAction, isPending] = useActionState(assignPanelMemberAction, initialState);
+  const showSuccess = useAutoClearMessage(state.ok ? state.message : "");
 
   return (
     <form action={formAction} className="space-y-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
       {!state.ok ? <Alert>{state.message}</Alert> : null}
-      {state.ok && state.message ? <p className="text-sm text-emerald-700">{state.message}</p> : null}
+      {showSuccess ? <p className="text-sm text-emerald-700">{state.message}</p> : null}
       <div className="grid gap-4 md:grid-cols-2">
         <select
           name="project_id"
