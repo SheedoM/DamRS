@@ -9,7 +9,6 @@ type ProjectRelation = {
   abstract?: string;
   status: string;
   department?: string | null;
-  program?: string | null;
   supervisor_name: string;
   technologies_used?: string | null;
   github_url?: string | null;
@@ -29,7 +28,6 @@ export type PanelProjectListItem = {
   id: string;
   title: string;
   status: string;
-  program: string | null;
   supervisor_name: string;
   team_leader_name: string;
   submitted_at: string | null;
@@ -47,7 +45,8 @@ export type PanelProjectDetail = PanelProjectListItem & {
     full_name: string;
     student_id: string;
     national_id: string | null;
-    email: string | null;
+    national_id: string | null;
+    program: string | null;
     role_in_team: string;
   }[];
   files: {
@@ -77,7 +76,6 @@ function toProjectListItem(
     id: project.id,
     title: project.title,
     status: project.status,
-    program: project.program ?? null,
     supervisor_name: project.supervisor_name,
     team_leader_name: profile?.full_name || "طالب غير معروف",
     submitted_at: project.submitted_at,
@@ -105,7 +103,7 @@ export async function getPanelProjects(panelMemberId: string) {
   const { data } = await supabase
     .from("panel_assignments")
     .select(
-      "id, project_id, assigned_at, projects!inner(id, title, status, program, supervisor_name, submitted_at, profiles!projects_team_leader_id_fkey(full_name))",
+      "id, project_id, assigned_at, projects!inner(id, title, status, supervisor_name, submitted_at, profiles!projects_team_leader_id_fkey(full_name))",
     )
     .eq("panel_member_id", panelMemberId)
     .eq("is_active", true)
@@ -204,7 +202,7 @@ export async function getPanelProjectDetail(projectId: string, panelMemberId: st
     supabase
       .from("projects")
       .select(
-        "id, title, abstract, status, program, supervisor_name, technologies_used, github_url, demo_video_url, submitted_at, profiles!projects_team_leader_id_fkey(full_name)",
+        "id, title, abstract, status, supervisor_name, technologies_used, github_url, demo_video_url, submitted_at, profiles!projects_team_leader_id_fkey(full_name)",
       )
       .eq("id", projectId)
       .maybeSingle(),
@@ -215,7 +213,7 @@ export async function getPanelProjectDetail(projectId: string, panelMemberId: st
   const [{ data: teamMembers }, { data: files }, gradedProjectIds] = await Promise.all([
     supabase
       .from("team_members")
-      .select("id, full_name, student_id, national_id, email, role_in_team")
+      .select("id, full_name, student_id, national_id, program, role_in_team")
       .eq("project_id", projectId)
       .order("created_at", { ascending: true }),
     supabase

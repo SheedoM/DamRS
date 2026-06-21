@@ -53,7 +53,6 @@ export default async function AdminProjectDetailPage({
             <div>
               <CardTitle>المشروع</CardTitle>
               <h2 className="mt-2 text-2xl font-semibold text-slate-950">{project.title}</h2>
-              <p className="mt-1 text-sm text-slate-500">{programLabel(project.program)}</p>
             </div>
             <Badge tone={project.status === "submitted" ? "success" : "info"}>{projectStatusLabel(project.status)}</Badge>
           </CardHeader>
@@ -105,7 +104,6 @@ export default async function AdminProjectDetailPage({
                 <div key={assignment.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-slate-200 p-3">
                   <div>
                     <p className="font-medium text-slate-950">{assignment.panel_member_name}</p>
-                    <p className="text-sm text-slate-500">{assignment.panel_member_email}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     {assignment.panel_member_type ? (

@@ -74,7 +74,7 @@ export default async function PanelHomePage({
                       ) : null}
                     </div>
                     <p className="text-sm text-slate-500">
-                      {programLabel(project.program)} - {project.team_leader_name}
+                      {project.team_leader_name}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <Badge tone={reviewBadge.tone}>{reviewBadge.label}</Badge>

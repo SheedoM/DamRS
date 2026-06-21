@@ -33,9 +33,6 @@ const initialState = { ok: true, message: "" };
 
 const roleOptions = [
   { value: "team_leader", label: "قائد الفريق" },
-  { value: "developer", label: "مطوّر" },
-  { value: "designer", label: "مصمم" },
-  { value: "tester", label: "مختبِر" },
   { value: "member", label: "عضو" },
 ];
 
@@ -64,7 +61,6 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
     defaultValues: {
       title: project?.title || "",
       abstract: project?.abstract || "",
-      program: (project?.program as ProjectFormInput["program"]) || undefined,
       supervisor_name: project?.supervisor_name || "",
       technologies_used: project?.technologies_used || "",
       github_url: project?.github_url || "",
@@ -75,10 +71,10 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
               full_name: member.full_name,
               student_id: member.student_id,
               national_id: member.national_id || "",
-              email: member.email || "",
-              role_in_team: member.role_in_team,
+              program: (member.program as ProjectFormInput["team_members"][0]["program"]) || undefined,
+              role_in_team: member.role_in_team as "team_leader" | "member",
             }))
-          : [{ full_name: "", student_id: "", national_id: "", email: "", role_in_team: "team_leader" }],
+          : [{ full_name: "", student_id: "", national_id: "", program: undefined as any, role_in_team: "team_leader" }],
     },
   });
 
@@ -127,20 +123,6 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
             <FieldError message={errors.abstract?.message} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="program">البرنامج</Label>
-            <select id="program" {...register("program")} className={selectClassName} defaultValue="">
-              <option value="" disabled>
-                اختر البرنامج
-              </option>
-              {programOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <FieldError message={errors.program?.message} />
-          </div>
-          <div className="space-y-2">
             <Label htmlFor="supervisor_name">اسم المشرف</Label>
             <Input id="supervisor_name" {...register("supervisor_name")} />
             <FieldError message={errors.supervisor_name?.message} />
@@ -176,7 +158,7 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
             variant="outline"
             disabled={atMemberLimit}
             onClick={() =>
-              append({ full_name: "", student_id: "", national_id: "", email: "", role_in_team: "member" })
+              append({ full_name: "", student_id: "", national_id: "", program: undefined as any, role_in_team: "member" })
             }
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
@@ -206,9 +188,21 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
                 <FieldError message={errors.team_members?.[index]?.national_id?.message} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor={`team-${index}-email`}>البريد الإلكتروني</Label>
-                <Input id={`team-${index}-email`} type="email" {...register(`team_members.${index}.email`)} />
-                <FieldError message={errors.team_members?.[index]?.email?.message} />
+                <Label htmlFor={`team-${index}-program`}>البرنامج</Label>
+                <select
+                  id={`team-${index}-program`}
+                  {...register(`team_members.${index}.program`)}
+                  className={selectClassName}
+                  defaultValue=""
+                >
+                  <option value="" disabled>اختر البرنامج</option>
+                  {programOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <FieldError message={errors.team_members?.[index]?.program?.message} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor={`team-${index}-role`}>الدور</Label>

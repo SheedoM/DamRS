@@ -47,7 +47,7 @@ export default async function PanelProjectDetailPage({
               <CardTitle>المشروع المُسند</CardTitle>
               <h2 className="mt-2 text-2xl font-semibold text-slate-950">{project.title}</h2>
               <p className="mt-1 text-sm text-slate-500">
-                {programLabel(project.program)} - {project.team_leader_name}
+                {project.team_leader_name}
               </p>
             </div>
             <Badge tone="info">{projectStatusLabel(project.status)}</Badge>

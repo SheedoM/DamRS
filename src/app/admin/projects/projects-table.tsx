@@ -72,10 +72,6 @@ const columns = [
     header: "الحالة",
     cell: (info) => <Badge tone={info.getValue() === "submitted" ? "success" : "info"}>{projectStatusLabel(info.getValue())}</Badge>,
   }),
-  columnHelper.accessor("program", {
-    header: "البرنامج",
-    cell: (info) => programLabel(info.getValue()),
-  }),
   columnHelper.accessor("supervisor_name", {
     header: "المشرف",
   }),

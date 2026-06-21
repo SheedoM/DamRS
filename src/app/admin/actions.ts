@@ -11,6 +11,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions";
 import { writeAuditLog } from "@/lib/audit";
+import { programValues } from "@/lib/i18n/labels";
 
 
 
@@ -29,6 +30,7 @@ const createStudentSchema = z.object({
   full_name: z.string().trim().min(2),
   student_id: z.string().trim().min(3),
   national_id: z.string().trim().regex(/^\d{14}$/),
+  program: z.enum(programValues, { message: "اختر البرنامج." }),
 });
 
 const eligibleStudentsSchema = z.object({
@@ -403,6 +405,7 @@ export async function createStudentAccountAction(
     full_name: formData.get("full_name"),
     student_id: formData.get("student_id"),
     national_id: formData.get("national_id"),
+    program: formData.get("program"),
   });
 
   if (!parsed.success) {
@@ -442,6 +445,7 @@ export async function createStudentAccountAction(
     role: "student",
     student_id: parsed.data.student_id,
     national_id: parsed.data.national_id,
+    program: parsed.data.program,
   });
 
   if (profileError) {

@@ -38,7 +38,6 @@ export function ProjectSummary({ project, teamMembers, files }: ProjectSummaryPr
   const missing = getMissingSubmissionRequirements({
     title: project.title,
     abstract: project.abstract,
-    program: project.program,
     supervisor_name: project.supervisor_name,
     demo_video_url: project.demo_video_url,
     teamMemberCount: teamMembers.length,
@@ -68,7 +67,6 @@ export function ProjectSummary({ project, teamMembers, files }: ProjectSummaryPr
           <div>
             <CardTitle>نظرة عامة على المشروع</CardTitle>
             <h2 className="mt-2 text-2xl font-semibold text-slate-950">{project.title}</h2>
-            <p className="mt-1 text-sm text-slate-500">{programLabel(project.program)}</p>
           </div>
           <Badge tone={project.status === "submitted" ? "success" : "warning"}>
             {projectStatusLabel(project.status)}
@@ -104,7 +102,7 @@ export function ProjectSummary({ project, teamMembers, files }: ProjectSummaryPr
                   <p className="font-medium text-slate-950">{member.full_name}</p>
                   <p className="text-sm text-slate-500">{member.student_id} - {member.role_in_team}</p>
                   {member.national_id ? <p className="text-sm text-slate-500">الرقم القومي: {member.national_id}</p> : null}
-                  {member.email ? <p className="text-sm text-slate-500">{member.email}</p> : null}
+                  {member.program ? <p className="text-sm text-slate-500">{programLabel(member.program)}</p> : null}
                 </div>
               ))}
             </div>

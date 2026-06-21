@@ -6,7 +6,6 @@ export type StudentProject = {
   cycle_id: string;
   title: string;
   abstract: string;
-  program: string | null;
   supervisor_name: string;
   technologies_used: string | null;
   github_url: string | null;
@@ -22,7 +21,7 @@ export type TeamMember = {
   full_name: string;
   student_id: string;
   national_id: string | null;
-  email: string | null;
+  program: string | null;
   role_in_team: string;
 };
 
@@ -63,7 +62,7 @@ export async function getStudentProject(teamLeaderId: string) {
   const { data: project } = await supabase
     .from("projects")
     .select(
-      "id, cycle_id, title, abstract, program, supervisor_name, technologies_used, github_url, demo_video_url, status, submitted_at, created_at, updated_at",
+      "id, cycle_id, title, abstract, supervisor_name, technologies_used, github_url, demo_video_url, status, submitted_at, created_at, updated_at",
     )
     .eq("team_leader_id", teamLeaderId)
     .order("created_at", { ascending: false })
@@ -77,7 +76,7 @@ export async function getStudentProject(teamLeaderId: string) {
   const [{ data: teamMembers }, { data: files }] = await Promise.all([
     supabase
       .from("team_members")
-      .select("id, full_name, student_id, national_id, email, role_in_team")
+      .select("id, full_name, student_id, national_id, program, role_in_team")
       .eq("project_id", project.id)
       .order("created_at", { ascending: true }),
     supabase

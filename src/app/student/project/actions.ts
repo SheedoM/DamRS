@@ -55,14 +55,13 @@ function parseProjectForm(formData: FormData) {
     full_name: String(formData.get(`team_members.${index}.full_name`) || ""),
     student_id: String(formData.get(`team_members.${index}.student_id`) || ""),
     national_id: String(formData.get(`team_members.${index}.national_id`) || ""),
-    email: String(formData.get(`team_members.${index}.email`) || ""),
+    program: String(formData.get(`team_members.${index}.program`) || ""),
     role_in_team: String(formData.get(`team_members.${index}.role_in_team`) || "member"),
   }));
 
   return projectFormSchema.safeParse({
     title: formData.get("title"),
     abstract: formData.get("abstract"),
-    program: formData.get("program"),
     supervisor_name: formData.get("supervisor_name"),
     technologies_used: formData.get("technologies_used"),
     github_url: formData.get("github_url"),
@@ -289,7 +288,7 @@ export async function submitProjectAction(
   const supabase = await createSupabaseServerClient();
   const { data: project, error: projectError } = await supabase
     .from("projects")
-    .select("id, title, abstract, program, supervisor_name, demo_video_url")
+    .select("id, title, abstract, supervisor_name, demo_video_url")
     .eq("id", parsed.data.projectId)
     .single();
 
@@ -311,7 +310,6 @@ export async function submitProjectAction(
   const missing = getMissingSubmissionRequirements({
     title: project.title as string | null,
     abstract: project.abstract as string | null,
-    program: project.program as string | null,
     supervisor_name: project.supervisor_name as string | null,
     demo_video_url: project.demo_video_url as string | null,
     teamMemberCount: teamMemberCount || 0,
