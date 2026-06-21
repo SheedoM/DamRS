@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowRight, FileText } from "lucide-react";
 
 import { StudentGradesForm } from "./student-grades-form";
+import { GradingBreakdown } from "./grading-breakdown";
 import { DeleteProjectButton } from "./delete-project-button";
 import { AssignPanelMemberForm, RevokeAssignmentForm } from "../assignment-forms";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppShell } from "@/components/layout/app-shell";
 import { requireRole } from "@/lib/auth/require-role";
 import { getAdminProjectDetail, getPanelMembers } from "@/lib/admin/queries";
-import { getProjectStudentGrades, getProjectTerm } from "@/lib/admin/student-grades";
+import { getProjectGradingBreakdown, getProjectStudentGrades, getProjectTerm } from "@/lib/admin/student-grades";
 import {
   panelMemberTypeLabel,
   projectFileTypeLabel,
@@ -28,11 +29,12 @@ export default async function AdminProjectDetailPage({
 }) {
   const { profile } = await requireRole(["admin"]);
   const { projectId } = await params;
-  const [project, panelMembers, studentGrades, term] = await Promise.all([
+  const [project, panelMembers, studentGrades, term, breakdown] = await Promise.all([
     getAdminProjectDetail(projectId),
     getPanelMembers(),
     getProjectStudentGrades(projectId),
     getProjectTerm(projectId),
+    getProjectGradingBreakdown(projectId),
   ]);
 
   if (!project) {
@@ -142,6 +144,13 @@ export default async function AdminProjectDetailPage({
               )}
             </div>
             <AssignPanelMemberForm panelMembers={panelMembers} projectId={project.id} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>تفصيل درجات المناقشة (لكل عضو لجنة)</CardTitle></CardHeader>
+          <CardContent>
+            <GradingBreakdown projectId={project.id} students={breakdown} />
           </CardContent>
         </Card>
 

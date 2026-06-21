@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { requireRole } from "@/lib/auth/require-role";
 import { projectFormSchema } from "@/lib/project/submission.schema";
+import { discussionCriteria, discussionScoreSchema } from "@/lib/review/grading";
 import { getAppSettings } from "@/lib/admin/app-settings";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -237,6 +238,70 @@ export async function saveStudentGradesAction(
   });
   revalidatePath("/", "layout");
   return { ok: true, message: "تم حفظ درجات الطلاب." };
+}
+
+// Admin override of a committee member's discussion scores. Form fields are
+// override.<panelMemberId>.<teamMemberId>.<criterion>. Admin RLS allows writing
+// any evaluator's score.
+export async function overrideDiscussionScoresAction(
+  _previousState: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const { profile } = await requireRole(["admin"]);
+  const projectId = String(formData.get("project_id") || "");
+  if (!z.string().uuid().safeParse(projectId).success) {
+    return { ok: false, message: "معرّف المشروع غير صالح." };
+  }
+
+  // Collect (panelMemberId, teamMemberId) pairs from the flat fields.
+  const pairs = new Set<string>();
+  for (const key of formData.keys()) {
+    const m = key.match(/^override\.([0-9a-fA-F-]+)\.([0-9a-fA-F-]+)\./);
+    if (m) pairs.add(`${m[1]}|${m[2]}`);
+  }
+  if (pairs.size === 0) {
+    return { ok: false, message: "لا توجد درجات لحفظها." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data: members } = await supabase.from("team_members").select("id").eq("project_id", projectId);
+  const validMembers = new Set((members || []).map((m) => m.id as string));
+
+  const now = new Date().toISOString();
+  const rows: Record<string, unknown>[] = [];
+  for (const pair of pairs) {
+    const [panelMemberId, teamMemberId] = pair.split("|");
+    if (!validMembers.has(teamMemberId)) {
+      return { ok: false, message: "أحد الطلاب لا ينتمي لهذا المشروع." };
+    }
+    const raw = Object.fromEntries(
+      discussionCriteria.map((c) => [c.key, formData.get(`override.${panelMemberId}.${teamMemberId}.${c.key}`)]),
+    );
+    const parsed = discussionScoreSchema.safeParse(raw);
+    if (!parsed.success) {
+      return { ok: false, message: parsed.error.issues[0]?.message || "درجات غير صالحة." };
+    }
+    rows.push({
+      project_id: projectId,
+      panel_member_id: panelMemberId,
+      team_member_id: teamMemberId,
+      ...parsed.data,
+      submitted_at: now,
+    });
+  }
+
+  const { error } = await supabase
+    .from("student_discussion_scores")
+    .upsert(rows, { onConflict: "panel_member_id,team_member_id" });
+  if (error) {
+    return { ok: false, message: error.message };
+  }
+
+  await writeAuditLog(profile.id, "admin_overrode_discussion_scores", "project", projectId, {
+    entries: rows.length,
+  });
+  revalidatePath("/", "layout");
+  return { ok: true, message: "تم حفظ درجات المناقشة." };
 }
 
 export async function createPanelMemberAction(
