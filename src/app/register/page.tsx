@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useActionState } from "react";
 
 import { registerStudentAction } from "./actions";
+import { AuthShell } from "@/components/auth/auth-shell";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -18,41 +18,7 @@ export default function RegisterPage() {
   const [state, formAction, isPending] = useActionState(registerStudentAction, initialState);
 
   return (
-    <main className="grid min-h-dvh bg-slate-50 lg:grid-cols-[0.95fr_1.05fr]">
-      <section className="flex flex-col justify-between bg-[var(--brand-navy)] px-6 py-8 text-white sm:px-10">
-        <div className="flex items-center gap-3">
-          <Image
-            src="/brand/damietta-university.jpg"
-            alt="Damietta University logo"
-            width={56}
-            height={56}
-            className="h-14 w-14 rounded-md bg-white object-cover"
-            priority
-          />
-          <Image
-            src="/brand/fcai-logo.jpg"
-            alt="FCAI logo"
-            width={56}
-            height={56}
-            className="h-14 w-14 rounded-md bg-white object-cover"
-            priority
-          />
-        </div>
-        <div className="my-16 max-w-xl">
-          <p className="text-sm font-semibold uppercase tracking-wide text-[var(--brand-yellow)]">
-            جامعة دمياط - كلية الحاسبات والمعلومات
-          </p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-normal sm:text-5xl">
-            إنشاء حساب طالب
-          </h1>
-          <p className="mt-5 text-base leading-7 text-blue-50">
-            سجّل قائد الفريق باستخدام بياناته الجامعية المعتمدة لبدء تسليم مشروع التخرج.
-          </p>
-        </div>
-        <p className="text-sm text-blue-100">نظام مراجعة مشاريع التخرج</p>
-      </section>
-
-      <section className="flex items-center justify-center px-4 py-10 sm:px-6">
+    <AuthShell>
         <Card className="w-full max-w-md">
           <CardHeader>
             <div>
@@ -130,7 +96,6 @@ export default function RegisterPage() {
             </p>
           </CardContent>
         </Card>
-      </section>
-    </main>
+    </AuthShell>
   );
 }

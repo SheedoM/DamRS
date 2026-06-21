@@ -13,10 +13,10 @@ import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
-export default function StudentLoginPage() {
+export default function StaffLoginPage() {
   const router = useRouter();
-  const [studentId, setStudentId] = useState("");
-  const [nationalId, setNationalId] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -28,12 +28,12 @@ export default function StudentLoginPage() {
     try {
       const supabase = createSupabaseBrowserClient();
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: `${studentId.trim()}@damrs.edu`,
-        password: nationalId.trim(),
+        email: email.trim(),
+        password,
       });
 
       if (signInError) {
-        setError("الرقم الجامعي أو الرقم القومي غير صحيح.");
+        setError(signInError.message);
         setIsSubmitting(false);
         return;
       }
@@ -55,10 +55,10 @@ export default function StudentLoginPage() {
     <AuthShell>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <p className="text-sm font-medium text-[var(--brand-blue)]">تسجيل دخول الطلاب</p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-950">دخول قائد الفريق</h2>
+          <p className="text-sm font-medium text-[var(--brand-blue)]">تسجيل دخول الموظفين</p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-950">دخول الإداريين وأعضاء اللجنة</h2>
           <p className="mt-3 text-sm leading-6 text-slate-500">
-            استخدم رقمك الجامعي والرقم القومي لتسجيل الدخول.
+            استخدم بريدك الإلكتروني وكلمة المرور لتسجيل الدخول.
           </p>
         </CardHeader>
         <CardContent>
@@ -66,26 +66,24 @@ export default function StudentLoginPage() {
             {error ? <Alert>{error}</Alert> : null}
 
             <div className="space-y-2">
-              <Label htmlFor="student_id">الرقم الجامعي</Label>
+              <Label htmlFor="email">البريد الإلكتروني</Label>
               <Input
-                id="student_id"
-                type="text"
-                inputMode="numeric"
-                autoComplete="username"
-                value={studentId}
-                onChange={(e) => setStudentId(e.target.value)}
+                id="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="national_id">الرقم القومي</Label>
+              <Label htmlFor="password">كلمة المرور</Label>
               <Input
-                id="national_id"
+                id="password"
                 type="password"
-                inputMode="numeric"
                 autoComplete="current-password"
-                value={nationalId}
-                onChange={(e) => setNationalId(e.target.value)}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
@@ -103,14 +101,8 @@ export default function StudentLoginPage() {
           </form>
 
           <p className="mt-4 text-center text-sm text-slate-500">
-            ليس لديك حساب؟{" "}
-            <Link href="/register" className="font-semibold text-[var(--brand-blue)] hover:underline">
-              إنشاء حساب قائد فريق
-            </Link>
-          </p>
-          <p className="mt-2 text-center text-sm text-slate-500">
-            <Link href="/staff-login" className="font-medium text-slate-600 hover:underline">
-              تسجيل دخول الإداريين وأعضاء اللجنة
+            <Link href="/login" className="font-medium text-slate-600 hover:underline">
+              تسجيل دخول الطلاب
             </Link>
           </p>
         </CardContent>
