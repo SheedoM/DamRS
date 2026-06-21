@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppShell } from "@/components/layout/app-shell";
 import { requireRole } from "@/lib/auth/require-role";
 import { getAdminProjectDetail, getPanelMembers } from "@/lib/admin/queries";
-import { getProjectStudentGrades } from "@/lib/admin/student-grades";
+import { getProjectStudentGrades, getProjectTerm } from "@/lib/admin/student-grades";
 import {
   panelMemberTypeLabel,
   projectFileTypeLabel,
@@ -28,10 +28,11 @@ export default async function AdminProjectDetailPage({
 }) {
   const { profile } = await requireRole(["admin"]);
   const { projectId } = await params;
-  const [project, panelMembers, studentGrades] = await Promise.all([
+  const [project, panelMembers, studentGrades, term] = await Promise.all([
     getAdminProjectDetail(projectId),
     getPanelMembers(),
     getProjectStudentGrades(projectId),
+    getProjectTerm(projectId),
   ]);
 
   if (!project) {
@@ -151,7 +152,7 @@ export default async function AdminProjectDetailPage({
               درجة المناقشة (60) = مجموع درجات المقيّمين. أدخل درجة الفصل الأول (10) وتقييم لجنة الإشراف (30) لكل طالب.
             </p>
             {studentGrades.length > 0 ? (
-              <StudentGradesForm projectId={project.id} students={studentGrades} />
+              <StudentGradesForm projectId={project.id} students={studentGrades} term={term} />
             ) : (
               <p className="text-sm text-slate-500">لا يوجد طلاب في هذا المشروع.</p>
             )}

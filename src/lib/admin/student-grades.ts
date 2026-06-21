@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { calcStudentFinal } from "@/lib/review/grading";
+import { calcStudentFinal, type CycleTerm } from "@/lib/review/grading";
 
 export type ProjectStudentGrade = {
   teamMemberId: string;
@@ -9,13 +9,27 @@ export type ProjectStudentGrade = {
   evaluatorsSubmitted: number;
   firstSemester: number;
   supervision: number;
-  final: number; // /100
+  final: number; // /termMax(term)
 };
+
+export async function getProjectTerm(projectId: string): Promise<CycleTerm> {
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase
+    .from("projects")
+    .select("discussion_cycles(term)")
+    .eq("id", projectId)
+    .maybeSingle();
+  const rel = (data as { discussion_cycles?: { term?: string } | { term?: string }[] } | null)
+    ?.discussion_cycles;
+  const cycle = Array.isArray(rel) ? rel[0] : rel;
+  return cycle?.term === "first" ? "first" : "second";
+}
 
 export async function getProjectStudentGrades(
   projectId: string,
 ): Promise<ProjectStudentGrade[]> {
   const supabase = await createSupabaseServerClient();
+  const term = await getProjectTerm(projectId);
 
   const [{ data: members }, { data: scores }, { data: supervision }] = await Promise.all([
     supabase
@@ -66,6 +80,7 @@ export async function getProjectStudentGrades(
       firstSemester: sup.firstSemester,
       supervision: sup.supervision,
       final: calcStudentFinal({
+        term,
         firstSemester: sup.firstSemester,
         supervision: sup.supervision,
         discussionTotals,

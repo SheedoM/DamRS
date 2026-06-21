@@ -14,7 +14,18 @@ export type DiscussionCriterionKey = (typeof discussionCriteria)[number]["key"];
 export const DISCUSSION_MAX = 20; // 5 + 5 + 5 + 3 + 2
 export const FIRST_SEMESTER_MAX = 10;
 export const SUPERVISION_MAX = 30;
-export const FINAL_MAX = 100;
+
+export type CycleTerm = "first" | "second";
+
+// Each cycle is one term, graded independently:
+//   second term: discussion 60 + أعمال السنة 30 = /90
+//   first  term: أعمال الفصل only             = /10
+export const SECOND_TERM_MAX = 90;
+export const FIRST_TERM_MAX = 10;
+
+export function termMax(term: CycleTerm): number {
+  return term === "first" ? FIRST_TERM_MAX : SECOND_TERM_MAX;
+}
 
 export type DiscussionScores = Record<DiscussionCriterionKey, number>;
 
@@ -52,27 +63,33 @@ export function calcDiscussionTotal(scores: Partial<DiscussionScores>): number {
   );
 }
 
-// Per-student final out of 100 = first semester (10) + supervision (30)
-// + SUM of every evaluator's 20-mark discussion total.
+// Per-student final, term-aware:
+//   second term (/90): SUM of evaluators' 20-mark discussion totals + supervision (30)
+//   first  term (/10): first-semester only
 export function calcStudentFinal({
+  term,
   firstSemester,
   supervision,
   discussionTotals,
 }: {
+  term: CycleTerm;
   firstSemester: number | null | undefined;
   supervision: number | null | undefined;
   discussionTotals: number[];
 }): number {
+  if (term === "first") {
+    return round2(Number(firstSemester || 0));
+  }
   const discussionSum = discussionTotals.reduce((sum, total) => sum + Number(total || 0), 0);
-  return round2(Number(firstSemester || 0) + Number(supervision || 0) + discussionSum);
+  return round2(Number(supervision || 0) + discussionSum);
 }
 
 export type StudentGradeSummary = {
   teamMemberId: string;
-  discussionSum: number; // out of 60 with three evaluators
+  discussionSum: number; // out of 60 with three evaluators (second term)
   evaluatorsSubmitted: number;
   evaluatorsRequired: number;
   firstSemester: number;
   supervision: number;
-  final: number; // out of 100
+  final: number; // out of termMax(term)
 };

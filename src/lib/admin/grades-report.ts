@@ -1,6 +1,11 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { calcStudentFinal } from "@/lib/review/grading";
+import { calcStudentFinal, type CycleTerm } from "@/lib/review/grading";
 import { programLabel } from "@/lib/i18n/labels";
+
+function termOf(rel: { term?: string } | { term?: string }[] | null | undefined): CycleTerm {
+  const c = Array.isArray(rel) ? rel[0] : rel;
+  return c?.term === "first" ? "first" : "second";
+}
 
 export type GradesReportRow = {
   studentName: string;
@@ -19,6 +24,7 @@ type RawProject = {
   id: string;
   title: string;
   supervisor_name: string;
+  discussion_cycles?: { term?: string } | { term?: string }[] | null;
 };
 
 type RawMember = {
@@ -35,7 +41,7 @@ export async function getGradesReportRows(): Promise<GradesReportRow[]> {
 
   const [{ data: projects }, { data: members }, { data: scores }, { data: supervision }] =
     await Promise.all([
-      supabase.from("projects").select("id, title, supervisor_name").order("created_at"),
+      supabase.from("projects").select("id, title, supervisor_name, discussion_cycles(term)").order("created_at"),
       supabase.from("team_members").select("id, project_id, full_name, student_id, national_id, program"),
       supabase.from("student_discussion_scores").select("team_member_id, total"),
       supabase
@@ -69,6 +75,7 @@ export async function getGradesReportRows(): Promise<GradesReportRow[]> {
     const sup = supervisionByMember.get(member.id) || { firstSemester: 0, supervision: 0 };
     const discussionSum = Number(discussionTotals.reduce((a, b) => a + b, 0).toFixed(2));
     const final = calcStudentFinal({
+      term: termOf(project?.discussion_cycles),
       firstSemester: sup.firstSemester,
       supervision: sup.supervision,
       discussionTotals,
@@ -99,7 +106,7 @@ const CSV_HEADERS = [
   "الفصل الأول (10)",
   "الإشراف (30)",
   "المناقشة (60)",
-  "الدرجة النهائية (100)",
+  "الدرجة النهائية",
 ];
 
 function csvCell(value: string): string {
