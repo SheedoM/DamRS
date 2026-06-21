@@ -26,6 +26,7 @@ export function StudentGradesForm({
   term: CycleTerm;
 }) {
   const [state, formAction, isPending] = useActionState(saveStudentGradesAction, initialState);
+  const isSecond = term === "second";
   const [entries, setEntries] = useState(
     () =>
       Object.fromEntries(
@@ -49,14 +50,22 @@ export function StudentGradesForm({
         <p className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-800">{state.message}</p>
       ) : null}
 
+      <p className="text-xs text-slate-500">
+        {isSecond
+          ? "الفصل الثاني: المناقشة (60) + أعمال السنة (30). يمكنك تعديل أعمال السنة كتجاوز إداري."
+          : "الفصل الأول: أعمال الفصل (10) فقط."}
+      </p>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-right text-sm">
+        <table className="w-full min-w-[520px] text-right text-sm">
           <thead className="bg-slate-50 text-xs text-slate-500">
             <tr>
               <th className="px-3 py-2 font-semibold">الطالب</th>
-              <th className="px-3 py-2 font-semibold">المناقشة (60)</th>
-              <th className="px-3 py-2 font-semibold">الفصل الأول ({FIRST_SEMESTER_MAX})</th>
-              <th className="px-3 py-2 font-semibold">الإشراف ({SUPERVISION_MAX})</th>
+              {isSecond ? <th className="px-3 py-2 font-semibold">المناقشة (60)</th> : null}
+              {isSecond ? (
+                <th className="px-3 py-2 font-semibold">أعمال السنة ({SUPERVISION_MAX})</th>
+              ) : (
+                <th className="px-3 py-2 font-semibold">أعمال الفصل ({FIRST_SEMESTER_MAX})</th>
+              )}
               <th className="px-3 py-2 font-semibold">النهائي ({termMax(term)})</th>
             </tr>
           </thead>
@@ -75,33 +84,43 @@ export function StudentGradesForm({
                     <p className="font-medium text-slate-950">{student.fullName}</p>
                     <p className="text-xs text-slate-500">{student.studentId}</p>
                   </td>
-                  <td className="px-3 py-2 text-slate-700">
-                    {student.discussionSum}
-                    <span className="text-xs text-slate-400"> ({student.evaluatorsSubmitted} مقيّم)</span>
-                  </td>
+                  {isSecond ? (
+                    <td className="px-3 py-2 text-slate-700">
+                      {student.discussionSum}
+                      <span className="text-xs text-slate-400"> ({student.evaluatorsSubmitted} مقيّم)</span>
+                    </td>
+                  ) : null}
                   <td className="px-3 py-2">
-                    <input
-                      name={`grades.${student.teamMemberId}.first_semester_score`}
-                      type="number"
-                      min="0"
-                      max={String(FIRST_SEMESTER_MAX)}
-                      step="0.5"
-                      value={entry.first}
-                      onChange={setField(student.teamMemberId, "first")}
-                      className="h-9 w-24 rounded-md border border-slate-300 px-2 text-sm"
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input
-                      name={`grades.${student.teamMemberId}.supervision_score`}
-                      type="number"
-                      min="0"
-                      max={String(SUPERVISION_MAX)}
-                      step="0.5"
-                      value={entry.supervision}
-                      onChange={setField(student.teamMemberId, "supervision")}
-                      className="h-9 w-24 rounded-md border border-slate-300 px-2 text-sm"
-                    />
+                    {isSecond ? (
+                      <>
+                        <input
+                          name={`grades.${student.teamMemberId}.supervision_score`}
+                          type="number"
+                          min="0"
+                          max={String(SUPERVISION_MAX)}
+                          step="0.5"
+                          value={entry.supervision}
+                          onChange={setField(student.teamMemberId, "supervision")}
+                          className="h-9 w-24 rounded-md border border-slate-300 px-2 text-sm"
+                        />
+                        {/* keep the unused term's value intact */}
+                        <input type="hidden" name={`grades.${student.teamMemberId}.first_semester_score`} value={entry.first} />
+                      </>
+                    ) : (
+                      <>
+                        <input
+                          name={`grades.${student.teamMemberId}.first_semester_score`}
+                          type="number"
+                          min="0"
+                          max={String(FIRST_SEMESTER_MAX)}
+                          step="0.5"
+                          value={entry.first}
+                          onChange={setField(student.teamMemberId, "first")}
+                          className="h-9 w-24 rounded-md border border-slate-300 px-2 text-sm"
+                        />
+                        <input type="hidden" name={`grades.${student.teamMemberId}.supervision_score`} value={entry.supervision} />
+                      </>
+                    )}
                   </td>
                   <td className="px-3 py-2 font-semibold text-slate-950">{final}</td>
                 </tr>
