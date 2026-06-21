@@ -49,6 +49,7 @@ dev-server.err.log
 /scripts/seed-from-sheet.mjs
 /scripts/export-panel-credentials.mjs
 /scripts/parse-sheet.py
+/scripts/parse-schedule.py
 /scripts/panel-credentials.csv
 /scripts/leaders.csv
 *.docx
