@@ -1,6 +1,5 @@
-import Link from "next/link";
-
 import { Alert } from "@/components/ui/alert";
+import { LogoutButton } from "@/components/layout/logout-button";
 
 export default function AccountSetupPage() {
   return (
@@ -9,12 +8,9 @@ export default function AccountSetupPage() {
         <Alert>
           حسابك موجود، لكن لم يُعثر على ملف تعريف مطابق. اطلب من المسؤول إنشاء ملف تعريف لحسابك.
         </Alert>
-        <Link
-          href="/logout"
-          className="inline-flex h-10 items-center justify-center rounded-md bg-[var(--brand-navy)] px-4 text-sm font-medium text-white transition-colors hover:bg-[var(--brand-navy-strong)]"
-        >
+        <LogoutButton className="inline-flex h-10 items-center justify-center rounded-md bg-[var(--brand-navy)] px-4 text-sm font-medium text-white transition-colors hover:bg-[var(--brand-navy-strong)]">
           العودة لتسجيل الدخول
-        </Link>
+        </LogoutButton>
       </div>
     </main>
   );

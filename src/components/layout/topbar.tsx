@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { LogOut } from "lucide-react";
 
 import type { CurrentProfile } from "@/lib/auth/get-current-profile";
 import type { UserRole } from "@/lib/auth/roles";
 import { MobileNav } from "./mobile-nav";
+import { LogoutButton } from "./logout-button";
 
 type TopbarProps = {
   title: string;
@@ -26,13 +26,12 @@ export function Topbar({ title, profile, role }: TopbarProps) {
           <p className="inline text-sm font-medium text-slate-900 sm:hidden">{profile.full_name.split(" ")[0]}</p>
           <p className="hidden text-xs text-slate-500 sm:block">{profile.email}</p>
         </div>
-        <Link
-          href="/logout"
+        <LogoutButton
           className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-700 transition-colors hover:bg-slate-50"
           aria-label="تسجيل الخروج"
         >
           <LogOut className="h-4 w-4" aria-hidden="true" />
-        </Link>
+        </LogoutButton>
       </div>
     </header>
   );

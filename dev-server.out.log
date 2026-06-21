@@ -1,0 +1,21 @@
+
+> gp-review@0.1.0 dev
+> next dev --hostname 127.0.0.1 --port 3000
+
+▲ Next.js 16.2.9 (Turbopack)
+- Local:         http://127.0.0.1:3000
+- Network:       http://127.0.0.1:3000
+- Environments: .env.local
+✓ Ready in 556ms
+- Experiments (use with caution):
+  · serverActions
+
+ GET /admin 200 in 1085ms (next.js: 55ms, application-code: 1030ms)
+ GET /admin/assignments 200 in 1723ms (next.js: 297ms, application-code: 1426ms)
+ HEAD /login 200 in 190ms (next.js: 41ms, application-code: 149ms)
+ HEAD /login 200 in 56ms (next.js: 7ms, application-code: 49ms)
+ GET /admin/assignments 200 in 748ms (next.js: 5ms, application-code: 743ms)
+ GET /admin/assignments 200 in 437ms (next.js: 4ms, application-code: 433ms)
+ GET /logout 307 in 429ms (next.js: 103ms, application-code: 326ms)
+ GET /login 200 in 23ms (next.js: 4ms, application-code: 19ms)
+[?25h
