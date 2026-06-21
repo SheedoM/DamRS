@@ -43,3 +43,12 @@ next-env.d.ts
 dev-server.out.log
 dev-server.err.log
 .worktrees/
+
+# confidential roster data + import tooling (kept local only, never commit)
+/scripts/sheet-data.json
+/scripts/seed-from-sheet.mjs
+/scripts/parse-sheet.py
+/scripts/panel-credentials.csv
+/scripts/leaders.csv
+*.docx
+test-assignments.js
