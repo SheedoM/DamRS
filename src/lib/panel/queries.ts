@@ -45,7 +45,6 @@ export type PanelProjectDetail = PanelProjectListItem & {
     full_name: string;
     student_id: string;
     national_id: string | null;
-    national_id: string | null;
     program: string | null;
     role_in_team: string;
   }[];
