@@ -14,8 +14,8 @@ import {
   getOwnDiscussionScores,
   getPanelProjectDetail,
 } from "@/lib/panel/queries";
-import { programLabel, projectFileTypeLabel, projectStatusLabel } from "@/lib/i18n/labels";
-import { cn, formatDate, formatFileSize } from "@/lib/utils";
+import { projectFileTypeLabel, projectStatusLabel } from "@/lib/i18n/labels";
+import { cn, formatFileSize } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 

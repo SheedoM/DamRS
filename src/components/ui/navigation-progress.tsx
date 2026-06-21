@@ -126,7 +126,10 @@ export function NavigationProgress() {
   // committed — finish the bar. The effect also runs on mount, which is a
   // harmless no-op since the bar isn't visible yet.
   useEffect(() => {
-    done();
+    const completionTimer = window.setTimeout(() => {
+      done();
+    }, 0);
+    return () => window.clearTimeout(completionTimer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, searchParams]);
 

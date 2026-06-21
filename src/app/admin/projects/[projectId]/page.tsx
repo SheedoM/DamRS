@@ -13,11 +13,10 @@ import { getAdminProjectDetail, getPanelMembers } from "@/lib/admin/queries";
 import { getProjectStudentGrades } from "@/lib/admin/student-grades";
 import {
   panelMemberTypeLabel,
-  programLabel,
   projectFileTypeLabel,
   projectStatusLabel,
 } from "@/lib/i18n/labels";
-import { cn, formatDate, formatFileSize } from "@/lib/utils";
+import { cn, formatFileSize } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 

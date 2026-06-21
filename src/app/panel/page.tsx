@@ -13,7 +13,6 @@ import {
   getPanelProjectReviewBadge,
   type PanelProjectReviewFilter,
 } from "@/lib/panel/panel-projects";
-import { programLabel } from "@/lib/i18n/labels";
 import { cn, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";

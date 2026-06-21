@@ -60,7 +60,6 @@ export function TourController() {
 
   useEffect(() => {
     if (!tourKey) {
-      setHasSteps(false);
       return;
     }
 
@@ -89,7 +88,7 @@ export function TourController() {
     };
   }, [tourKey, runTour]);
 
-  if (!hasSteps) return null;
+  if (!tourKey || !hasSteps) return null;
 
   return (
     <button

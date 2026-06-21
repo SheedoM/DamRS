@@ -36,6 +36,8 @@ const roleOptions = [
   { value: "member", label: "عضو" },
 ];
 
+const blankProgram = "" as ProjectFormInput["team_members"][number]["program"];
+
 const selectClassName =
   "flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
@@ -74,7 +76,7 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
               program: (member.program as ProjectFormInput["team_members"][0]["program"]) || undefined,
               role_in_team: member.role_in_team as "team_leader" | "member",
             }))
-          : [{ full_name: "", student_id: "", national_id: "", program: undefined as any, role_in_team: "team_leader" }],
+          : [{ full_name: "", student_id: "", national_id: "", program: blankProgram, role_in_team: "team_leader" }],
     },
   });
 
@@ -158,7 +160,7 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
             variant="outline"
             disabled={atMemberLimit}
             onClick={() =>
-              append({ full_name: "", student_id: "", national_id: "", program: undefined as any, role_in_team: "member" })
+              append({ full_name: "", student_id: "", national_id: "", program: blankProgram, role_in_team: "member" })
             }
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
