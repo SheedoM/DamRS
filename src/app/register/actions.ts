@@ -59,24 +59,42 @@ export async function registerStudentAction(
     };
   }
 
-  // The university ID must be on the approved roster and not already claimed.
-  const { data: eligible } = await adminClient
-    .from("eligible_students")
-    .select("id, claimed_by, national_id")
+  // Authorization to register comes from one of two sources:
+  //   1. Primary: a pending project the admin pre-created for this university ID
+  //      (team_leader_id still NULL). Sign-up claims it.
+  //   2. Fallback: the eligible_students roster (legacy self-service flow).
+  const { data: pendingProject } = await adminClient
+    .from("projects")
+    .select("id")
     .eq("cycle_id", cycleId)
-    .eq("university_id", parsed.data.student_id)
+    .eq("leader_university_id", parsed.data.student_id)
+    .is("team_leader_id", null)
+    .order("created_at", { ascending: true })
+    .limit(1)
     .maybeSingle();
 
-  if (!eligible) {
-    return { ok: false, message: "الرقم الجامعي غير معتمد للتسجيل. تواصل مع إدارة النظام." };
-  }
+  let rosterEntryId: string | null = null;
+  if (!pendingProject) {
+    const { data: eligible } = await adminClient
+      .from("eligible_students")
+      .select("id, claimed_by, national_id")
+      .eq("cycle_id", cycleId)
+      .eq("university_id", parsed.data.student_id)
+      .maybeSingle();
 
-  if (eligible.claimed_by) {
-    return { ok: false, message: "تم استخدام هذا الرقم الجامعي للتسجيل من قبل." };
-  }
+    if (!eligible) {
+      return { ok: false, message: "الرقم الجامعي غير معتمد للتسجيل. تواصل مع إدارة النظام." };
+    }
 
-  if (rosterNationalIdMismatch(eligible.national_id as string | null, parsed.data.national_id)) {
-    return { ok: false, message: "الرقم القومي لا يطابق بيانات الرقم الجامعي المعتمد." };
+    if (eligible.claimed_by) {
+      return { ok: false, message: "تم استخدام هذا الرقم الجامعي للتسجيل من قبل." };
+    }
+
+    if (rosterNationalIdMismatch(eligible.national_id as string | null, parsed.data.national_id)) {
+      return { ok: false, message: "الرقم القومي لا يطابق بيانات الرقم الجامعي المعتمد." };
+    }
+
+    rosterEntryId = eligible.id as string;
   }
 
   const { data: authUser, error: authError } = await adminClient.auth.admin.createUser(
@@ -86,23 +104,39 @@ export async function registerStudentAction(
   if (authError || !authUser.user) {
     return { ok: false, message: authError?.message || "تعذّر إنشاء الحساب." };
   }
+  const leaderId = authUser.user.id;
 
   const { error: profileError } = await adminClient
     .from("profiles")
-    .insert(buildStudentProfileInsert(authUser.user.id, parsed.data));
+    .insert(buildStudentProfileInsert(leaderId, parsed.data));
 
   if (profileError) {
+    await adminClient.auth.admin.deleteUser(leaderId);
     return { ok: false, message: profileError.message };
   }
 
-  const { error: claimError } = await adminClient
-    .from("eligible_students")
-    .update({ claimed_by: authUser.user.id, claimed_at: nowIso })
-    .eq("id", eligible.id)
-    .is("claimed_by", null);
+  if (pendingProject) {
+    // Claim the pre-created project shell.
+    const { error: claimError } = await adminClient
+      .from("projects")
+      .update({ team_leader_id: leaderId })
+      .eq("id", pendingProject.id)
+      .is("team_leader_id", null);
 
-  if (claimError) {
-    return { ok: false, message: claimError.message };
+    if (claimError) {
+      await adminClient.auth.admin.deleteUser(leaderId);
+      return { ok: false, message: claimError.message };
+    }
+  } else if (rosterEntryId) {
+    const { error: claimError } = await adminClient
+      .from("eligible_students")
+      .update({ claimed_by: leaderId, claimed_at: nowIso })
+      .eq("id", rosterEntryId)
+      .is("claimed_by", null);
+
+    if (claimError) {
+      return { ok: false, message: claimError.message };
+    }
   }
 
   return { ok: true, message: "تم إنشاء حسابك بنجاح. يمكنك الآن تسجيل الدخول." };
