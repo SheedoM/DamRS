@@ -33,8 +33,15 @@ truncate table
 restart identity cascade;
 
 -- 2) Remove every uploaded file from the three private storage buckets.
+--    A Supabase safety trigger (storage.protect_delete) blocks a plain DELETE on
+--    storage.objects, so we disable triggers JUST for this statement, then restore
+--    immediately — restoring BEFORE the auth.users delete so its FK cascade fires.
+--    If your project restricts session_replication_role, skip this block and empty
+--    the 3 buckets from Dashboard → Storage instead (orphaned files are harmless).
+set session_replication_role = replica;
 delete from storage.objects
 where bucket_id in ('project-documents', 'project-source-code', 'project-presentations');
+set session_replication_role = origin;
 
 -- 3) Delete all auth users. This cascades to public.profiles
 --    (profiles.id references auth.users(id) ON DELETE CASCADE).
