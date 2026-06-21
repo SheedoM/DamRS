@@ -19,6 +19,7 @@ export default async function StudentProjectPage() {
 
   return (
     <AppShell title="مشروعي" profile={profile}>
+      <div data-tour="student-project">
       {projectData ? (
         <ProjectSummary {...projectData} />
       ) : (
@@ -42,6 +43,7 @@ export default async function StudentProjectPage() {
           </CardContent>
         </Card>
       )}
+      </div>
     </AppShell>
   );
 }

@@ -16,8 +16,10 @@ export default async function AdminPanelMembersPage() {
   return (
     <AppShell title="أعضاء اللجنة" profile={profile}>
       <div className="space-y-5">
-        <CreatePanelMemberForm />
-        <Card>
+        <div data-tour="panel-members-create">
+          <CreatePanelMemberForm />
+        </div>
+        <Card data-tour="panel-members-list">
           <CardHeader><CardTitle>أعضاء اللجنة الحاليون</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {panelMembers.length > 0 ? panelMembers.map((member) => (

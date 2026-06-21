@@ -20,7 +20,7 @@ export default async function AdminStudentsPage() {
   ]);
 
   const accountsSection = (
-    <Card>
+    <Card data-tour="students-main">
       <CardHeader>
         <CardTitle>حسابات الطلاب</CardTitle>
       </CardHeader>

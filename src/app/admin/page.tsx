@@ -53,17 +53,19 @@ export default async function AdminDashboardPage({
   return (
     <AppShell title="لوحة المسؤول" profile={profile}>
       <div className="space-y-5">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div data-tour="admin-metrics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {cards.map((card) => (
             <DashboardCard key={card.title} {...card} />
           ))}
         </div>
 
         {/* Grading open/close + CSV export */}
-        <GradingControl isOpen={gradingWindow?.is_open ?? false} />
+        <div data-tour="admin-grading">
+          <GradingControl isOpen={gradingWindow?.is_open ?? false} />
+        </div>
 
         {/* Submission window */}
-        <Card>
+        <Card data-tour="admin-submission">
           <CardHeader className="flex flex-row items-start justify-between gap-4">
             <div>
               <CardTitle>نافذة التسليم</CardTitle>
@@ -104,7 +106,7 @@ export default async function AdminDashboardPage({
         ) : null}
 
         {/* Settings */}
-        <Card>
+        <Card data-tour="admin-settings">
           <CardHeader>
             <CardTitle>إعدادات المشاريع</CardTitle>
           </CardHeader>

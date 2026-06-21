@@ -31,11 +31,12 @@ export default async function AdminProjectsPage({
     <AppShell title="المشاريع" profile={profile}>
       <div className="space-y-4">
         <div className="flex justify-end">
-          <Link href="/admin/projects/new" className={cn(buttonVariants({ size: "sm" }))}>
+          <Link href="/admin/projects/new" data-tour="admin-projects-create" className={cn(buttonVariants({ size: "sm" }))}>
             <Plus className="h-4 w-4" aria-hidden="true" />
             إنشاء مشروع
           </Link>
         </div>
+        <div data-tour="admin-projects-table">
         <AdminProjectsTable
           projects={projects}
           panelMembers={panelMembers}
@@ -46,6 +47,7 @@ export default async function AdminProjectsPage({
             submission: params.submission,
           }}
         />
+        </div>
       </div>
     </AppShell>
   );

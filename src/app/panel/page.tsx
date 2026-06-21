@@ -46,14 +46,14 @@ export default async function PanelHomePage({
           <Alert>باب التقييم مغلق حاليًا. لا يمكنك إدخال الدرجات حتى يفتحه المسؤول.</Alert>
         ) : null}
 
-        <Card>
+        <Card data-tour="panel-assigned">
           <CardHeader>
             <CardTitle>
               المشاريع المسندة إليك ({stats.assignedProjects}) · بانتظار التقييم ({stats.pendingProjects})
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2 mb-4 border-b border-slate-200 pb-4">
+            <div data-tour="panel-filters" className="flex flex-wrap items-center gap-2 mb-4 border-b border-slate-200 pb-4">
               <Link href="/panel" className={cn(buttonVariants({ variant: reviewFilter === "all" ? "default" : "ghost", size: "sm" }))}>الكل</Link>
               <Link href="/panel?review=pending" className={cn(buttonVariants({ variant: reviewFilter === "pending" ? "default" : "ghost", size: "sm" }))}>بانتظار التقييم</Link>
               <Link href="/panel?review=graded" className={cn(buttonVariants({ variant: reviewFilter === "graded" ? "default" : "ghost", size: "sm" }))}>تم التقييم</Link>

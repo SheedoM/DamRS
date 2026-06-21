@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Cairo } from "next/font/google";
 import "./globals.css";
 
+import { TourController } from "@/components/tour/tour-controller";
+
 const cairo = Cairo({
   variable: "--font-geist-sans",
   subsets: ["arabic", "latin"],
@@ -33,7 +35,10 @@ export default function RootLayout({
       dir="rtl"
       className={`${cairo.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {children}
+        <TourController />
+      </body>
     </html>
   );
 }

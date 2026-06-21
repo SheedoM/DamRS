@@ -20,7 +20,7 @@ export default async function PanelSettingsPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
+        <Card data-tour="panel-password">
           <CardHeader>
             <CardTitle>تغيير كلمة المرور</CardTitle>
             <p className="text-sm text-slate-500">
@@ -32,7 +32,7 @@ export default async function PanelSettingsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-tour="panel-account">
           <CardHeader>
             <CardTitle>معلومات الحساب</CardTitle>
           </CardHeader>

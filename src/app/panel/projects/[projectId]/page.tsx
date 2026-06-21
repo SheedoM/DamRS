@@ -41,7 +41,7 @@ export default async function PanelProjectDetailPage({
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
           العودة إلى المشاريع
         </Link>
-        <Card>
+        <Card data-tour="panel-project-info">
           <CardHeader className="flex flex-row items-start justify-between gap-4">
             <div>
               <CardTitle>المشروع المُسند</CardTitle>
@@ -69,7 +69,7 @@ export default async function PanelProjectDetailPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-tour="panel-files">
           <CardHeader><CardTitle>الملفات المرفوعة</CardTitle></CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             {project.files.length > 0 ? project.files.map((file) => (
@@ -93,7 +93,7 @@ export default async function PanelProjectDetailPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-tour="panel-discussion">
           <CardHeader>
             <CardTitle>أعضاء الفريق وتقييم المناقشة</CardTitle>
           </CardHeader>

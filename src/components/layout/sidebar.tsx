@@ -48,7 +48,7 @@ export function Sidebar({ role }: SidebarProps) {
           <p className="text-xs font-medium text-slate-700">نظام دمياط لمراجعة المشاريع</p>
         </div>
       </div>
-      <nav aria-label="التنقل الرئيسي" className="flex-1 space-y-1 px-3 py-4">
+      <nav data-tour="nav" aria-label="التنقل الرئيسي" className="flex-1 space-y-1 px-3 py-4">
         {navigationByRole[role].map(({ href, label, icon: Icon }) => (
           <NavLink key={href} href={href} label={label}>
             <Icon className="h-4 w-4" aria-hidden="true" />

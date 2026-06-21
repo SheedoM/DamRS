@@ -27,3 +27,24 @@ body {
   background: var(--brand-yellow);
   color: var(--brand-navy);
 }
+
+/* Onboarding tour (driver.js) — RTL/Arabic popover tweaks */
+.driver-popover.damrs-tour {
+  direction: rtl;
+  text-align: right;
+  font-family: var(--font-geist-sans), "Segoe UI", Tahoma, Arial, sans-serif;
+  max-width: 320px;
+}
+
+.driver-popover.damrs-tour .driver-popover-title {
+  font-weight: 700;
+  color: var(--brand-navy);
+}
+
+.driver-popover.damrs-tour .driver-popover-progress-text {
+  color: #64748b;
+}
+
+.driver-popover.damrs-tour .driver-popover-navigation-btns {
+  flex-direction: row-reverse;
+}

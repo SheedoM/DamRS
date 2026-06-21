@@ -47,7 +47,7 @@ export default async function AdminProjectDetailPage({
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
           العودة إلى المشاريع
         </Link>
-        <Card>
+        <Card data-tour="project-info">
           <CardHeader className="flex flex-row items-start justify-between gap-4">
             <div>
               <CardTitle>المشروع</CardTitle>
@@ -70,7 +70,7 @@ export default async function AdminProjectDetailPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-tour="project-files">
           <CardHeader><CardTitle>الملفات المرفوعة</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {project.files.length > 0 ? project.files.map((file) => (
@@ -95,7 +95,7 @@ export default async function AdminProjectDetailPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-tour="project-assignments">
           <CardHeader><CardTitle>أعضاء اللجنة</CardTitle></CardHeader>
           <CardContent className="space-y-5">
             <div className="space-y-3">
@@ -119,7 +119,7 @@ export default async function AdminProjectDetailPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-tour="project-grades">
           <CardHeader><CardTitle>درجات الطلاب</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-slate-500">
