@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CheckCircle2, ExternalLink, FileText } from "lucide-react";
 
 import { FileUploadForm } from "./file-upload-form";
+import { CompetitionUploadForm } from "./competition-upload-form";
 import { SubmitProjectForm } from "./submit-project-form";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -52,11 +53,14 @@ export function ProjectSummary({ project, teamMembers, files, uploadedBy }: Proj
   const canEdit = project.status === "draft";
   const isSubmitted = project.status !== "draft";
 
-  // Latest uploaded file per type, to show inline next to each upload slot.
+  // Latest uploaded file per required type, to show inline next to each slot.
   const fileByType = new Map<string, ProjectFile>();
   for (const file of files) {
-    if (!fileByType.has(file.file_type)) fileByType.set(file.file_type, file);
+    if (file.file_type !== "competition_proof" && !fileByType.has(file.file_type)) {
+      fileByType.set(file.file_type, file);
+    }
   }
+  const competitionFiles = files.filter((file) => file.file_type === "competition_proof");
 
   // Before the core details are filled, the action is "complete", not "edit".
   const needsDetails =
@@ -107,8 +111,6 @@ export function ProjectSummary({ project, teamMembers, files, uploadedBy }: Proj
           <div className="grid gap-3 text-sm sm:grid-cols-2">
             <p><span className="font-medium text-slate-900">المشرف:</span> {project.supervisor_name}</p>
             <p><span className="font-medium text-slate-900">التقنيات:</span> {project.technologies_used || "غير محددة"}</p>
-            <p><span className="font-medium text-slate-900">GitHub:</span> {project.github_url ? <a className="text-[var(--brand-blue)]" href={project.github_url} target="_blank" rel="noreferrer">فتح المستودع</a> : "غير متوفر"}</p>
-            <p><span className="font-medium text-slate-900">الفيديو:</span> {project.demo_video_url ? <a className="inline-flex items-center gap-1 text-[var(--brand-blue)]" href={project.demo_video_url} target="_blank" rel="noreferrer">فتح العرض <ExternalLink className="h-3 w-3" /></a> : "غير متوفر"}</p>
           </div>
           <div className="flex flex-wrap gap-3">
             {canEdit ? (
@@ -127,22 +129,50 @@ export function ProjectSummary({ project, teamMembers, files, uploadedBy }: Proj
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {teamMembers.map((member) => (
-                <div key={member.id} className="rounded-md border border-slate-200 p-3">
-                  <p className="font-medium text-slate-950">{member.full_name}</p>
-                  <p className="text-sm text-slate-500">{member.student_id} - {member.role_in_team}</p>
-                  {member.program ? <p className="text-sm text-slate-500">{programLabel(member.program)}</p> : null}
-                </div>
-              ))}
+              {teamMembers.map((member) => {
+                const isLeader = member.role_in_team === "team_leader";
+                return (
+                  <div
+                    key={member.id}
+                    className={cn(
+                      "rounded-md border p-3",
+                      isLeader ? "border-[var(--brand-blue)] bg-blue-50/50" : "border-slate-200",
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-medium text-slate-950">{member.full_name}</p>
+                      {isLeader ? <Badge tone="info">قائد الفريق</Badge> : null}
+                    </div>
+                    <p className="text-sm text-slate-500">{member.student_id}</p>
+                    {member.program ? <p className="text-sm text-slate-500">{programLabel(member.program)}</p> : null}
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>ملفات المشروع</CardTitle>
+            <CardTitle>ملفات المشروع والوسائط</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="grid gap-3 rounded-md border border-slate-200 p-4 text-sm sm:grid-cols-2">
+              <p>
+                <span className="font-medium text-slate-900">رابط GitHub:</span>{" "}
+                {project.github_url ? (
+                  <a className="text-[var(--brand-blue)]" href={project.github_url} target="_blank" rel="noreferrer">فتح المستودع</a>
+                ) : "غير متوفر"}
+              </p>
+              <p>
+                <span className="font-medium text-slate-900">فيديو العرض:</span>{" "}
+                {project.demo_video_url ? (
+                  <a className="inline-flex items-center gap-1 text-[var(--brand-blue)]" href={project.demo_video_url} target="_blank" rel="noreferrer">
+                    فتح العرض <ExternalLink className="h-3 w-3" />
+                  </a>
+                ) : "غير متوفر"}
+              </p>
+            </div>
             {canEdit
               ? requiredUploads.map((upload) => (
                   <FileUploadForm
@@ -183,6 +213,13 @@ export function ProjectSummary({ project, teamMembers, files, uploadedBy }: Proj
                     </div>
                   );
                 })}
+            <CompetitionUploadForm
+              projectId={project.id}
+              cycleId={project.cycle_id}
+              uploadedBy={uploadedBy}
+              files={competitionFiles}
+              canEdit={canEdit}
+            />
           </CardContent>
         </Card>
       </div>

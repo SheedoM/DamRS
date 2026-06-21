@@ -6,16 +6,21 @@ export const bucketByFileType: Record<RequiredProjectFileType, string> = {
   presentation_file: "project-presentations",
 };
 
+// Competition-proof PDFs live in the documents bucket (PDF-only).
+export const COMPETITION_BUCKET = "project-documents";
+
+const allBucketsByFileType: Record<string, string> = {
+  ...bucketByFileType,
+  competition_proof: COMPETITION_BUCKET,
+};
+
 export function getBucketForFileType(fileType: RequiredProjectFileType) {
   return bucketByFileType[fileType];
 }
 
 export function getBucketForProjectFileType(fileType: unknown) {
   if (typeof fileType !== "string") return null;
-
-  return Object.hasOwn(bucketByFileType, fileType)
-    ? bucketByFileType[fileType as RequiredProjectFileType]
-    : null;
+  return allBucketsByFileType[fileType] ?? null;
 }
 
 export const SIGNED_FILE_URL_EXPIRES_IN_SECONDS = 60 * 60;

@@ -31,6 +31,7 @@ export type ProjectFile = {
   id: string;
   file_type: string;
   file_name: string;
+  note: string | null;
   storage_path: string;
   file_size: number;
   mime_type: string;
@@ -83,7 +84,7 @@ export async function getStudentProject(teamLeaderId: string) {
       .order("created_at", { ascending: true }),
     supabase
       .from("project_files")
-      .select("id, file_type, file_name, storage_path, file_size, mime_type, created_at")
+      .select("id, file_type, file_name, note, storage_path, file_size, mime_type, created_at")
       .eq("project_id", project.id)
       .order("created_at", { ascending: false }),
   ]);
