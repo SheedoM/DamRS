@@ -1,33 +1,23 @@
 "use server";
 
-import { z } from "zod";
-
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions";
-
-const registerSchema = z.object({
-  full_name: z.string().trim().min(2, "الاسم الكامل مطلوب."),
-  email: z.string().trim().email("بريد إلكتروني غير صالح."),
-  password: z.string().min(8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل."),
-  student_id: z.string().trim().min(3, "الرقم الجامعي مطلوب."),
-  national_id: z.string().trim().regex(/^\d{14}$/, "الرقم القومي يجب أن يتكون من 14 رقمًا."),
-});
+import {
+  buildStudentAuthCredentials,
+  buildStudentProfileInsert,
+  parseStudentRegistrationForm,
+  rosterNationalIdMismatch,
+} from "./registration";
 
 export async function registerStudentAction(
   _previousState: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
-  const parsed = registerSchema.safeParse({
-    full_name: formData.get("full_name"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-    student_id: formData.get("student_id"),
-    national_id: formData.get("national_id"),
-  });
+  const parsed = parseStudentRegistrationForm(formData);
 
-  if (!parsed.success) {
-    return { ok: false, message: parsed.error.issues[0]?.message || "بيانات التسجيل غير صالحة." };
+  if (!parsed.ok) {
+    return { ok: false, message: parsed.message };
   }
 
   const supabase = await createSupabaseServerClient();
@@ -72,7 +62,7 @@ export async function registerStudentAction(
   // The university ID must be on the approved roster and not already claimed.
   const { data: eligible } = await adminClient
     .from("eligible_students")
-    .select("id, claimed_by")
+    .select("id, claimed_by, national_id")
     .eq("cycle_id", cycleId)
     .eq("university_id", parsed.data.student_id)
     .maybeSingle();
@@ -85,25 +75,21 @@ export async function registerStudentAction(
     return { ok: false, message: "تم استخدام هذا الرقم الجامعي للتسجيل من قبل." };
   }
 
-  const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
-    email: parsed.data.email,
-    password: parsed.data.password,
-    email_confirm: true,
-    user_metadata: { full_name: parsed.data.full_name, role: "student" },
-  });
+  if (rosterNationalIdMismatch(eligible.national_id as string | null, parsed.data.national_id)) {
+    return { ok: false, message: "الرقم القومي لا يطابق بيانات الرقم الجامعي المعتمد." };
+  }
+
+  const { data: authUser, error: authError } = await adminClient.auth.admin.createUser(
+    buildStudentAuthCredentials(parsed.data),
+  );
 
   if (authError || !authUser.user) {
     return { ok: false, message: authError?.message || "تعذّر إنشاء الحساب." };
   }
 
-  const { error: profileError } = await adminClient.from("profiles").insert({
-    id: authUser.user.id,
-    full_name: parsed.data.full_name,
-    email: parsed.data.email,
-    role: "student",
-    student_id: parsed.data.student_id,
-    national_id: parsed.data.national_id,
-  });
+  const { error: profileError } = await adminClient
+    .from("profiles")
+    .insert(buildStudentProfileInsert(authUser.user.id, parsed.data));
 
   if (profileError) {
     return { ok: false, message: profileError.message };
