@@ -47,6 +47,7 @@ dev-server.err.log
 # confidential roster data + import tooling (kept local only, never commit)
 /scripts/sheet-data.json
 /scripts/seed-from-sheet.mjs
+/scripts/export-panel-credentials.mjs
 /scripts/parse-sheet.py
 /scripts/panel-credentials.csv
 /scripts/leaders.csv
