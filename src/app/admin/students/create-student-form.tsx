@@ -48,6 +48,7 @@ export function CreateStudentForm() {
               <Label htmlFor="national_id">الرقم القومي (يُستخدم كلمة مرور)</Label>
               <Input id="national_id" name="national_id" inputMode="numeric" maxLength={14} required />
               <p className="text-xs text-slate-500">سيتمكن الطالب من تسجيل الدخول باستخدام رقمه الجامعي والرقم القومي.</p>
+            </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="program">البرنامج</Label>
               <select

@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { requireRole } from "@/lib/auth/require-role";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UpdatePasswordForm } from "./update-password-form";
 
 export const metadata: Metadata = {
@@ -23,9 +23,9 @@ export default async function PanelSettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>تغيير كلمة المرور</CardTitle>
-            <CardDescription>
+            <p className="text-sm text-slate-500">
               قم بتحديث كلمة المرور الخاصة بك. بمجرد التغيير، سيتم إخفاء كلمة المرور المؤقتة عن المشرفين.
-            </CardDescription>
+            </p>
           </CardHeader>
           <CardContent>
             <UpdatePasswordForm />
