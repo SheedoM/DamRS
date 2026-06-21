@@ -15,7 +15,7 @@ export default async function AdminProjectsPage({
 }: {
   searchParams: Promise<{
     assignment?: string;
-    review?: string;
+    grading?: string;
     status?: string;
     submission?: string;
   }>;
@@ -41,7 +41,7 @@ export default async function AdminProjectsPage({
           panelMembers={panelMembers}
           initialFilters={{
             assignmentStatus: params.assignment,
-            reviewStatus: params.review,
+            gradingStatus: params.grading,
             status: params.status,
             submission: params.submission,
           }}

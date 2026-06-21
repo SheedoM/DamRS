@@ -39,10 +39,7 @@ export default async function AdminDashboardPage({
   const incompleteCount = projects.filter((project) => project.status === "draft").length;
   const unassignedCount = projects.filter((project) => project.active_assignment_count === 0).length;
   const assignedCount = projects.filter((project) => project.active_assignment_count > 0).length;
-  const finalCompleteCount = projects.filter(
-    (project) => project.required_review_count > 0
-      && project.completed_final_review_count === project.required_review_count,
-  ).length;
+  const fullyGradedCount = projects.filter((project) => project.grading_status === "graded").length;
 
   const cards = [
     { title: "إجمالي المشاريع", value: String(projects.length), detail: "جميع المشاريع المرئية للمسؤول.", icon: Files, href: "/admin/projects" },
@@ -50,7 +47,7 @@ export default async function AdminDashboardPage({
     { title: "غير المكتملة", value: String(incompleteCount), detail: "مشاريع مسودة لم تُسلَّم بعد.", icon: FileWarning, href: "/admin/projects?submission=draft" },
     { title: "غير المُسندة", value: String(unassignedCount), detail: "مشاريع بدون إسناد لجنة فعّال.", icon: Users, href: "/admin/projects?assignment=unassigned" },
     { title: "المُسندة", value: String(assignedCount), detail: "مشاريع بها عضو لجنة فعّال على الأقل.", icon: ClipboardCheck, href: "/admin/projects?assignment=assigned" },
-    { title: "المراجعات النهائية", value: String(finalCompleteCount), detail: "مشاريع اكتملت درجاتها النهائية.", icon: UserCheck, href: "/admin/projects?review=final-complete" },
+    { title: "مكتملة التقييم", value: String(fullyGradedCount), detail: "مشاريع اكتمل تقييم المناقشة والإشراف لكل طلابها.", icon: UserCheck, href: "/admin/projects?grading=graded" },
   ];
 
   return (

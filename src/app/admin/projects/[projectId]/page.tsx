@@ -9,7 +9,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppShell } from "@/components/layout/app-shell";
 import { requireRole } from "@/lib/auth/require-role";
-import { getAdminProjectDetail, getAdminProjects, getPanelMembers } from "@/lib/admin/queries";
+import { getAdminProjectDetail, getPanelMembers } from "@/lib/admin/queries";
 import { getProjectStudentGrades } from "@/lib/admin/student-grades";
 import {
   panelMemberTypeLabel,
@@ -28,10 +28,9 @@ export default async function AdminProjectDetailPage({
 }) {
   const { profile } = await requireRole(["admin"]);
   const { projectId } = await params;
-  const [project, panelMembers, projects, studentGrades] = await Promise.all([
+  const [project, panelMembers, studentGrades] = await Promise.all([
     getAdminProjectDetail(projectId),
     getPanelMembers(),
-    getAdminProjects(),
     getProjectStudentGrades(projectId),
   ]);
 
@@ -116,7 +115,7 @@ export default async function AdminProjectDetailPage({
                 <p className="text-sm text-slate-500">لا توجد إسنادات لجنة بعد.</p>
               )}
             </div>
-            <AssignPanelMemberForm projects={projects} panelMembers={panelMembers} projectId={project.id} />
+            <AssignPanelMemberForm panelMembers={panelMembers} projectId={project.id} />
           </CardContent>
         </Card>
 

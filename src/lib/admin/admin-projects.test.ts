@@ -3,62 +3,35 @@ import { describe, expect, it } from "vitest";
 import {
   filterAdminProjects,
   getAssignmentStatus,
+  getGradingProgress,
   type AdminProjectRow,
 } from "./admin-projects";
 
-const projects: AdminProjectRow[] = [
-  {
-    id: "p1",
-    title: "Vision Attendance",
+function makeProject(overrides: Partial<AdminProjectRow>): AdminProjectRow {
+  return {
+    id: "p",
+    title: "Project",
     status: "submitted",
     department: "Computer Science",
-    supervisor_name: "Dr. A",
-    team_leader_name: "Student A",
+    supervisor_name: "Dr. X",
+    team_leader_name: "Student X",
     active_assignment_count: 0,
-    required_review_count: 0,
-    completed_draft_review_count: 0,
-    completed_final_review_count: 0,
+    team_member_count: 0,
+    discussion_required_count: 0,
+    discussion_completed_count: 0,
+    supervision_required_count: 0,
+    supervision_completed_count: 0,
+    grading_status: "not_graded",
     submitted_at: "2026-06-01T10:00:00.000Z",
-  },
-  {
-    id: "p2",
-    title: "Secure Archive",
-    status: "assigned",
-    department: "Information Systems",
-    supervisor_name: "Dr. B",
-    team_leader_name: "Student B",
-    active_assignment_count: 2,
-    required_review_count: 2,
-    completed_draft_review_count: 2,
-    completed_final_review_count: 2,
-    submitted_at: "2026-06-02T10:00:00.000Z",
-  },
-  {
-    id: "p3",
-    title: "IoT Locker",
-    status: "assigned",
-    department: "Computer Science",
-    supervisor_name: "Dr. C",
-    team_leader_name: "Student C",
-    active_assignment_count: 2,
-    required_review_count: 2,
-    completed_draft_review_count: 1,
-    completed_final_review_count: 1,
-    submitted_at: "2026-06-03T10:00:00.000Z",
-  },
-  {
-    id: "p4",
-    title: "Draft Assistant",
-    status: "draft",
-    department: "Artificial Intelligence",
-    supervisor_name: "Dr. D",
-    team_leader_name: "Student D",
-    active_assignment_count: 0,
-    required_review_count: 0,
-    completed_draft_review_count: 0,
-    completed_final_review_count: 0,
-    submitted_at: null,
-  },
+    ...overrides,
+  };
+}
+
+const projects: AdminProjectRow[] = [
+  makeProject({ id: "p1", title: "Vision Attendance", status: "submitted", department: "Computer Science", supervisor_name: "Dr. A", active_assignment_count: 0, grading_status: "not_graded" }),
+  makeProject({ id: "p2", title: "Secure Archive", status: "assigned", department: "Information Systems", supervisor_name: "Dr. B", active_assignment_count: 2, grading_status: "graded" }),
+  makeProject({ id: "p3", title: "IoT Locker", status: "assigned", department: "Computer Science", supervisor_name: "Dr. C", active_assignment_count: 2, grading_status: "partial" }),
+  makeProject({ id: "p4", title: "Draft Assistant", status: "draft", department: "Artificial Intelligence", supervisor_name: "Dr. D", active_assignment_count: 0, grading_status: "not_graded", submitted_at: null }),
 ];
 
 describe("admin project helpers", () => {
@@ -75,15 +48,61 @@ describe("admin project helpers", () => {
     expect(filterAdminProjects(projects, { assignmentStatus: "assigned" })).toEqual([projects[1], projects[2]]);
   });
 
-  it("filters dashboard routes by submission and review status", () => {
+  it("filters by submission and grading status", () => {
     expect(filterAdminProjects(projects, { submission: "submitted" })).toEqual([
       projects[0],
       projects[1],
       projects[2],
     ]);
     expect(filterAdminProjects(projects, { submission: "draft" })).toEqual([projects[3]]);
-    expect(filterAdminProjects(projects, { reviewStatus: "final-complete" })).toEqual([projects[1]]);
-    expect(filterAdminProjects(projects, { reviewStatus: "final-pending" })).toEqual([projects[2]]);
-    expect(filterAdminProjects(projects, { reviewStatus: "draft-pending" })).toEqual([projects[2]]);
+    expect(filterAdminProjects(projects, { gradingStatus: "graded" })).toEqual([projects[1]]);
+    expect(filterAdminProjects(projects, { gradingStatus: "partial" })).toEqual([projects[2]]);
+    expect(filterAdminProjects(projects, { gradingStatus: "not-graded" })).toEqual([projects[0], projects[3]]);
+  });
+});
+
+describe("getGradingProgress", () => {
+  it("is not_graded when nothing has been entered", () => {
+    expect(
+      getGradingProgress({
+        discussion_required_count: 6,
+        discussion_completed_count: 0,
+        supervision_required_count: 2,
+        supervision_completed_count: 0,
+      }),
+    ).toBe("not_graded");
+  });
+
+  it("is graded only when discussion and supervision are both complete", () => {
+    expect(
+      getGradingProgress({
+        discussion_required_count: 6,
+        discussion_completed_count: 6,
+        supervision_required_count: 2,
+        supervision_completed_count: 2,
+      }),
+    ).toBe("graded");
+  });
+
+  it("is partial when discussion is done but supervision is missing", () => {
+    expect(
+      getGradingProgress({
+        discussion_required_count: 6,
+        discussion_completed_count: 6,
+        supervision_required_count: 2,
+        supervision_completed_count: 1,
+      }),
+    ).toBe("partial");
+  });
+
+  it("is partial when some scores exist but discussion is incomplete", () => {
+    expect(
+      getGradingProgress({
+        discussion_required_count: 6,
+        discussion_completed_count: 3,
+        supervision_required_count: 2,
+        supervision_completed_count: 2,
+      }),
+    ).toBe("partial");
   });
 });

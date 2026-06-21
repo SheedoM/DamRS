@@ -56,9 +56,10 @@ export const projectStatusLabels: Record<string, string> = {
   completed: "مكتمل",
 };
 
-export const reviewStatusLabels: Record<string, string> = {
-  draft_reviewed: "مراجعة مبدئية",
-  final_reviewed: "مراجعة نهائية",
+export const gradingStatusLabels: Record<string, string> = {
+  not_graded: "لم يُقيَّم",
+  partial: "قيد التقييم",
+  graded: "مكتمل التقييم",
 };
 
 export const projectFileTypeLabels: Record<string, string> = {
@@ -91,4 +92,9 @@ export function projectStatusLabel(value: string | null | undefined): string {
 export function projectFileTypeLabel(value: string | null | undefined): string {
   if (!value) return "—";
   return projectFileTypeLabels[value] ?? value;
+}
+
+export function gradingStatusLabel(value: string | null | undefined): string {
+  if (!value) return "—";
+  return gradingStatusLabels[value] ?? value;
 }

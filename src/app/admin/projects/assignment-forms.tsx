@@ -13,11 +13,11 @@ import { useAutoClearMessage } from "@/hooks/use-auto-clear-message";
 const initialState = { ok: true, message: "" };
 
 export function AssignPanelMemberForm({
-  projects,
+  projects = [],
   panelMembers,
   projectId,
 }: {
-  projects: AdminProjectRow[];
+  projects?: AdminProjectRow[];
   panelMembers: PanelMember[];
   projectId?: string;
 }) {

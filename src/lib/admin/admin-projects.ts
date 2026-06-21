@@ -1,6 +1,10 @@
 export type AssignmentStatus = "assigned" | "unassigned";
 export type SubmissionFilter = "all" | "submitted" | "draft";
-export type AdminReviewFilter = "all" | "final-complete" | "final-pending" | "draft-pending";
+
+// Grading progress derived from the per-student model (student_discussion_scores
+// + student_supervision_grades). Replaces the legacy reviews-based status.
+export type GradingProgress = "not_graded" | "partial" | "graded";
+export type GradingFilter = "all" | "graded" | "partial" | "not-graded";
 
 export type AdminProjectRow = {
   id: string;
@@ -10,9 +14,14 @@ export type AdminProjectRow = {
   supervisor_name: string;
   team_leader_name: string;
   active_assignment_count: number;
-  required_review_count: number;
-  completed_draft_review_count: number;
-  completed_final_review_count: number;
+  team_member_count: number;
+  // Discussion: one score per (active evaluator × team member).
+  discussion_required_count: number;
+  discussion_completed_count: number;
+  // Supervision: one admin-entered grade per team member.
+  supervision_required_count: number;
+  supervision_completed_count: number;
+  grading_status: GradingProgress;
   submitted_at: string | null;
 };
 
@@ -22,19 +31,48 @@ export type AdminProjectFilters = {
   department?: string;
   supervisor?: string;
   assignmentStatus?: AssignmentStatus | "all";
-  reviewStatus?: AdminReviewFilter;
+  gradingStatus?: GradingFilter;
 };
 
 export function getAssignmentStatus(activeAssignmentCount: number): AssignmentStatus {
   return activeAssignmentCount > 0 ? "assigned" : "unassigned";
 }
 
-export function getAdminReviewStatus(project: AdminProjectRow): Exclude<AdminReviewFilter, "all"> | "none" {
-  if (project.required_review_count === 0) return "none";
-  if (project.completed_final_review_count === project.required_review_count) return "final-complete";
-  if (project.completed_draft_review_count < project.required_review_count) return "draft-pending";
-  return "final-pending";
+export type GradingCounts = {
+  discussion_required_count: number;
+  discussion_completed_count: number;
+  supervision_required_count: number;
+  supervision_completed_count: number;
+};
+
+// A project is "graded" only when every active evaluator has scored every
+// student AND every student has an admin-entered supervision grade. Any progress
+// short of that (but more than nothing) is "partial".
+export function getGradingProgress(counts: GradingCounts): GradingProgress {
+  const {
+    discussion_required_count,
+    discussion_completed_count,
+    supervision_required_count,
+    supervision_completed_count,
+  } = counts;
+
+  if (discussion_completed_count === 0 && supervision_completed_count === 0) {
+    return "not_graded";
+  }
+
+  const discussionComplete =
+    discussion_required_count > 0 && discussion_completed_count >= discussion_required_count;
+  const supervisionComplete =
+    supervision_required_count > 0 && supervision_completed_count >= supervision_required_count;
+
+  return discussionComplete && supervisionComplete ? "graded" : "partial";
 }
+
+const gradingFilterToStatus: Record<Exclude<GradingFilter, "all">, GradingProgress> = {
+  graded: "graded",
+  partial: "partial",
+  "not-graded": "not_graded",
+};
 
 function includesNormalized(value: string, query?: string) {
   if (!query) return true;
@@ -58,21 +96,12 @@ export function filterAdminProjects(
     ) {
       return false;
     }
-    if (filters.reviewStatus && filters.reviewStatus !== "all") {
-      if (filters.reviewStatus === "final-complete") {
-        return project.required_review_count > 0
-          && project.completed_final_review_count === project.required_review_count;
-      }
-
-      if (filters.reviewStatus === "final-pending") {
-        return project.required_review_count > 0
-          && project.completed_final_review_count < project.required_review_count;
-      }
-
-      if (filters.reviewStatus === "draft-pending") {
-        return project.required_review_count > 0
-          && project.completed_draft_review_count < project.required_review_count;
-      }
+    if (
+      filters.gradingStatus &&
+      filters.gradingStatus !== "all" &&
+      project.grading_status !== gradingFilterToStatus[filters.gradingStatus]
+    ) {
+      return false;
     }
 
     return true;

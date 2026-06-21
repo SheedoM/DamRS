@@ -23,13 +23,13 @@ import {
   filterAdminProjects,
   getAssignmentStatus,
   type AdminProjectRow,
-  type AdminReviewFilter,
+  type GradingFilter,
   type AssignmentStatus,
   type SubmissionFilter,
 } from "@/lib/admin/admin-projects";
 import { BulkAssignForm } from "./bulk-assign-form";
 import type { PanelMember } from "@/lib/admin/queries";
-import { programLabel, projectStatusLabel } from "@/lib/i18n/labels";
+import { gradingStatusLabel, projectStatusLabel } from "@/lib/i18n/labels";
 import { cn } from "@/lib/utils";
 
 const assignmentStatusLabels: Record<AssignmentStatus, string> = {
@@ -84,15 +84,15 @@ const columns = [
       </Badge>
     ),
   }),
-  columnHelper.display({
-    id: "reviews",
-    header: "المراجعات",
+  columnHelper.accessor("grading_status", {
+    id: "grading",
+    header: "التقييم",
     enableSorting: true,
-    cell: (info) => (
-      <span className="text-sm text-slate-600">
-        {info.row.original.completed_final_review_count} / {info.row.original.required_review_count} نهائية
-      </span>
-    ),
+    cell: (info) => {
+      const status = info.getValue();
+      const tone = status === "graded" ? "success" : status === "partial" ? "warning" : "neutral";
+      return <Badge tone={tone}>{gradingStatusLabel(status)}</Badge>;
+    },
   }),
   columnHelper.display({
     id: "actions",
@@ -116,8 +116,8 @@ function normalizeAssignment(value?: string): AssignmentStatus | "all" {
   return value === "assigned" || value === "unassigned" ? value : "all";
 }
 
-function normalizeReview(value?: string): AdminReviewFilter {
-  return value === "final-complete" || value === "final-pending" || value === "draft-pending" ? value : "all";
+function normalizeGrading(value?: string): GradingFilter {
+  return value === "graded" || value === "partial" || value === "not-graded" ? value : "all";
 }
 
 export function AdminProjectsTable({
@@ -129,7 +129,7 @@ export function AdminProjectsTable({
   panelMembers: PanelMember[];
   initialFilters?: {
     assignmentStatus?: string;
-    reviewStatus?: string;
+    gradingStatus?: string;
     status?: string;
     submission?: string;
   };
@@ -138,7 +138,7 @@ export function AdminProjectsTable({
   const [status, setStatus] = useState(initialFilters.status || "");
   const [submission, setSubmission] = useState<SubmissionFilter>(normalizeSubmission(initialFilters.submission));
   const [assignment, setAssignment] = useState<AssignmentStatus | "all">(normalizeAssignment(initialFilters.assignmentStatus));
-  const [review, setReview] = useState<AdminReviewFilter>(normalizeReview(initialFilters.reviewStatus));
+  const [grading, setGrading] = useState<GradingFilter>(normalizeGrading(initialFilters.gradingStatus));
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
 
@@ -147,9 +147,9 @@ export function AdminProjectsTable({
       status: status || undefined,
       submission,
       assignmentStatus: assignment,
-      reviewStatus: review,
+      gradingStatus: grading,
     });
-  }, [assignment, projects, review, status, submission]);
+  }, [assignment, projects, grading, status, submission]);
 
   const table = useReactTable({
     data: filteredProjects,
@@ -205,14 +205,14 @@ export function AdminProjectsTable({
           <option value="unassigned">غير مُسند</option>
         </select>
         <select
-          value={review}
-          onChange={(event) => setReview(normalizeReview(event.target.value))}
+          value={grading}
+          onChange={(event) => setGrading(normalizeGrading(event.target.value))}
           className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
         >
-          <option value="all">كل المراجعات</option>
-          <option value="final-complete">النهائية مكتملة</option>
-          <option value="final-pending">النهائية معلّقة</option>
-          <option value="draft-pending">المبدئية معلّقة</option>
+          <option value="all">كل حالات التقييم</option>
+          <option value="graded">مكتمل التقييم</option>
+          <option value="partial">قيد التقييم</option>
+          <option value="not-graded">لم يُقيَّم</option>
         </select>
       </div>
 
