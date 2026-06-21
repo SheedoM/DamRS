@@ -102,7 +102,7 @@ export async function getPanelProjects(panelMemberId: string) {
   const { data } = await supabase
     .from("panel_assignments")
     .select(
-      "id, project_id, assigned_at, projects!inner(id, title, status, supervisor_name, submitted_at, profiles!projects_team_leader_id_fkey(full_name))",
+      "id, project_id, assigned_at, projects(id, title, status, supervisor_name, submitted_at, profiles!projects_team_leader_id_fkey(full_name))",
     )
     .eq("panel_member_id", panelMemberId)
     .eq("is_active", true)
