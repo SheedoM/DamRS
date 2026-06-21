@@ -14,7 +14,6 @@ import { requireRole } from "@/lib/auth/require-role";
 import { getAdminProjectDetail, getPanelMembers } from "@/lib/admin/queries";
 import { getProjectGradingBreakdown, getProjectStudentGrades, getProjectTerm } from "@/lib/admin/student-grades";
 import {
-  panelMemberTypeLabel,
   projectFileTypeLabel,
   projectStatusLabel,
 } from "@/lib/i18n/labels";
@@ -133,9 +132,8 @@ export default async function AdminProjectDetailPage({
                     <p className="font-medium text-slate-950">{assignment.panel_member_name}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    {assignment.panel_member_type ? (
-                      <Badge tone="info">{panelMemberTypeLabel(assignment.panel_member_type)}</Badge>
-                    ) : null}
+                    {assignment.roles.committee ? <Badge tone="info">عضو لجنة</Badge> : null}
+                    {assignment.roles.supervisor ? <Badge tone="neutral">مشرف</Badge> : null}
                     <RevokeAssignmentForm assignment={assignment} />
                   </div>
                 </div>

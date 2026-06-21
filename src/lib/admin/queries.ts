@@ -14,7 +14,10 @@ export type PanelMember = {
 
 
 export type Assignment = {
+  /** Primary assignment id (first row when a person holds multiple roles). */
   id: string;
+  /** All assignment row ids for this person on this project (for bulk-revoke). */
+  ids: string[];
   project_id: string;
   panel_member_id: string;
   assigned_at: string;
@@ -24,6 +27,8 @@ export type Assignment = {
   panel_member_email: string;
   panel_member_type: string | null;
   project_title: string;
+  /** Collapsed roles this member holds on this project. */
+  roles: { committee: boolean; supervisor: boolean };
 };
 
 type RawAssignment = {
@@ -33,6 +38,7 @@ type RawAssignment = {
   assigned_at: string;
   revoked_at: string | null;
   is_active: boolean;
+  role: string | null;
   profiles:
     | { full_name: string; email: string; panel_member_type: string | null }
     | { full_name: string; email: string; panel_member_type: string | null }[]
@@ -129,6 +135,7 @@ function toAssignment(assignment: RawAssignment): Assignment {
 
   return {
     id: assignment.id,
+    ids: [assignment.id],
     project_id: assignment.project_id,
     panel_member_id: assignment.panel_member_id,
     assigned_at: assignment.assigned_at,
@@ -138,7 +145,30 @@ function toAssignment(assignment: RawAssignment): Assignment {
     panel_member_email: profile?.email || "",
     panel_member_type: profile?.panel_member_type ?? null,
     project_title: project?.title || "مشروع غير معروف",
+    roles: {
+      committee: assignment.role !== "supervisor",
+      supervisor: assignment.role === "supervisor",
+    },
   };
+}
+
+/**
+ * Collapse multiple assignment rows for the same panel member (one per role)
+ * into a single Assignment entry with combined roles.
+ */
+function collapseByMember(assignments: Assignment[]): Assignment[] {
+  const byMember = new Map<string, Assignment>();
+  for (const a of assignments) {
+    const existing = byMember.get(a.panel_member_id);
+    if (!existing) {
+      byMember.set(a.panel_member_id, { ...a });
+    } else {
+      existing.ids.push(...a.ids);
+      existing.roles.committee = existing.roles.committee || a.roles.committee;
+      existing.roles.supervisor = existing.roles.supervisor || a.roles.supervisor;
+    }
+  }
+  return [...byMember.values()];
 }
 
 const PROJECT_ROW_SELECT =
@@ -220,11 +250,12 @@ export async function getAssignmentsForProject(projectId: string) {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("panel_assignments")
-    .select("id, project_id, panel_member_id, assigned_at, revoked_at, is_active, profiles!panel_assignments_panel_member_id_fkey(full_name, email, panel_member_type), projects(title)")
+    .select("id, project_id, panel_member_id, assigned_at, revoked_at, is_active, role, profiles!panel_assignments_panel_member_id_fkey(full_name, email, panel_member_type), projects(title)")
     .eq("project_id", projectId)
     .order("assigned_at", { ascending: false });
 
-  return ((data || []) as unknown as RawAssignment[]).map(toAssignment);
+  const raw = ((data || []) as unknown as RawAssignment[]).map(toAssignment);
+  return collapseByMember(raw);
 }
 
 export async function getAllAssignments() {

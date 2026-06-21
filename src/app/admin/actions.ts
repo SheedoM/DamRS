@@ -80,7 +80,9 @@ const assignPanelSchema = z.object({
 });
 
 const revokeAssignmentSchema = z.object({
-  assignment_id: z.string().uuid(),
+  // Comma-separated list of assignment UUIDs (a person may hold multiple roles
+  // on one project, each stored as a separate row — revoke them all at once).
+  assignment_ids: z.string().min(1),
   project_id: z.string().uuid(),
 });
 
@@ -937,11 +939,20 @@ export async function revokeAssignmentAction(
 ): Promise<ActionResult> {
   const { profile } = await requireRole(["admin"]);
   const parsed = revokeAssignmentSchema.safeParse({
-    assignment_id: formData.get("assignment_id"),
+    assignment_ids: formData.get("assignment_ids"),
     project_id: formData.get("project_id"),
   });
 
   if (!parsed.success) {
+    return { ok: false, message: "Invalid assignment." };
+  }
+
+  const ids = parsed.data.assignment_ids
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => z.string().uuid().safeParse(s).success);
+
+  if (ids.length === 0) {
     return { ok: false, message: "Invalid assignment." };
   }
 
@@ -952,15 +963,17 @@ export async function revokeAssignmentAction(
       is_active: false,
       revoked_at: new Date().toISOString(),
     })
-    .eq("id", parsed.data.assignment_id);
+    .in("id", ids);
 
   if (error) {
     return { ok: false, message: error.message };
   }
 
-  await writeAuditLog(profile.id, "admin_revoked_panel", "panel_assignment", parsed.data.assignment_id, {
-    project_id: parsed.data.project_id,
-  });
+  for (const id of ids) {
+    await writeAuditLog(profile.id, "admin_revoked_panel", "panel_assignment", id, {
+      project_id: parsed.data.project_id,
+    });
+  }
   revalidatePath("/", "layout");
   return { ok: true, message: "Assignment revoked." };
 }
