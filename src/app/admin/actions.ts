@@ -281,14 +281,13 @@ export async function createAdminProjectAction(
     full_name: String(formData.get(`team_members.${index}.full_name`) || ""),
     student_id: String(formData.get(`team_members.${index}.student_id`) || ""),
     national_id: String(formData.get(`team_members.${index}.national_id`) || ""),
-    email: String(formData.get(`team_members.${index}.email`) || ""),
+    program: String(formData.get(`team_members.${index}.program`) || ""),
     role_in_team: String(formData.get(`team_members.${index}.role_in_team`) || "member"),
   }));
 
   const parsed = projectFormSchema.safeParse({
     title: formData.get("title"),
     abstract: formData.get("abstract"),
-    program: formData.get("program"),
     supervisor_name: formData.get("supervisor_name"),
     technologies_used: formData.get("technologies_used"),
     github_url: formData.get("github_url"),
@@ -352,7 +351,7 @@ export async function createAdminProjectAction(
     role: "student",
     student_id: leader.student_id,
     national_id: leader.national_id,
-    program: parsed.data.program,
+    program: leader.program,
   });
   if (profileError) {
     await adminClient.auth.admin.deleteUser(leaderId);
