@@ -26,6 +26,13 @@ const createPanelMemberSchema = z.object({
   panel_member_type: z.enum(["supervisor", "referee", "committee_head"]),
 });
 
+const updatePanelMemberSchema = z.object({
+  panel_member_id: z.string().uuid(),
+  full_name: z.string().trim().min(2, "اسم عضو اللجنة مطلوب."),
+  department: z.string().trim().optional().transform((v) => v || null),
+  panel_member_type: z.enum(["supervisor", "referee", "committee_head"]),
+});
+
 const eligibleStudentsSchema = z.object({
   university_ids: z.string().trim().min(1),
 });
@@ -290,6 +297,75 @@ export async function createPanelMemberAction(
   await writeAuditLog(profile.id, "admin_created_panel_member", "profile", authUser.user.id);
   revalidatePath("/admin/panel-members");
   return { ok: true, message: `تم إنشاء حساب عضو اللجنة. كلمة المرور المؤقتة: ${tempPassword}` };
+}
+
+export async function updatePanelMemberAction(
+  _previousState: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const { profile } = await requireRole(["admin"]);
+  const parsed = updatePanelMemberSchema.safeParse({
+    panel_member_id: formData.get("panel_member_id"),
+    full_name: formData.get("full_name"),
+    department: formData.get("department"),
+    panel_member_type: formData.get("panel_member_type"),
+  });
+  if (!parsed.success) {
+    return { ok: false, message: parsed.error.issues[0]?.message || "بيانات عضو اللجنة غير صالحة." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      full_name: parsed.data.full_name,
+      department: parsed.data.department,
+      panel_member_type: parsed.data.panel_member_type,
+    })
+    .eq("id", parsed.data.panel_member_id)
+    .eq("role", "panel_member");
+
+  if (error) {
+    return { ok: false, message: error.message };
+  }
+
+  await writeAuditLog(profile.id, "admin_updated_panel_member", "profile", parsed.data.panel_member_id);
+  revalidatePath("/admin/panel-members");
+  return { ok: true, message: "تم تحديث بيانات عضو اللجنة." };
+}
+
+export async function deletePanelMemberAction(
+  _previousState: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const { profile } = await requireRole(["admin"]);
+  const panelMemberId = String(formData.get("panel_member_id") || "");
+  if (!z.string().uuid().safeParse(panelMemberId).success) {
+    return { ok: false, message: "معرّف عضو اللجنة غير صالح." };
+  }
+
+  let adminClient;
+  try {
+    adminClient = createSupabaseAdminClient();
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : "مفتاح خدمة Supabase غير متوفر." };
+  }
+
+  // profiles is referenced ON DELETE RESTRICT by assignments / scores / audit
+  // logs, so clear those for this member before removing the account.
+  await adminClient.from("student_discussion_scores").delete().eq("panel_member_id", panelMemberId);
+  await adminClient.from("panel_assignments").delete().eq("panel_member_id", panelMemberId);
+  await adminClient.from("audit_logs").delete().eq("actor_id", panelMemberId);
+
+  // Deleting the auth user cascades the profile row.
+  const { error } = await adminClient.auth.admin.deleteUser(panelMemberId);
+  if (error) {
+    return { ok: false, message: error.message };
+  }
+
+  await writeAuditLog(profile.id, "admin_deleted_panel_member", "profile", panelMemberId);
+  revalidatePath("/admin/panel-members");
+  return { ok: true, message: "تم حذف عضو اللجنة." };
 }
 
 export async function createAdminProjectAction(
