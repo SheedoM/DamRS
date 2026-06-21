@@ -50,9 +50,23 @@ export default async function AdminProjectDetailPage({
           <CardHeader className="flex flex-row items-start justify-between gap-4">
             <div>
               <CardTitle>المشروع</CardTitle>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-950">{project.title}</h2>
+              {project.project_number ? (
+                <p className="mt-1 text-sm font-medium text-[var(--brand-blue)]">
+                  رقم المشروع: {project.project_number}
+                </p>
+              ) : null}
+              <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+                {project.title || "بانتظار إدخال بيانات المشروع"}
+              </h2>
+              {project.title_en ? (
+                <p className="mt-1 text-base text-slate-600" dir="ltr">{project.title_en}</p>
+              ) : null}
             </div>
-            <Badge tone={project.status === "submitted" ? "success" : "info"}>{projectStatusLabel(project.status)}</Badge>
+            {project.awaiting_leader ? (
+              <Badge tone="warning">بانتظار القائد</Badge>
+            ) : (
+              <Badge tone={project.status === "submitted" ? "success" : "info"}>{projectStatusLabel(project.status)}</Badge>
+            )}
           </CardHeader>
           <CardContent className="space-y-4 text-sm text-slate-700">
             <p className="leading-6">{project.abstract}</p>
