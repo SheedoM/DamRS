@@ -32,7 +32,6 @@ export type AdminEditableProject = {
 export type AdminEditableMember = {
   full_name: string;
   student_id: string;
-  national_id: string | null;
   program: string | null;
   role_in_team: string;
 };
@@ -66,11 +65,10 @@ export function AdminProjectEditForm({
           ? teamMembers.map((m) => ({
               full_name: m.full_name,
               student_id: m.student_id,
-              national_id: m.national_id || "",
               program: m.program || "",
               role_in_team: m.role_in_team || "member",
             }))
-          : [{ full_name: "", student_id: "", national_id: "", program: "", role_in_team: "team_leader" }],
+          : [{ full_name: "", student_id: "", program: "", role_in_team: "team_leader" }],
     },
   });
   const { fields, append, remove } = useFieldArray({ control, name: "team_members" });
@@ -150,7 +148,7 @@ export function AdminProjectEditForm({
           <Button
             type="button"
             variant="outline"
-            onClick={() => append({ full_name: "", student_id: "", national_id: "", program: "", role_in_team: "member" })}
+            onClick={() => append({ full_name: "", student_id: "", program: "", role_in_team: "member" })}
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
             إضافة عضو
@@ -158,7 +156,7 @@ export function AdminProjectEditForm({
         </div>
         <div className="space-y-4">
           {fields.map((field, index) => (
-            <div key={field.id} className="grid gap-3 rounded-md border border-slate-200 p-4 md:grid-cols-[1fr_0.8fr_0.9fr_1fr_0.7fr_auto]">
+            <div key={field.id} className="grid gap-3 rounded-md border border-slate-200 p-4 md:grid-cols-[1fr_0.9fr_1fr_0.7fr_auto]">
               <div className="space-y-2">
                 <Label htmlFor={`tm-${index}-name`}>الاسم</Label>
                 <Input id={`tm-${index}-name`} {...register(`team_members.${index}.full_name`)} />
@@ -166,10 +164,6 @@ export function AdminProjectEditForm({
               <div className="space-y-2">
                 <Label htmlFor={`tm-${index}-sid`}>الرقم الجامعي</Label>
                 <Input id={`tm-${index}-sid`} {...register(`team_members.${index}.student_id`)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`tm-${index}-nid`}>الرقم القومي</Label>
-                <Input id={`tm-${index}-nid`} inputMode="numeric" {...register(`team_members.${index}.national_id`)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor={`tm-${index}-prog`}>البرنامج</Label>

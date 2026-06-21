@@ -30,7 +30,7 @@ export default async function AdminProjectEditPage({
 
   const { data: teamMembers } = await supabase
     .from("team_members")
-    .select("full_name, student_id, national_id, program, role_in_team")
+    .select("full_name, student_id, program, role_in_team")
     .eq("project_id", projectId)
     .order("created_at", { ascending: true });
 
@@ -41,7 +41,6 @@ export default async function AdminProjectEditPage({
         teamMembers={(teamMembers || []).map((m) => ({
           full_name: m.full_name as string,
           student_id: m.student_id as string,
-          national_id: (m.national_id as string | null) ?? null,
           program: (m.program as string | null) ?? null,
           role_in_team: (m.role_in_team as string) || "member",
         }))}

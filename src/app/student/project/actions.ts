@@ -46,7 +46,6 @@ function parseProjectForm(formData: FormData) {
   const team_members = teamMemberIndexes.map((index) => ({
     full_name: String(formData.get(`team_members.${index}.full_name`) || ""),
     student_id: String(formData.get(`team_members.${index}.student_id`) || ""),
-    national_id: String(formData.get(`team_members.${index}.national_id`) || ""),
     program: String(formData.get(`team_members.${index}.program`) || ""),
     role_in_team: String(formData.get(`team_members.${index}.role_in_team`) || "member"),
   }));

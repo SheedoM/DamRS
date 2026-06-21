@@ -131,7 +131,6 @@ export function ProjectSummary({ project, teamMembers, files, uploadedBy }: Proj
                 <div key={member.id} className="rounded-md border border-slate-200 p-3">
                   <p className="font-medium text-slate-950">{member.full_name}</p>
                   <p className="text-sm text-slate-500">{member.student_id} - {member.role_in_team}</p>
-                  {member.national_id ? <p className="text-sm text-slate-500">الرقم القومي: {member.national_id}</p> : null}
                   {member.program ? <p className="text-sm text-slate-500">{programLabel(member.program)}</p> : null}
                 </div>
               ))}

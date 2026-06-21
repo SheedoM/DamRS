@@ -380,7 +380,6 @@ export async function createAdminProjectAction(
   const team_members = indexes.map((index) => ({
     full_name: String(formData.get(`team_members.${index}.full_name`) || ""),
     student_id: String(formData.get(`team_members.${index}.student_id`) || ""),
-    national_id: String(formData.get(`team_members.${index}.national_id`) || ""),
     program: String(formData.get(`team_members.${index}.program`) || ""),
     role_in_team: String(formData.get(`team_members.${index}.role_in_team`) || "member"),
   }));
@@ -432,10 +431,12 @@ export async function createAdminProjectAction(
     return { ok: false, message: error instanceof Error ? error.message : "مفتاح خدمة Supabase غير متوفر." };
   }
 
-  // Auto-provision the team-leader login using their national ID.
+  // Auto-provision the team-leader login with a generated temp password
+  // (team-member national IDs are no longer collected).
+  const tempPassword = Math.random().toString(36).slice(-10) + "Aa1!";
   const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
     email: derivedEmail,
-    password: leader.national_id,
+    password: tempPassword,
     email_confirm: true,
     user_metadata: { full_name: leader.full_name, role: "student" },
   });
@@ -450,8 +451,8 @@ export async function createAdminProjectAction(
     email: derivedEmail,
     role: "student",
     student_id: leader.student_id,
-    national_id: leader.national_id,
     program: leader.program,
+    temp_password: tempPassword,
   });
   if (profileError) {
     await adminClient.auth.admin.deleteUser(leaderId);
@@ -492,7 +493,7 @@ export async function createAdminProjectAction(
   revalidatePath("/", "layout");
   return {
     ok: true,
-    message: `تم إنشاء المشروع بنجاح. يمكن لقائد الفريق الآن تسجيل الدخول باستخدام الرقم القومي ككلمة مرور.`,
+    message: `تم إنشاء المشروع بنجاح. كلمة مرور قائد الفريق المؤقتة: ${tempPassword}`,
   };
 }
 
@@ -600,7 +601,6 @@ export async function updateAdminProjectAction(
     .map((index) => ({
       full_name: String(formData.get(`team_members.${index}.full_name`) || "").trim(),
       student_id: String(formData.get(`team_members.${index}.student_id`) || "").trim(),
-      national_id: String(formData.get(`team_members.${index}.national_id`) || "").trim() || null,
       program: String(formData.get(`team_members.${index}.program`) || "").trim() || null,
       role_in_team: String(formData.get(`team_members.${index}.role_in_team`) || "member"),
     }))

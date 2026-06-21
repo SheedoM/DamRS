@@ -73,11 +73,10 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
           ? teamMembers.map((member) => ({
               full_name: member.full_name,
               student_id: member.student_id,
-              national_id: member.national_id || "",
               program: (member.program as ProjectFormInput["team_members"][0]["program"]) || undefined,
               role_in_team: member.role_in_team as "team_leader" | "member",
             }))
-          : [{ full_name: "", student_id: "", national_id: "", program: blankProgram, role_in_team: "team_leader" }],
+          : [{ full_name: "", student_id: "", program: blankProgram, role_in_team: "team_leader" }],
     },
   });
 
@@ -109,7 +108,7 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
       ) : null}
       {isAdminCreate ? (
         <p className="rounded-md bg-slate-100 p-3 text-sm text-slate-600">
-          سيتم إنشاء حساب دخول لقائد الفريق (العضو ذي الدور «قائد الفريق») تلقائيًا باستخدام رقمه الجامعي والرقم القومي ككلمة مرور.
+          سيتم إنشاء حساب دخول لقائد الفريق (العضو ذي الدور «قائد الفريق») تلقائيًا، وستظهر كلمة المرور المؤقتة بعد الإنشاء.
         </p>
       ) : null}
 
@@ -173,7 +172,7 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
             variant="outline"
             disabled={atMemberLimit}
             onClick={() =>
-              append({ full_name: "", student_id: "", national_id: "", program: blankProgram, role_in_team: "member" })
+              append({ full_name: "", student_id: "", program: blankProgram, role_in_team: "member" })
             }
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
@@ -182,7 +181,7 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
         </div>
         <div className="space-y-4">
           {fields.map((field, index) => (
-            <div key={field.id} className="grid gap-3 rounded-md border border-slate-200 p-4 md:grid-cols-[1fr_0.8fr_0.9fr_1fr_0.7fr_auto]">
+            <div key={field.id} className="grid gap-3 rounded-md border border-slate-200 p-4 md:grid-cols-[1fr_0.9fr_1fr_0.7fr_auto]">
               <div className="space-y-2">
                 <Label htmlFor={`team-${index}-name`}>الاسم الكامل</Label>
                 <Input id={`team-${index}-name`} {...register(`team_members.${index}.full_name`)} />
@@ -192,15 +191,6 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
                 <Label htmlFor={`team-${index}-student-id`}>الرقم الجامعي</Label>
                 <Input id={`team-${index}-student-id`} {...register(`team_members.${index}.student_id`)} />
                 <FieldError message={errors.team_members?.[index]?.student_id?.message} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`team-${index}-national-id`}>الرقم القومي</Label>
-                <Input
-                  id={`team-${index}-national-id`}
-                  inputMode="numeric"
-                  {...register(`team_members.${index}.national_id`)}
-                />
-                <FieldError message={errors.team_members?.[index]?.national_id?.message} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor={`team-${index}-program`}>البرنامج</Label>

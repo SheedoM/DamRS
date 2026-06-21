@@ -17,15 +17,9 @@ export const requiredSubmissionFileTypes = [
 
 type RequiredSubmissionFileType = (typeof requiredSubmissionFileTypes)[number];
 
-export const nationalIdSchema = z
-  .string()
-  .trim()
-  .regex(/^\d{14}$/, "الرقم القومي يجب أن يتكون من 14 رقمًا.");
-
 export const teamMemberSchema = z.object({
   full_name: z.string().trim().min(2, "اسم عضو الفريق مطلوب."),
   student_id: z.string().trim().min(3, "الرقم الجامعي مطلوب."),
-  national_id: nationalIdSchema,
   program: z.enum(programValues, { message: "اختر البرنامج." }),
   role_in_team: z.enum(["team_leader", "member"], { message: "دور غير صالح." }),
 });
