@@ -103,7 +103,7 @@ export default function StudentLoginPage() {
           </form>
 
           <p className="mt-4 text-center text-sm text-slate-500">
-            ليس لديك حساب؟{" "}
+            ليس لديك حساب طالب؟{" "}
             <Link href="/register" className="font-semibold text-[var(--brand-blue)] hover:underline">
               إنشاء حساب قائد فريق
             </Link>

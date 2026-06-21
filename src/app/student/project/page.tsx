@@ -21,7 +21,7 @@ export default async function StudentProjectPage() {
     <AppShell title="مشروعي" profile={profile}>
       <div data-tour="student-project">
       {projectData ? (
-        <ProjectSummary {...projectData} />
+        <ProjectSummary {...projectData} uploadedBy={profile.id} />
       ) : (
         <Card>
           <CardHeader>

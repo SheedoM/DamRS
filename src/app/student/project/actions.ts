@@ -7,22 +7,14 @@ import { z } from "zod";
 import { requireRole } from "@/lib/auth/require-role";
 import {
   getMissingSubmissionRequirements,
-  projectFileTypes,
   projectFormSchema,
-  type RequiredProjectFileType,
 } from "@/lib/project/submission.schema";
-import { buildProjectStoragePath, getBucketForFileType } from "@/lib/project/storage";
 import { getAppSettings } from "@/lib/admin/app-settings";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions";
 import { writeAuditLog } from "@/lib/audit";
 
 
-
-const fileUploadSchema = z.object({
-  projectId: z.string().uuid(),
-  fileType: z.enum(projectFileTypes),
-});
 
 const submitProjectSchema = z.object({
   projectId: z.string().uuid(),
@@ -195,82 +187,6 @@ export async function updateProjectAction(
   await writeAuditLog(profile.id, "student_updated_project", "project", projectId);
   revalidatePath("/", "layout");
   redirect("/student/project?success=project-updated");
-}
-
-export async function uploadProjectFileAction(
-  _previousState: ActionResult,
-  formData: FormData,
-): Promise<ActionResult> {
-  const { profile } = await requireRole(["student"]);
-  const parsed = fileUploadSchema.safeParse({
-    projectId: formData.get("project_id"),
-    fileType: formData.get("file_type"),
-  });
-
-  if (!parsed.success) {
-    return { ok: false, message: "طلب رفع الملف غير صالح." };
-  }
-
-  const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, message: "اختر ملفًا للرفع." };
-  }
-
-  const supabase = await createSupabaseServerClient();
-  const { data: project, error: projectError } = await supabase
-    .from("projects")
-    .select("id, cycle_id")
-    .eq("id", parsed.data.projectId)
-    .single();
-
-  if (projectError || !project) {
-    return { ok: false, message: projectError?.message || "لم يتم العثور على المشروع." };
-  }
-
-  const fileType = parsed.data.fileType as RequiredProjectFileType;
-  const bucket = getBucketForFileType(fileType);
-  const storagePath = buildProjectStoragePath({
-    cycleId: project.cycle_id as string,
-    projectId: project.id as string,
-    fileName: file.name,
-  });
-
-  const { error: uploadError } = await supabase.storage
-    .from(bucket)
-    .upload(storagePath, file, {
-      contentType: file.type || undefined,
-      upsert: true,
-    });
-
-  if (uploadError) {
-    return { ok: false, message: uploadError.message };
-  }
-
-  const { error: metadataError } = await supabase
-    .from("project_files")
-    .upsert(
-      {
-        project_id: project.id,
-        file_type: fileType,
-        file_name: file.name,
-        storage_path: storagePath,
-        file_size: file.size,
-        mime_type: file.type || "application/octet-stream",
-        uploaded_by: profile.id,
-      },
-      { onConflict: "storage_path" },
-    );
-
-  if (metadataError) {
-    return { ok: false, message: metadataError.message };
-  }
-
-  await writeAuditLog(profile.id, "student_uploaded_project_file", "project", project.id as string, {
-    file_type: fileType,
-    file_name: file.name,
-  });
-  revalidatePath("/", "layout");
-  return { ok: true, message: "تم رفع الملف." };
 }
 
 export async function submitProjectAction(

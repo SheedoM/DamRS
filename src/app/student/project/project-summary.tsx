@@ -10,7 +10,7 @@ import {
   getMissingSubmissionRequirements,
   type RequiredProjectFileType,
 } from "@/lib/project/submission.schema";
-import { programLabel, projectFileTypeLabel, projectStatusLabel } from "@/lib/i18n/labels";
+import { programLabel, projectStatusLabel } from "@/lib/i18n/labels";
 import { formatFileSize } from "@/lib/utils";
 import type { ProjectFile, StudentProject, TeamMember } from "@/lib/project/queries";
 import { cn } from "@/lib/utils";
@@ -19,7 +19,12 @@ type ProjectSummaryProps = {
   project: StudentProject;
   teamMembers: TeamMember[];
   files: ProjectFile[];
+  uploadedBy: string;
 };
+
+function isBlank(value: string | null | undefined) {
+  return !value || value.trim().length === 0;
+}
 
 const requiredUploads: {
   fileType: RequiredProjectFileType;
@@ -34,7 +39,7 @@ const requiredUploads: {
 
 
 
-export function ProjectSummary({ project, teamMembers, files }: ProjectSummaryProps) {
+export function ProjectSummary({ project, teamMembers, files, uploadedBy }: ProjectSummaryProps) {
   const missing = getMissingSubmissionRequirements({
     title: project.title,
     title_en: project.title_en,
@@ -46,6 +51,20 @@ export function ProjectSummary({ project, teamMembers, files }: ProjectSummaryPr
   });
   const canEdit = project.status === "draft";
   const isSubmitted = project.status !== "draft";
+
+  // Latest uploaded file per type, to show inline next to each upload slot.
+  const fileByType = new Map<string, ProjectFile>();
+  for (const file of files) {
+    if (!fileByType.has(file.file_type)) fileByType.set(file.file_type, file);
+  }
+
+  // Before the core details are filled, the action is "complete", not "edit".
+  const needsDetails =
+    isBlank(project.title) ||
+    isBlank(project.title_en) ||
+    isBlank(project.abstract) ||
+    isBlank(project.supervisor_name) ||
+    isBlank(project.demo_video_url);
 
   return (
     <div className="space-y-5">
@@ -93,8 +112,8 @@ export function ProjectSummary({ project, teamMembers, files }: ProjectSummaryPr
           </div>
           <div className="flex flex-wrap gap-3">
             {canEdit ? (
-              <Link href="/student/project/edit" className={cn(buttonVariants({ variant: "outline" }))}>
-                تعديل البيانات
+              <Link href="/student/project/edit" className={cn(buttonVariants({ variant: needsDetails ? "default" : "outline" }))}>
+                {needsDetails ? "أكمل بيانات المشروع" : "تعديل البيانات"}
               </Link>
             ) : null}
           </div>
@@ -122,46 +141,52 @@ export function ProjectSummary({ project, teamMembers, files }: ProjectSummaryPr
 
         <Card>
           <CardHeader>
-            <CardTitle>الملفات المرفوعة</CardTitle>
+            <CardTitle>ملفات المشروع</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {files.length > 0 ? files.map((file) => (
-                <div key={file.id} className="rounded-md border border-slate-200 p-3">
-                  <p className="font-medium text-slate-950">{file.file_name}</p>
-                  <p className="text-sm text-slate-500">{projectFileTypeLabel(file.file_type)} - {formatFileSize(file.file_size)}</p>
-                  {file.signedUrl ? (
-                    <a
-                      href={file.signedUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-3")}
-                    >
-                      <FileText className="h-4 w-4" aria-hidden="true" />
-                      فتح الملف
-                    </a>
-                  ) : (
-                    <p className="mt-2 text-xs text-amber-700">رابط المعاينة غير متاح.</p>
-                  )}
-                </div>
-              )) : <p className="text-sm text-slate-500">لم يتم رفع أي ملفات بعد.</p>}
-            </div>
+          <CardContent className="space-y-4">
+            {canEdit
+              ? requiredUploads.map((upload) => (
+                  <FileUploadForm
+                    key={upload.fileType}
+                    projectId={project.id}
+                    cycleId={project.cycle_id}
+                    uploadedBy={uploadedBy}
+                    existingFile={fileByType.get(upload.fileType)}
+                    {...upload}
+                  />
+                ))
+              : requiredUploads.map((upload) => {
+                  const file = fileByType.get(upload.fileType);
+                  return (
+                    <div key={upload.fileType} className="rounded-md border border-slate-200 p-3">
+                      <p className="text-sm font-medium text-slate-900">{upload.label}</p>
+                      {file ? (
+                        <div className="mt-2 flex items-center justify-between gap-2 text-sm">
+                          <span className="truncate text-slate-700">
+                            {file.file_name}
+                            <span className="text-slate-400"> · {formatFileSize(file.file_size)}</span>
+                          </span>
+                          {file.signedUrl ? (
+                            <a
+                              href={file.signedUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+                            >
+                              <FileText className="h-4 w-4" aria-hidden="true" />
+                              فتح
+                            </a>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <p className="mt-1 text-xs text-slate-500">لم يُرفع.</p>
+                      )}
+                    </div>
+                  );
+                })}
           </CardContent>
         </Card>
       </div>
-
-      {canEdit ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>رفع الملفات</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4 lg:grid-cols-3">
-            {requiredUploads.map((upload) => (
-              <FileUploadForm key={upload.fileType} projectId={project.id} {...upload} />
-            ))}
-          </CardContent>
-        </Card>
-      ) : null}
 
       <Card>
         <CardHeader>
