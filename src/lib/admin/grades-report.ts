@@ -18,7 +18,6 @@ export type GradesReportRow = {
 type RawProject = {
   id: string;
   title: string;
-  program: string | null;
   supervisor_name: string;
 };
 
@@ -28,6 +27,7 @@ type RawMember = {
   full_name: string;
   student_id: string | null;
   national_id: string | null;
+  program: string | null;
 };
 
 export async function getGradesReportRows(): Promise<GradesReportRow[]> {
@@ -35,8 +35,8 @@ export async function getGradesReportRows(): Promise<GradesReportRow[]> {
 
   const [{ data: projects }, { data: members }, { data: scores }, { data: supervision }] =
     await Promise.all([
-      supabase.from("projects").select("id, title, program, supervisor_name").order("created_at"),
-      supabase.from("team_members").select("id, project_id, full_name, student_id, national_id"),
+      supabase.from("projects").select("id, title, supervisor_name").order("created_at"),
+      supabase.from("team_members").select("id, project_id, full_name, student_id, national_id, program"),
       supabase.from("student_discussion_scores").select("team_member_id, total"),
       supabase
         .from("student_supervision_grades")
@@ -78,7 +78,7 @@ export async function getGradesReportRows(): Promise<GradesReportRow[]> {
       studentName: member.full_name,
       universityId: member.student_id || "—",
       nationalId: member.national_id || "—",
-      program: programLabel(project?.program ?? null),
+      program: programLabel(member.program ?? null),
       project: project?.title || "—",
       supervisor: project?.supervisor_name || "—",
       firstSemester: String(sup.firstSemester),

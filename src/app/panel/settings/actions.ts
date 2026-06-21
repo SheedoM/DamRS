@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireRole } from "@/lib/auth/require-role";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type ActionResult = {
@@ -44,15 +45,23 @@ export async function updatePanelMemberPasswordAction(
     return { ok: false, message: updateError.message };
   }
 
-  // Clear temp_password so admins can no longer view it
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .update({ temp_password: null })
-    .eq("id", profile.id);
+  // Clear temp_password so admins can no longer view it. Must use the
+  // service-role client: profiles UPDATE is admin-only under RLS, so the
+  // member's own session would silently update zero rows.
+  try {
+    const adminClient = createSupabaseAdminClient();
+    const { error: profileError } = await adminClient
+      .from("profiles")
+      .update({ temp_password: null })
+      .eq("id", profile.id);
 
-  if (profileError) {
-    console.error("Failed to clear temp_password:", profileError);
-    // Even if this fails, the auth password was updated successfully.
+    if (profileError) {
+      console.error("Failed to clear temp_password:", profileError);
+      // Even if this fails, the auth password was updated successfully.
+    }
+  } catch (error) {
+    console.error("Failed to clear temp_password:", error);
+    // Service-role key missing; auth password was still updated successfully.
   }
 
   revalidatePath("/panel/settings");
