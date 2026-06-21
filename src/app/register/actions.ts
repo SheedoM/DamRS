@@ -1,7 +1,6 @@
 "use server";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions";
 import {
   buildStudentAuthCredentials,
@@ -20,10 +19,21 @@ export async function registerStudentAction(
     return { ok: false, message: parsed.message };
   }
 
-  const supabase = await createSupabaseServerClient();
+  // Registration runs for an anonymous visitor (no session yet), so all reads
+  // must use the service-role client — RLS only grants discussion_cycles /
+  // submission_windows reads to authenticated users.
+  let adminClient;
+  try {
+    adminClient = createSupabaseAdminClient();
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "مفتاح خدمة Supabase غير متوفر.",
+    };
+  }
 
   // The active cycle and an open submission window are required to self-register.
-  const { data: cycle } = await supabase
+  const { data: cycle } = await adminClient
     .from("discussion_cycles")
     .select("id")
     .eq("is_active", true)
@@ -36,7 +46,7 @@ export async function registerStudentAction(
 
   const cycleId = cycle.id as string;
   const nowIso = new Date().toISOString();
-  const { data: openWindow } = await supabase
+  const { data: openWindow } = await adminClient
     .from("submission_windows")
     .select("id")
     .eq("cycle_id", cycleId)
@@ -47,16 +57,6 @@ export async function registerStudentAction(
 
   if (!openWindow) {
     return { ok: false, message: "التسجيل متاح فقط أثناء فتح نافذة التسليم." };
-  }
-
-  let adminClient;
-  try {
-    adminClient = createSupabaseAdminClient();
-  } catch (error) {
-    return {
-      ok: false,
-      message: error instanceof Error ? error.message : "مفتاح خدمة Supabase غير متوفر.",
-    };
   }
 
   // Authorization to register comes from one of two sources:
