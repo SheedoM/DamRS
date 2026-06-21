@@ -59,7 +59,7 @@ type SubmissionRequirementInput = {
 };
 
 const requiredFileLabels: Record<RequiredSubmissionFileType, string> = {
-  documentation_pdf: "ملف التوثيق (PDF)",
+  documentation_pdf: "مستند المشروع (PDF)",
   source_code_zip: "الكود المصدري (ZIP)",
 };
 

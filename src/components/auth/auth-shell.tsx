@@ -29,16 +29,16 @@ export function AuthShell({ children }: { children: ReactNode }) {
         </div>
         <div className="my-16 max-w-xl">
           <p className="text-sm font-semibold uppercase tracking-wide text-[var(--brand-yellow)]">
-            جامعة دمياط - كلية الحاسبات والمعلومات
+            جامعة دمياط - كلية الحاسبات والذكاء الاصطناعي
           </p>
           <h1 className="mt-4 text-4xl font-semibold tracking-normal sm:text-5xl">
-            نظام مراجعة مشاريع التخرج
+            نظام تقييم مشروعات التخرج
           </h1>
           <p className="mt-5 text-base leading-7 text-blue-50">
-            منصّة آمنة لتسليم مشاريع التخرج وإسنادها ومراجعتها.
+            منصّة آمنة لتسليم مشروعات التخرج وإسنادها وتقييمها.
           </p>
         </div>
-        <p className="text-sm text-blue-100">مراجعة مشاريع التخرج</p>
+        <p className="text-sm text-blue-100">تقييم مشروعات التخرج</p>
       </section>
 
       <section className="flex items-center justify-center px-4 py-10 sm:px-6">

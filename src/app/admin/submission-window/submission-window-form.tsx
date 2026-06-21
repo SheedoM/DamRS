@@ -68,7 +68,7 @@ export function SubmissionWindowForm({ mode, windowData }: SubmissionWindowFormP
         </div>
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="department">القسم / الجهة</Label>
-          <Input id="department" name="department" defaultValue="كلية الحاسبات والمعلومات بدمياط" required />
+          <Input id="department" name="department" defaultValue="كلية الحاسبات والذكاء الاصطناعي بدمياط" required />
         </div>
         <div className="space-y-2">
           <Label htmlFor="opens_at">يفتح في</Label>

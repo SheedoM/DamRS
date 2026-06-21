@@ -55,8 +55,8 @@ export default function StudentLoginPage() {
     <AuthShell>
       <Card className="w-full max-w-md">
         <CardHeader>
-          <p className="text-sm font-medium text-[var(--brand-blue)]">تسجيل دخول الطلاب</p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-950">دخول قائد الفريق</h2>
+          <p className="text-sm font-medium text-[var(--brand-blue)]">دخول قائد فريق المشروع</p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-950">تسجيل الدخول</h2>
           <p className="mt-3 text-sm leading-6 text-slate-500">
             استخدم رقمك الجامعي والرقم القومي لتسجيل الدخول.
           </p>
@@ -110,7 +110,7 @@ export default function StudentLoginPage() {
           </p>
           <p className="mt-2 text-center text-sm text-slate-500">
             <Link href="/staff-login" className="font-medium text-slate-600 hover:underline">
-              تسجيل دخول الإداريين وأعضاء اللجنة
+              تسجيل دخول أعضاء لجان المناقشة
             </Link>
           </p>
         </CardContent>

@@ -63,9 +63,10 @@ export const gradingStatusLabels: Record<string, string> = {
 };
 
 export const projectFileTypeLabels: Record<string, string> = {
-  documentation_pdf: "ملف التوثيق (PDF)",
+  documentation_pdf: "مستند المشروع (PDF)",
   source_code_zip: "الكود المصدري (ZIP)",
   presentation_file: "ملف العرض التقديمي",
+  competition_proof: "إثبات اشتراك في مسابقة",
   extra_attachment: "مرفق إضافي",
 };
 

@@ -13,11 +13,11 @@ const cairo = Cairo({
 
 export const metadata: Metadata = {
   title: {
-    default: "DamRS - Damietta Review System | نظام دمياط لمراجعة المشاريع",
-    template: "%s | DamRS",
+    default: "نظام تقييم مشروعات التخرج | كلية الحاسبات والذكاء الاصطناعي - جامعة دمياط",
+    template: "%s | نظام تقييم مشروعات التخرج",
   },
   description:
-    "Damietta Review System (DamRS) - نظام دمياط لمراجعة المشاريع بكلية الحاسبات والمعلومات.",
+    "نظام تقييم مشروعات التخرج بكلية الحاسبات والذكاء الاصطناعي - جامعة دمياط.",
   manifest: "/manifest.webmanifest",
   applicationName: "DamRS",
 };

@@ -32,7 +32,7 @@ const requiredUploads: {
   accept: string;
   maxSizeBytes: number;
 }[] = [
-  { fileType: "documentation_pdf", label: "ملف التوثيق (PDF)", accept: "application/pdf", maxSizeBytes: 50 * 1024 * 1024 },
+  { fileType: "documentation_pdf", label: "مستند المشروع (PDF)", accept: "application/pdf", maxSizeBytes: 50 * 1024 * 1024 },
   { fileType: "source_code_zip", label: "الكود المصدري (ZIP)", accept: ".zip,application/zip,application/x-zip-compressed", maxSizeBytes: 100 * 1024 * 1024 },
   { fileType: "presentation_file", label: "ملف العرض التقديمي (اختياري)", accept: ".pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation", maxSizeBytes: 50 * 1024 * 1024 },
 ];

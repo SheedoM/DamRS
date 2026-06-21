@@ -59,16 +59,15 @@ export function MobileNav({ role }: MobileNavProps) {
           <div className="flex items-center gap-3">
             <Image
               src="/brand/fcai-logo.jpg"
-              alt="شعار كلية الحاسبات والمعلومات بدمياط"
+              alt="شعار كلية الحاسبات والذكاء الاصطناعي بدمياط"
               width={44}
               height={44}
               className="h-11 w-11 rounded-md object-cover"
               priority
             />
             <div className="flex flex-col justify-center text-start">
-              <p className="text-lg font-black tracking-tight text-blue-900">DamRS</p>
-              <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-500">Damietta Review System</p>
-              <p className="text-[11px] font-medium text-slate-700">نظام دمياط لمراجعة المشاريع</p>
+              <p className="text-sm font-bold leading-tight text-blue-900">نظام تقييم مشروعات التخرج</p>
+              <p className="text-[11px] font-medium text-slate-600">كلية الحاسبات والذكاء الاصطناعي</p>
             </div>
           </div>
           <button

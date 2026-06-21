@@ -36,16 +36,15 @@ export function Sidebar({ role }: SidebarProps) {
       <div className="flex min-h-20 items-center gap-3 border-b border-slate-200 px-5">
         <Image
           src="/brand/fcai-logo.jpg"
-          alt="شعار كلية الحاسبات والمعلومات بدمياط"
+          alt="شعار كلية الحاسبات والذكاء الاصطناعي بدمياط"
           width={44}
           height={44}
           className="h-11 w-11 rounded-md object-cover"
           priority
         />
         <div className="flex flex-col justify-center text-start">
-          <p className="text-xl font-black tracking-tight text-blue-900">DamRS</p>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Damietta Review System</p>
-          <p className="text-xs font-medium text-slate-700">نظام دمياط لمراجعة المشاريع</p>
+          <p className="text-sm font-bold leading-tight text-blue-900">نظام تقييم مشروعات التخرج</p>
+          <p className="text-[11px] font-medium text-slate-600">كلية الحاسبات والذكاء الاصطناعي</p>
         </div>
       </div>
       <nav data-tour="nav" aria-label="التنقل الرئيسي" className="flex-1 space-y-1 px-3 py-4">

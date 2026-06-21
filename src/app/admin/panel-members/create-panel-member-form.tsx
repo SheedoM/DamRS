@@ -81,7 +81,7 @@ export function CreatePanelMemberForm() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="department">القسم / الجهة</Label>
-              <Input id="department" name="department" defaultValue="كلية الحاسبات والمعلومات بدمياط" required />
+              <Input id="department" name="department" defaultValue="كلية الحاسبات والذكاء الاصطناعي بدمياط" required />
             </div>
           </div>
           <div className="flex flex-wrap gap-2">

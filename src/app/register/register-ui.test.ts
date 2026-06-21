@@ -14,13 +14,13 @@ function readLoginPage() {
 }
 
 describe("student signup UI", () => {
-  it("collects student identity and program without public email or password fields", () => {
+  it("collects only university ID and national ID — no name, program, email, or password fields", () => {
     const source = readRegisterPage();
 
-    expect(source).toContain("programOptions");
-    expect(source).toContain('name="program"');
     expect(source).toContain('name="student_id"');
     expect(source).toContain('name="national_id"');
+    expect(source).not.toContain('name="full_name"');
+    expect(source).not.toContain('name="program"');
     expect(source).not.toContain('name="email"');
     expect(source).not.toContain('name="password"');
   });
