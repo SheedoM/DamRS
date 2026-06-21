@@ -331,11 +331,10 @@ export async function createAdminProjectAction(
     return { ok: false, message: error instanceof Error ? error.message : "مفتاح خدمة Supabase غير متوفر." };
   }
 
-  // Auto-provision the team-leader login.
-  const tempPassword = Math.random().toString(36).slice(-10) + "Aa1!";
+  // Auto-provision the team-leader login using their national ID.
   const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
     email: derivedEmail,
-    password: tempPassword,
+    password: leader.national_id,
     email_confirm: true,
     user_metadata: { full_name: leader.full_name, role: "student" },
   });
@@ -392,7 +391,7 @@ export async function createAdminProjectAction(
   revalidatePath("/", "layout");
   return {
     ok: true,
-    message: `تم إنشاء المشروع وحساب قائد الفريق. كلمة المرور المؤقتة: ${tempPassword}`,
+    message: `تم إنشاء المشروع بنجاح. يمكن لقائد الفريق الآن تسجيل الدخول باستخدام الرقم القومي ككلمة مرور.`,
   };
 }
 
