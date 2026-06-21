@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireRole } from "@/lib/auth/require-role";
 import { getPanelMembers } from "@/lib/admin/queries";
 import { panelMemberTypeLabel } from "@/lib/i18n/labels";
+import { PasswordToggle } from "./password-toggle";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,7 @@ export default async function AdminPanelMembersPage() {
                 </div>
                 <p className="text-sm text-slate-500">{member.email}</p>
                 <p className="text-sm text-slate-500">{member.department || "بدون قسم"}</p>
+                <PasswordToggle password={member.temp_password} />
               </div>
             )) : <p className="text-sm text-slate-500">لا يوجد أعضاء لجنة بعد.</p>}
           </CardContent>

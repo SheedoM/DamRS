@@ -10,7 +10,9 @@ export type PanelMember = {
   email: string;
   department: string | null;
   panel_member_type: string | null;
+  temp_password?: string | null;
 };
+
 
 export type Assignment = {
   id: string;
@@ -310,7 +312,7 @@ export async function getPanelMembers() {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("profiles")
-    .select("id, full_name, email, department, panel_member_type")
+    .select("id, full_name, email, department, panel_member_type, temp_password")
     .eq("role", "panel_member")
     .order("full_name", { ascending: true });
 

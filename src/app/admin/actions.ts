@@ -254,6 +254,7 @@ export async function createPanelMemberAction(
     role: "panel_member",
     department: parsed.data.department,
     panel_member_type: parsed.data.panel_member_type,
+    temp_password: tempPassword,
   });
 
   if (profileError) {

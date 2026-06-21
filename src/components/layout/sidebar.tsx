@@ -3,6 +3,7 @@ import {
   Files,
   GraduationCap,
   LayoutDashboard,
+  Settings,
   Users,
 } from "lucide-react";
 import type { UserRole } from "@/lib/auth/roles";
@@ -21,6 +22,7 @@ export const navigationByRole: Record<UserRole, { label: string; href: string; i
   ],
   panel_member: [
     { label: "المشاريع المسندة", href: "/panel", icon: Files },
+    { label: "الإعدادات", href: "/panel/settings", icon: Settings },
   ],
 };
 
