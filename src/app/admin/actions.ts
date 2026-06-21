@@ -1073,3 +1073,37 @@ export async function saveSubmissionWindowAction(
   redirect("/admin?success=window-saved");
 }
 
+export async function closeSubmissionWindowNowAction(
+  _previousState: ActionResult,
+  _formData: FormData,
+): Promise<ActionResult> {
+  const { profile } = await requireRole(["admin"]);
+  const supabase = await createSupabaseServerClient();
+
+  const { data: window } = await supabase
+    .from("submission_windows")
+    .select("id, discussion_cycles!inner(is_active)")
+    .eq("discussion_cycles.is_active", true)
+    .limit(1)
+    .maybeSingle();
+
+  if (!window) {
+    return { ok: false, message: "لا توجد نافذة تسليم مفعّلة لإغلاقها." };
+  }
+
+  // Closing means: deadline is now, and late submission must be off — otherwise
+  // the `allow_late_submission` bypass would keep submissions open past the deadline.
+  const { error } = await supabase
+    .from("submission_windows")
+    .update({ closes_at: new Date().toISOString(), allow_late_submission: false })
+    .eq("id", window.id);
+
+  if (error) {
+    return { ok: false, message: error.message };
+  }
+
+  await writeAuditLog(profile.id, "admin_closed_submission_window", "submission_window", window.id, {});
+  revalidatePath("/", "layout");
+  return { ok: true, message: "تم إغلاق نافذة التسليم." };
+}
+

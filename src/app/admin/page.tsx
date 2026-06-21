@@ -3,6 +3,7 @@ import { ClipboardCheck, FileWarning, Files, ListChecks, UserCheck, Users } from
 
 import { DashboardCard } from "@/components/dashboard/dashboard-card";
 import { SubmissionWindowForm } from "./submission-window/submission-window-form";
+import { CloseSubmissionWindowButton } from "./submission-window/close-window-button";
 import { AppSettingsForm } from "./settings/settings-form";
 import { GradingControl } from "./grading-control";
 import { AppShell } from "@/components/layout/app-shell";
@@ -98,6 +99,7 @@ export default async function AdminDashboardPage({
                 </Link>
               ) : null}
             </div>
+            {state.isOpen ? <CloseSubmissionWindowButton /> : null}
           </CardContent>
         </Card>
 
