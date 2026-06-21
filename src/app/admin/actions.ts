@@ -308,9 +308,10 @@ export async function createAdminProjectAction(
   const leader =
     parsed.data.team_members.find((member) => member.role_in_team === "team_leader") ??
     parsed.data.team_members[0];
-  if (!leader.email) {
-    return { ok: false, message: "بريد قائد الفريق الإلكتروني مطلوب لإنشاء حسابه." };
+  if (!leader.student_id) {
+    return { ok: false, message: "رقم قائد الفريق الجامعي مطلوب لإنشاء حسابه." };
   }
+  const derivedEmail = `${leader.student_id}@damrs.edu`;
 
   const supabase = await createSupabaseServerClient();
   const { data: cycle } = await supabase
@@ -334,7 +335,7 @@ export async function createAdminProjectAction(
   // Auto-provision the team-leader login.
   const tempPassword = Math.random().toString(36).slice(-10) + "Aa1!";
   const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
-    email: leader.email,
+    email: derivedEmail,
     password: tempPassword,
     email_confirm: true,
     user_metadata: { full_name: leader.full_name, role: "student" },
@@ -347,7 +348,7 @@ export async function createAdminProjectAction(
   const { error: profileError } = await adminClient.from("profiles").insert({
     id: leaderId,
     full_name: leader.full_name,
-    email: leader.email,
+    email: derivedEmail,
     role: "student",
     student_id: leader.student_id,
     national_id: leader.national_id,
