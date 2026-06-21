@@ -32,4 +32,18 @@ describe("student signup UI", () => {
     expect(source).toContain('href="/register"');
     expect(source).toContain("ليس لديك حساب طالب؟");
   });
+
+  it("signs in a newly registered student, shows success briefly, then redirects into the app", () => {
+    const source = readRegisterPage();
+
+    expect(source).toContain('from "next/navigation"');
+    expect(source).toContain("useRouter");
+    expect(source).toContain("useEffect");
+    expect(source).toContain("createSupabaseBrowserClient");
+    expect(source).toContain("signInWithPassword");
+    expect(source).toContain("setTimeout");
+    expect(source).toContain("2000");
+    expect(source).toContain('router.replace("/")');
+    expect(source).not.toContain("يمكنك الآن تسجيل الدخول");
+  });
 });

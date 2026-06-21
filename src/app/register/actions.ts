@@ -5,14 +5,22 @@ import type { ActionResult } from "@/lib/actions";
 import {
   buildStudentAuthCredentials,
   buildStudentProfileInsert,
+  deriveStudentAuthEmail,
   parseStudentRegistrationForm,
   rosterNationalIdMismatch,
 } from "./registration";
 
+export type StudentRegistrationActionResult = ActionResult & {
+  credentials?: {
+    email: string;
+    password: string;
+  };
+};
+
 export async function registerStudentAction(
-  _previousState: ActionResult,
+  _previousState: StudentRegistrationActionResult,
   formData: FormData,
-): Promise<ActionResult> {
+): Promise<StudentRegistrationActionResult> {
   const parsed = parseStudentRegistrationForm(formData);
 
   if (!parsed.ok) {
@@ -139,5 +147,12 @@ export async function registerStudentAction(
     }
   }
 
-  return { ok: true, message: "تم إنشاء حسابك بنجاح. يمكنك الآن تسجيل الدخول." };
+  return {
+    ok: true,
+    message: "تم إنشاء حسابك بنجاح. سيتم تحويلك الآن.",
+    credentials: {
+      email: deriveStudentAuthEmail(parsed.data.student_id),
+      password: parsed.data.national_id.trim(),
+    },
+  };
 }

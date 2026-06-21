@@ -65,8 +65,8 @@ The grading window is **open** and the submission window is **open**.
 ## 4. Self-registration (gated by the roster)
 
 1. Log out, go to **/register**.
-2. Register with university ID **`806599001`** + any 14-digit national ID + a new email +
-   password → success, then log in.
+2. Register with university ID **`806599001`** + its 14-digit national ID → success,
+   then the app signs you in and redirects automatically.
 3. Try ID **`806599002`** → also works. Try a made-up ID → "غير معتمد للتسجيل". Try a
    already-used ID (e.g. one of the seeded leaders') → "تم استخدامه من قبل".
    (Registration only works while the submission window is open.)

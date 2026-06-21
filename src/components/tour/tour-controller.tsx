@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
@@ -17,11 +17,10 @@ function presentSteps(steps: readonly TourStep[]): TourStep[] {
 
 // Mounted once in the root layout. Derives the tour from the current route,
 // auto-runs it the first time that page is opened on this device (localStorage),
-// and always exposes a manual replay button when the page has a tour.
+// and always exposes a manual replay button on any route that has a tour.
 export function TourController() {
   const pathname = usePathname();
   const tourKey = resolveTourKey(pathname || "/");
-  const [hasSteps, setHasSteps] = useState(false);
 
   const runTour = useCallback(() => {
     if (!tourKey) return;
@@ -59,16 +58,12 @@ export function TourController() {
   }, [tourKey]);
 
   useEffect(() => {
-    if (!tourKey) {
-      return;
-    }
+    if (!tourKey) return;
 
     let cancelled = false;
-    // Give the page a moment to render its anchors before measuring/auto-running.
+    // Give the page a moment to render its anchors before auto-running.
     const timer = window.setTimeout(() => {
       if (cancelled) return;
-      const steps = presentSteps(tours[tourKey]);
-      setHasSteps(steps.length > 0);
 
       let alreadyDone = false;
       try {
@@ -77,7 +72,7 @@ export function TourController() {
         /* ignore */
       }
 
-      if (steps.length > 0 && !alreadyDone) {
+      if (!alreadyDone && presentSteps(tours[tourKey]).length > 0) {
         runTour();
       }
     }, 700);
@@ -88,7 +83,10 @@ export function TourController() {
     };
   }, [tourKey, runTour]);
 
-  if (!tourKey || !hasSteps) return null;
+  // Show the replay button on any route that defines a tour. Anchor presence is
+  // re-checked at click time, so this stays correct even if the page is still
+  // settling when the controller first runs.
+  if (!tourKey) return null;
 
   return (
     <button

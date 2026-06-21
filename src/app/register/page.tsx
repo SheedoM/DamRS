@@ -1,20 +1,59 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useState } from "react";
 
-import { registerStudentAction } from "./actions";
+import { registerStudentAction, type StudentRegistrationActionResult } from "./actions";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
-const initialState = { ok: true, message: "" };
+const initialState: StudentRegistrationActionResult = { ok: true, message: "" };
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [state, formAction, isPending] = useActionState(registerStudentAction, initialState);
+  const [autoLoginError, setAutoLoginError] = useState<string | null>(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  useEffect(() => {
+    if (!state.ok || !state.credentials) return;
+    const credentials = state.credentials;
+
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setAutoLoginError(null);
+      setIsRedirecting(true);
+
+      const supabase = createSupabaseBrowserClient();
+      const { error } = await supabase.auth.signInWithPassword({
+        email: credentials.email,
+        password: credentials.password,
+      });
+
+      if (cancelled) return;
+
+      if (error) {
+        setIsRedirecting(false);
+        setAutoLoginError("تم إنشاء الحساب، لكن تعذّر تسجيل الدخول تلقائيًا. استخدم صفحة تسجيل الدخول.");
+        return;
+      }
+
+      router.replace("/");
+      router.refresh();
+    }, 2000);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [router, state]);
 
   return (
     <AuthShell>
@@ -32,16 +71,21 @@ export default function RegisterPage() {
             {state.message ? (
               state.ok ? (
                 <div className="mb-4 rounded-md bg-emerald-50 p-3 text-sm text-emerald-800">
-                  {state.message}{" "}
-                  <Link href="/login" className="font-semibold underline">
-                    تسجيل الدخول
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    {isRedirecting ? <Spinner /> : null}
+                    <span>{state.message}</span>
+                  </div>
                 </div>
               ) : (
                 <div className="mb-4">
                   <Alert>{state.message}</Alert>
                 </div>
               )
+            ) : null}
+            {autoLoginError ? (
+              <div className="mb-4">
+                <Alert>{autoLoginError}</Alert>
+              </div>
             ) : null}
 
             <form className="space-y-4" action={formAction}>
@@ -61,8 +105,8 @@ export default function RegisterPage() {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isPending}>
-                {isPending ? "جارٍ إنشاء الحساب..." : "إنشاء الحساب"}
+              <Button type="submit" className="w-full" disabled={isPending || isRedirecting}>
+                {isPending ? "جارٍ إنشاء الحساب..." : isRedirecting ? "جارٍ تحويلك..." : "إنشاء الحساب"}
               </Button>
             </form>
 
