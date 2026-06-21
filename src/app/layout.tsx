@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Cairo } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 
 import { TourController } from "@/components/tour/tour-controller";
+import { NavigationProgress } from "@/components/ui/navigation-progress";
 
 const cairo = Cairo({
   variable: "--font-geist-sans",
@@ -36,6 +38,9 @@ export default function RootLayout({
       className={`${cairo.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         {children}
         <TourController />
       </body>

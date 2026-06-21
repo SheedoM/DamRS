@@ -50,9 +50,15 @@ export default function LoginPage() {
             ? "الرقم الجامعي أو الرقم القومي غير صحيح."
             : signInError.message,
         );
+        setIsSubmitting(false);
         return;
       }
 
+      // Keep the button in its loading state: the navigation + refresh below
+      // triggers a server round-trip (middleware role check + redirect) that
+      // can take a moment. Resetting isSubmitting here would make the form
+      // look idle during that gap. We intentionally leave it true so the
+      // spinner stays visible until the new page renders.
       router.replace("/");
       router.refresh();
     } catch (caughtError) {
@@ -61,7 +67,6 @@ export default function LoginPage() {
           ? caughtError.message
           : "تعذّر تسجيل الدخول. تحقق من إعدادات Supabase.",
       );
-    } finally {
       setIsSubmitting(false);
     }
   }
@@ -185,7 +190,33 @@ export default function LoginPage() {
               )}
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "جارٍ تسجيل الدخول..." : "تسجيل الدخول"}
+                {isSubmitting ? (
+                  <>
+                    <svg
+                      className="h-4 w-4 animate-spin"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z"
+                      />
+                    </svg>
+                    جارٍ تسجيل الدخول...
+                  </>
+                ) : (
+                  "تسجيل الدخول"
+                )}
               </Button>
             </form>
           </CardContent>
