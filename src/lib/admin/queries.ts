@@ -241,7 +241,7 @@ export async function getSubmissionWindow() {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("submission_windows")
-    .select("id, cycle_id, opens_at, closes_at, allow_late_submission, allow_edit_after_submit, discussion_cycles!inner(id, name, is_active)")
+    .select("id, cycle_id, opens_at, closes_at, allow_late_submission, allow_edit_after_submit, discussion_cycles!inner(id, name, is_active, term)")
     .eq("discussion_cycles.is_active", true)
     .limit(1)
     .maybeSingle();
@@ -256,8 +256,8 @@ export async function getSubmissionWindow() {
     allow_late_submission: boolean;
     allow_edit_after_submit: boolean;
     discussion_cycles:
-      | { id: string; name: string; is_active: boolean }
-      | { id: string; name: string; is_active: boolean }[]
+      | { id: string; name: string; is_active: boolean; term?: string }
+      | { id: string; name: string; is_active: boolean; term?: string }[]
       | null;
   };
 

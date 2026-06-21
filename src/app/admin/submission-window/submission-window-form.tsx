@@ -27,7 +27,7 @@ type SubmissionWindowFormProps = {
     closes_at: string;
     allow_late_submission: boolean;
     allow_edit_after_submit: boolean;
-    discussion_cycles?: { id: string; name: string; is_active: boolean } | null;
+    discussion_cycles?: { id: string; name: string; is_active: boolean; term?: string } | null;
   } | null;
 } ;
 
@@ -69,6 +69,21 @@ export function SubmissionWindowForm({ mode, windowData }: SubmissionWindowFormP
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="department">القسم / الجهة</Label>
           <Input id="department" name="department" defaultValue="كلية الحاسبات والذكاء الاصطناعي بدمياط" required />
+        </div>
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="term">الفصل الدراسي</Label>
+          <select
+            id="term"
+            name="term"
+            defaultValue={windowData?.discussion_cycles?.term || "second"}
+            className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2"
+          >
+            <option value="second">الفصل الدراسي الثاني (الدرجة من 90)</option>
+            <option value="first">الفصل الدراسي الأول (الدرجة من 10)</option>
+          </select>
+          <p className="text-xs text-slate-500">
+            الفصل الثاني: مناقشة (60) + أعمال السنة (30). الفصل الأول: أعمال الفصل (10) فقط.
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="opens_at">يفتح في</Label>

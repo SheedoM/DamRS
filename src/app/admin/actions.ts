@@ -88,6 +88,7 @@ const submissionWindowSchema = z.object({
   cycle_name: z.string().trim().min(3),
   academic_year: z.string().trim().min(4),
   department: z.string().trim().min(2),
+  term: z.enum(["first", "second"]).optional(),
   opens_at: z.string().min(1),
   closes_at: z.string().min(1),
   allow_late_submission: z.boolean(),
@@ -909,6 +910,7 @@ export async function saveSubmissionWindowAction(
     cycle_name: formData.get("cycle_name"),
     academic_year: formData.get("academic_year"),
     department: formData.get("department"),
+    term: formData.get("term") || undefined,
     opens_at: formData.get("opens_at"),
     closes_at: formData.get("closes_at"),
     allow_late_submission: formData.get("allow_late_submission") === "on",
@@ -934,6 +936,7 @@ export async function saveSubmissionWindowAction(
         name: parsed.data.cycle_name,
         academic_year: parsed.data.academic_year,
         department: parsed.data.department,
+        term: parsed.data.term || "second",
         created_by: profile.id,
         is_active: true,
       })
@@ -952,6 +955,7 @@ export async function saveSubmissionWindowAction(
         name: parsed.data.cycle_name,
         academic_year: parsed.data.academic_year,
         department: parsed.data.department,
+        term: parsed.data.term || "second",
         is_active: true,
       })
       .eq("id", cycleId);
