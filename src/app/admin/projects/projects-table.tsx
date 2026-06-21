@@ -59,18 +59,31 @@ const columns = [
       />
     ),
   }),
+  columnHelper.accessor("project_number", {
+    header: "رقم المشروع",
+    cell: (info) => (
+      <span className="font-mono text-sm text-slate-700">{info.getValue() || "—"}</span>
+    ),
+  }),
   columnHelper.accessor("title", {
     header: "المشروع",
     cell: (info) => (
       <div>
-        <p className="font-medium text-slate-950">{info.getValue()}</p>
+        <p className="font-medium text-slate-950">{info.getValue() || "—"}</p>
         <p className="text-xs text-slate-500">{info.row.original.team_leader_name}</p>
       </div>
     ),
   }),
   columnHelper.accessor("status", {
     header: "الحالة",
-    cell: (info) => <Badge tone={info.getValue() === "submitted" ? "success" : "info"}>{projectStatusLabel(info.getValue())}</Badge>,
+    cell: (info) =>
+      info.row.original.awaiting_leader ? (
+        <Badge tone="warning">بانتظار القائد</Badge>
+      ) : (
+        <Badge tone={info.getValue() === "submitted" ? "success" : "info"}>
+          {projectStatusLabel(info.getValue())}
+        </Badge>
+      ),
   }),
   columnHelper.accessor("supervisor_name", {
     header: "المشرف",

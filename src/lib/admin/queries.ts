@@ -67,11 +67,15 @@ export type AdminProjectDetail = AdminProjectRow & {
 
 type RawProject = {
   id: string;
-  title: string;
+  project_number: string | null;
+  title: string | null;
+  title_en: string | null;
   status: string;
   department: string | null;
-  supervisor_name: string;
+  supervisor_name: string | null;
   submitted_at: string | null;
+  team_leader_id: string | null;
+  leader_full_name: string | null;
   profiles: { full_name: string } | null;
   panel_assignments: { panel_member_id: string }[] | null;
   team_members: { id: string }[] | null;
@@ -96,13 +100,19 @@ function toProjectRow(project: RawProject): AdminProjectRow {
     supervision_completed_count: supervisionCompleted,
   };
 
+  const awaitingLeader = !project.team_leader_id;
+
   return {
     id: project.id,
-    title: project.title,
+    project_number: project.project_number,
+    title: project.title || "",
+    title_en: project.title_en,
     status: project.status,
+    awaiting_leader: awaitingLeader,
     department: project.department || "",
-    supervisor_name: project.supervisor_name,
-    team_leader_name: project.profiles?.full_name || "طالب غير معروف",
+    supervisor_name: project.supervisor_name || "",
+    team_leader_name:
+      project.profiles?.full_name || project.leader_full_name || "بانتظار تسجيل القائد",
     active_assignment_count: activePanelMemberIds.length,
     team_member_count: teamMemberCount,
     ...counts,
@@ -132,7 +142,7 @@ function toAssignment(assignment: RawAssignment): Assignment {
 }
 
 const PROJECT_ROW_SELECT =
-  "id, title, status, department, supervisor_name, submitted_at, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(panel_member_id), team_members(id), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)";
+  "id, project_number, title, title_en, status, department, supervisor_name, submitted_at, team_leader_id, leader_full_name, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(panel_member_id), team_members(id), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)";
 
 export async function getAdminProjects() {
   const supabase = await createSupabaseServerClient();
@@ -151,7 +161,7 @@ export async function getAdminProjectDetail(projectId: string) {
   const { data: project } = await supabase
     .from("projects")
     .select(
-      "id, title, abstract, status, department, supervisor_name, technologies_used, github_url, demo_video_url, submitted_at, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(panel_member_id), team_members(id), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)",
+      "id, project_number, title, title_en, abstract, status, department, supervisor_name, technologies_used, github_url, demo_video_url, submitted_at, team_leader_id, leader_full_name, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(panel_member_id), team_members(id), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)",
     )
     .is("panel_assignments.revoked_at", null)
     .eq("panel_assignments.is_active", true)

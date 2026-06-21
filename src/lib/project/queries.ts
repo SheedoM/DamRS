@@ -4,9 +4,11 @@ import { createSignedUrlForProjectFile } from "@/lib/project/storage";
 export type StudentProject = {
   id: string;
   cycle_id: string;
-  title: string;
-  abstract: string;
-  supervisor_name: string;
+  project_number: string | null;
+  title: string | null;
+  title_en: string | null;
+  abstract: string | null;
+  supervisor_name: string | null;
   technologies_used: string | null;
   github_url: string | null;
   demo_video_url: string | null;
@@ -62,7 +64,7 @@ export async function getStudentProject(teamLeaderId: string) {
   const { data: project } = await supabase
     .from("projects")
     .select(
-      "id, cycle_id, title, abstract, supervisor_name, technologies_used, github_url, demo_video_url, status, submitted_at, created_at, updated_at",
+      "id, cycle_id, project_number, title, title_en, abstract, supervisor_name, technologies_used, github_url, demo_video_url, status, submitted_at, created_at, updated_at",
     )
     .eq("team_leader_id", teamLeaderId)
     .order("created_at", { ascending: false })

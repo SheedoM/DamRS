@@ -31,7 +31,8 @@ export const teamMemberSchema = z.object({
 });
 
 export const projectFormSchema = z.object({
-  title: z.string().trim().min(5, "عنوان المشروع مطلوب."),
+  title: z.string().trim().min(5, "عنوان المشروع بالعربية مطلوب."),
+  title_en: z.string().trim().min(5, "عنوان المشروع بالإنجليزية مطلوب."),
   abstract: z.string().trim().min(20, "ملخص المشروع يجب أن يكون 20 حرفًا على الأقل."),
   supervisor_name: z.string().trim().min(2, "اسم المشرف مطلوب."),
   technologies_used: z.string().trim().optional().transform((value) => value || null),
@@ -55,6 +56,7 @@ export type ProjectFormData = z.output<typeof projectFormSchema>;
 
 type SubmissionRequirementInput = {
   title: string | null;
+  title_en: string | null;
   abstract: string | null;
   supervisor_name: string | null;
   demo_video_url: string | null;
@@ -74,7 +76,8 @@ function isBlank(value: string | null) {
 export function getMissingSubmissionRequirements(input: SubmissionRequirementInput) {
   const missing: string[] = [];
 
-  if (isBlank(input.title)) missing.push("عنوان المشروع");
+  if (isBlank(input.title)) missing.push("عنوان المشروع بالعربية");
+  if (isBlank(input.title_en)) missing.push("عنوان المشروع بالإنجليزية");
   if (isBlank(input.abstract)) missing.push("ملخص المشروع");
   if (isBlank(input.supervisor_name)) missing.push("اسم المشرف");
   if (isBlank(input.demo_video_url)) missing.push("رابط فيديو العرض");

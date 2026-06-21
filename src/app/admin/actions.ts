@@ -26,15 +26,15 @@ const createPanelMemberSchema = z.object({
   panel_member_type: z.enum(["supervisor", "referee", "committee_head"]),
 });
 
-const createStudentSchema = z.object({
-  full_name: z.string().trim().min(2),
-  student_id: z.string().trim().min(3),
-  national_id: z.string().trim().regex(/^\d{14}$/),
-  program: z.enum(programValues, { message: "اختر البرنامج." }),
-});
-
 const eligibleStudentsSchema = z.object({
   university_ids: z.string().trim().min(1),
+});
+
+const pendingProjectSchema = z.object({
+  project_number: z.string().trim().min(1, "رقم المشروع مطلوب."),
+  leader_university_id: z.string().trim().min(3, "الرقم الجامعي لقائد الفريق مطلوب."),
+  leader_full_name: z.string().trim().min(2, "اسم قائد الفريق مطلوب."),
+  leader_program: z.enum(programValues, { message: "اختر البرنامج." }),
 });
 
 const bulkAssignSchema = z.object({
@@ -287,6 +287,7 @@ export async function createAdminProjectAction(
 
   const parsed = projectFormSchema.safeParse({
     title: formData.get("title"),
+    title_en: formData.get("title_en"),
     abstract: formData.get("abstract"),
     supervisor_name: formData.get("supervisor_name"),
     technologies_used: formData.get("technologies_used"),
@@ -395,82 +396,72 @@ export async function createAdminProjectAction(
   };
 }
 
-export async function createStudentAccountAction(
+// Primary flow: pre-create a project shell stamped with a number and assigned to
+// a leader university ID. No account is created yet — the leader signs up later
+// (with their national ID as password) and claims this pending project.
+export async function createPendingProjectAction(
   _previousState: ActionResult,
   formData: FormData,
 ): Promise<ActionResult> {
   const { profile } = await requireRole(["admin"]);
-  const parsed = createStudentSchema.safeParse({
-    full_name: formData.get("full_name"),
-    student_id: formData.get("student_id"),
-    national_id: formData.get("national_id"),
-    program: formData.get("program"),
+  const parsed = pendingProjectSchema.safeParse({
+    project_number: formData.get("project_number"),
+    leader_university_id: formData.get("leader_university_id"),
+    leader_full_name: formData.get("leader_full_name"),
+    leader_program: formData.get("leader_program"),
   });
 
   if (!parsed.success) {
-    return { ok: false, message: parsed.error.issues[0]?.message || "بيانات الطالب غير صالحة." };
+    return { ok: false, message: parsed.error.issues[0]?.message || "بيانات المشروع غير صالحة." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const { data: cycle } = await supabase
+    .from("discussion_cycles")
+    .select("id")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!cycle) {
+    return { ok: false, message: "لا توجد دورة مناقشة مفعّلة. أنشئ نافذة التسليم أولًا." };
   }
 
   let adminClient;
   try {
     adminClient = createSupabaseAdminClient();
   } catch (error) {
-    return {
-      ok: false,
-      message: error instanceof Error ? error.message : "مفتاح خدمة Supabase غير متوفر.",
-    };
+    return { ok: false, message: error instanceof Error ? error.message : "مفتاح خدمة Supabase غير متوفر." };
   }
 
-  // Derive a stable email from the student ID — students never see this.
-  // Password is the national ID — simple, memorable, no temp password needed.
-  const derivedEmail = `${parsed.data.student_id}@damrs.edu`;
-  const password = parsed.data.national_id;
-
-  const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
-    email: derivedEmail,
-    password,
-    email_confirm: true,
-    user_metadata: { full_name: parsed.data.full_name, role: "student" },
-  });
-
-  if (authError || !authUser.user) {
-    return { ok: false, message: authError?.message || "تعذّر إنشاء حساب المستخدم." };
-  }
-
-  const { error: profileError } = await adminClient.from("profiles").insert({
-    id: authUser.user.id,
-    full_name: parsed.data.full_name,
-    email: derivedEmail,
-    role: "student",
-    student_id: parsed.data.student_id,
-    national_id: parsed.data.national_id,
-    program: parsed.data.program,
-  });
-
-  if (profileError) {
-    await adminClient.auth.admin.deleteUser(authUser.user.id);
-    return { ok: false, message: profileError.message };
-  }
-
-  // Mark the matching roster entry (if any) for the active cycle as claimed.
-  const { data: cycle } = await adminClient
-    .from("discussion_cycles")
+  const { data: createdProject, error: projectError } = await adminClient
+    .from("projects")
+    .insert({
+      cycle_id: cycle.id,
+      project_number: parsed.data.project_number,
+      leader_university_id: parsed.data.leader_university_id,
+      leader_full_name: parsed.data.leader_full_name,
+      leader_program: parsed.data.leader_program,
+      team_leader_id: null,
+      status: "draft",
+    })
     .select("id")
-    .eq("is_active", true)
-    .limit(1)
-    .maybeSingle();
-  if (cycle) {
-    await adminClient
-      .from("eligible_students")
-      .update({ claimed_by: authUser.user.id, claimed_at: new Date().toISOString() })
-      .eq("cycle_id", cycle.id)
-      .eq("university_id", parsed.data.student_id)
-      .is("claimed_by", null);
+    .single();
+
+  if (projectError || !createdProject) {
+    // 23505 = unique_violation (duplicate project_number within the cycle).
+    if (projectError?.code === "23505") {
+      return { ok: false, message: `رقم المشروع «${parsed.data.project_number}» مستخدم بالفعل في هذه الدورة.` };
+    }
+    return { ok: false, message: projectError?.message || "تعذّر إنشاء المشروع." };
   }
 
-  await writeAuditLog(profile.id, "admin_created_student", "profile", authUser.user.id);
-  revalidatePath("/admin/students");
-  return { ok: true, message: "تم إنشاء حساب الطالب بنجاح." };
+  await writeAuditLog(profile.id, "admin_created_pending_project", "project", createdProject.id as string);
+  revalidatePath("/", "layout");
+  return {
+    ok: true,
+    message: `تم إنشاء المشروع رقم «${parsed.data.project_number}». يمكن لقائد الفريق التسجيل الآن برقمه الجامعي والرقم القومي.`,
+  };
 }
 
 export async function addEligibleStudentsAction(

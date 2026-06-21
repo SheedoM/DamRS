@@ -61,6 +61,7 @@ function parseProjectForm(formData: FormData) {
 
   return projectFormSchema.safeParse({
     title: formData.get("title"),
+    title_en: formData.get("title_en"),
     abstract: formData.get("abstract"),
     supervisor_name: formData.get("supervisor_name"),
     technologies_used: formData.get("technologies_used"),
@@ -288,7 +289,7 @@ export async function submitProjectAction(
   const supabase = await createSupabaseServerClient();
   const { data: project, error: projectError } = await supabase
     .from("projects")
-    .select("id, title, abstract, supervisor_name, demo_video_url")
+    .select("id, title, title_en, abstract, supervisor_name, demo_video_url")
     .eq("id", parsed.data.projectId)
     .single();
 
@@ -309,6 +310,7 @@ export async function submitProjectAction(
 
   const missing = getMissingSubmissionRequirements({
     title: project.title as string | null,
+    title_en: project.title_en as string | null,
     abstract: project.abstract as string | null,
     supervisor_name: project.supervisor_name as string | null,
     demo_video_url: project.demo_video_url as string | null,

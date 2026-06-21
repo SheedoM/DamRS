@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
 
 import { AdminProjectsTable } from "./projects-table";
+import { CreatePendingProjectForm } from "./create-pending-project-form";
 import { AppShell } from "@/components/layout/app-shell";
 import { buttonVariants } from "@/components/ui/button";
 import { requireRole } from "@/lib/auth/require-role";
@@ -30,10 +30,13 @@ export default async function AdminProjectsPage({
   return (
     <AppShell title="المشاريع" profile={profile}>
       <div className="space-y-4">
-        <div className="flex justify-end">
-          <Link href="/admin/projects/new" data-tour="admin-projects-create" className={cn(buttonVariants({ size: "sm" }))}>
-            <Plus className="h-4 w-4" aria-hidden="true" />
-            إنشاء مشروع
+        <div className="flex flex-wrap items-start justify-between gap-3" data-tour="admin-projects-create">
+          <CreatePendingProjectForm />
+          <Link
+            href="/admin/projects/new"
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+          >
+            إنشاء مشروع كامل (احتياطي)
           </Link>
         </div>
         <div data-tour="admin-projects-table">

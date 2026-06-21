@@ -8,8 +8,11 @@ export type GradingFilter = "all" | "graded" | "partial" | "not-graded";
 
 export type AdminProjectRow = {
   id: string;
+  project_number: string | null;
   title: string;
+  title_en: string | null;
   status: string;
+  awaiting_leader: boolean;
   department: string;
   supervisor_name: string;
   team_leader_name: string;

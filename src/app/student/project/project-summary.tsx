@@ -37,6 +37,7 @@ const requiredUploads: {
 export function ProjectSummary({ project, teamMembers, files }: ProjectSummaryProps) {
   const missing = getMissingSubmissionRequirements({
     title: project.title,
+    title_en: project.title_en,
     abstract: project.abstract,
     supervisor_name: project.supervisor_name,
     demo_video_url: project.demo_video_url,
@@ -66,7 +67,17 @@ export function ProjectSummary({ project, teamMembers, files }: ProjectSummaryPr
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div>
             <CardTitle>نظرة عامة على المشروع</CardTitle>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">{project.title}</h2>
+            {project.project_number ? (
+              <p className="mt-1 text-sm font-medium text-[var(--brand-blue)]">
+                رقم المشروع: {project.project_number}
+              </p>
+            ) : null}
+            <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+              {project.title || "بانتظار إدخال بيانات المشروع"}
+            </h2>
+            {project.title_en ? (
+              <p className="mt-1 text-base text-slate-600" dir="ltr">{project.title_en}</p>
+            ) : null}
           </div>
           <Badge tone={project.status === "submitted" ? "success" : "warning"}>
             {projectStatusLabel(project.status)}

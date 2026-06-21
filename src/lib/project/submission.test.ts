@@ -16,6 +16,7 @@ describe("project submission validation", () => {
   it("accepts a complete project form with team members", () => {
     const result = projectFormSchema.safeParse({
       title: "Smart Attendance System",
+      title_en: "Smart Attendance System",
       abstract: "A graduation project that tracks attendance with computer vision.",
       supervisor_name: "Dr. Example",
       technologies_used: "Next.js, Supabase, Python",
@@ -38,6 +39,7 @@ describe("project submission validation", () => {
   it("reports missing submission requirements before final submit", () => {
     const missing = getMissingSubmissionRequirements({
       title: "Smart Attendance System",
+      title_en: "Smart Attendance System",
       abstract: "",
       supervisor_name: "",
       demo_video_url: "",
@@ -57,6 +59,7 @@ describe("project submission validation", () => {
   it("returns no missing requirements when required PDF and ZIP are uploaded", () => {
     const missing = getMissingSubmissionRequirements({
       title: "Smart Attendance System",
+      title_en: "Smart Attendance System",
       abstract: "Complete abstract",
       supervisor_name: "Dr. Example",
       demo_video_url: "https://drive.google.com/file/d/example",

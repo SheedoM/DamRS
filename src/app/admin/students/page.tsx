@@ -1,4 +1,3 @@
-import { CreateStudentForm } from "./create-student-form";
 import { RosterForm } from "./roster-form";
 import { StudentsTabs } from "./students-tabs";
 import { AppShell } from "@/components/layout/app-shell";
@@ -25,7 +24,9 @@ export default async function AdminStudentsPage() {
         <CardTitle>حسابات الطلاب</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <CreateStudentForm />
+        <p className="text-sm text-slate-500">
+          تُنشأ حسابات قادة الفرق تلقائيًا عند تسجيلهم الذاتي بعد إنشاء مشاريعهم من صفحة المشاريع.
+        </p>
         <div className="space-y-3">
           {students.length > 0 ? students.map((student) => (
             <div key={student.id} className="rounded-md border border-slate-200 p-3">

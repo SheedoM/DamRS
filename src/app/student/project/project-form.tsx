@@ -62,6 +62,7 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
     resolver: zodResolver(projectFormSchema),
     defaultValues: {
       title: project?.title || "",
+      title_en: project?.title_en || "",
       abstract: project?.abstract || "",
       supervisor_name: project?.supervisor_name || "",
       technologies_used: project?.technologies_used || "",
@@ -108,16 +109,28 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
       ) : null}
       {isAdminCreate ? (
         <p className="rounded-md bg-slate-100 p-3 text-sm text-slate-600">
-          سيتم إنشاء حساب دخول لقائد الفريق (العضو ذي الدور «قائد الفريق») تلقائيًا — تأكد من إدخال بريده الإلكتروني.
+          سيتم إنشاء حساب دخول لقائد الفريق (العضو ذي الدور «قائد الفريق») تلقائيًا باستخدام رقمه الجامعي والرقم القومي ككلمة مرور.
         </p>
       ) : null}
 
       <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
         <div className="grid gap-4 md:grid-cols-2">
+          {project?.project_number ? (
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="project_number_display">رقم المشروع</Label>
+              <Input id="project_number_display" value={project.project_number} disabled readOnly />
+              <p className="text-xs text-slate-500">رقم المشروع محدد من قبل الإدارة ولا يمكن تعديله.</p>
+            </div>
+          ) : null}
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="title">عنوان المشروع</Label>
+            <Label htmlFor="title">عنوان المشروع (بالعربية)</Label>
             <Input id="title" {...register("title")} />
             <FieldError message={errors.title?.message} />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="title_en">عنوان المشروع (بالإنجليزية)</Label>
+            <Input id="title_en" dir="ltr" {...register("title_en")} />
+            <FieldError message={errors.title_en?.message} />
           </div>
           <div className="space-y-2 md:col-span-2">
             <Label htmlFor="abstract">الملخص</Label>

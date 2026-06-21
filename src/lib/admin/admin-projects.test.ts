@@ -10,8 +10,11 @@ import {
 function makeProject(overrides: Partial<AdminProjectRow>): AdminProjectRow {
   return {
     id: "p",
+    project_number: "1",
     title: "Project",
+    title_en: "Project",
     status: "submitted",
+    awaiting_leader: false,
     department: "Computer Science",
     supervisor_name: "Dr. X",
     team_leader_name: "Student X",
