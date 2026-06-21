@@ -13,7 +13,7 @@ export function UpdatePasswordForm() {
   return (
     <form action={action} className="space-y-4">
       {state && !state.ok && (
-        <Alert variant="destructive">
+        <Alert className="bg-red-50 text-red-900 border-red-200">
           {state.message}
         </Alert>
       )}
