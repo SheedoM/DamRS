@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowRight, FileText } from "lucide-react";
 
 import { DiscussionForm } from "./discussion-form";
+import { SupervisionForm } from "./supervision-form";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -93,26 +94,52 @@ export default async function PanelProjectDetailPage({
           </CardContent>
         </Card>
 
-        <Card data-tour="panel-discussion">
-          <CardHeader>
-            <CardTitle>أعضاء الفريق وتقييم المناقشة</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {grading.isOpen ? (
-              <DiscussionForm
-                projectId={project.id}
-                students={project.team_members.map((member) => ({
-                  id: member.id,
-                  full_name: member.full_name,
-                  student_id: member.student_id,
-                }))}
-                existingScores={existingScores}
-              />
-            ) : (
-              <Alert>باب التقييم مغلق حاليًا. لا يمكنك إدخال أو تعديل الدرجات حتى يفتحه المسؤول.</Alert>
-            )}
-          </CardContent>
-        </Card>
+        {project.roles.committee ? (
+          <Card data-tour="panel-discussion">
+            <CardHeader>
+              <CardTitle>تقييم المناقشة (عضو لجنة)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {grading.isOpen ? (
+                <DiscussionForm
+                  projectId={project.id}
+                  students={project.team_members.map((member) => ({
+                    id: member.id,
+                    full_name: member.full_name,
+                    student_id: member.student_id,
+                  }))}
+                  existingScores={existingScores}
+                />
+              ) : (
+                <Alert>باب التقييم مغلق حاليًا. لا يمكنك إدخال أو تعديل الدرجات حتى يفتحه المسؤول.</Alert>
+              )}
+            </CardContent>
+          </Card>
+        ) : null}
+
+        {project.roles.supervisor ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>{project.term === "first" ? "أعمال الفصل (المشرف)" : "أعمال السنة (المشرف)"}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {grading.isOpen ? (
+                <SupervisionForm
+                  projectId={project.id}
+                  term={project.term}
+                  students={project.team_members.map((member) => ({
+                    id: member.id,
+                    full_name: member.full_name,
+                    student_id: member.student_id,
+                  }))}
+                  existing={project.supervision}
+                />
+              ) : (
+                <Alert>باب التقييم مغلق حاليًا. لا يمكنك إدخال أو تعديل الدرجات حتى يفتحه المسؤول.</Alert>
+              )}
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
     </AppShell>
   );

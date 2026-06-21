@@ -21,8 +21,11 @@ type RawAssignment = {
   id: string;
   project_id: string;
   assigned_at: string;
+  role?: string;
   projects: ProjectRelation | ProjectRelation[] | null;
 };
+
+export type PanelRoles = { committee: boolean; supervisor: boolean };
 
 export type PanelProjectListItem = {
   id: string;
@@ -33,6 +36,13 @@ export type PanelProjectListItem = {
   submitted_at: string | null;
   assigned_at: string;
   graded: boolean;
+  roles: PanelRoles;
+};
+
+export type SupervisionEntry = {
+  team_member_id: string;
+  first_semester_score: number;
+  supervision_score: number;
 };
 
 export type PanelProjectDetail = PanelProjectListItem & {
@@ -40,6 +50,8 @@ export type PanelProjectDetail = PanelProjectListItem & {
   technologies_used: string | null;
   github_url: string | null;
   demo_video_url: string | null;
+  term: "first" | "second";
+  supervision: SupervisionEntry[];
   team_members: {
     id: string;
     full_name: string;
@@ -65,6 +77,7 @@ export type PanelProjectDetail = PanelProjectListItem & {
 function toProjectListItem(
   assignment: RawAssignment,
   gradedProjectIds: Set<string>,
+  roles: PanelRoles,
 ): PanelProjectListItem | null {
   const project = firstRelation(assignment.projects);
   if (!project) return null;
@@ -80,6 +93,7 @@ function toProjectListItem(
     submitted_at: project.submitted_at,
     assigned_at: assignment.assigned_at,
     graded: gradedProjectIds.has(project.id),
+    roles,
   };
 }
 
@@ -102,7 +116,7 @@ export async function getPanelProjects(panelMemberId: string) {
   const { data } = await supabase
     .from("panel_assignments")
     .select(
-      "id, project_id, assigned_at, projects(id, title, status, supervisor_name, submitted_at, profiles!projects_team_leader_id_fkey(full_name))",
+      "id, project_id, assigned_at, role, projects(id, title, status, supervisor_name, submitted_at, profiles!projects_team_leader_id_fkey(full_name))",
     )
     .eq("panel_member_id", panelMemberId)
     .eq("is_active", true)
@@ -110,11 +124,21 @@ export async function getPanelProjects(panelMemberId: string) {
     .order("assigned_at", { ascending: false });
 
   const assignments = (data || []) as unknown as RawAssignment[];
-  const projectIds = assignments.map((assignment) => assignment.project_id);
+  const projectIds = [...new Set(assignments.map((a) => a.project_id))];
   const gradedProjectIds = await getGradedProjectIds(projectIds, panelMemberId);
 
-  return assignments
-    .map((assignment) => toProjectListItem(assignment, gradedProjectIds))
+  // A member can have both a committee and a supervisor assignment on one
+  // project — collapse to a single row with the combined roles.
+  const byProject = new Map<string, { assignment: RawAssignment; roles: PanelRoles }>();
+  for (const a of assignments) {
+    const entry = byProject.get(a.project_id) || { assignment: a, roles: { committee: false, supervisor: false } };
+    if (a.role === "supervisor") entry.roles.supervisor = true;
+    else entry.roles.committee = true;
+    byProject.set(a.project_id, entry);
+  }
+
+  return [...byProject.values()]
+    .map(({ assignment, roles }) => toProjectListItem(assignment, gradedProjectIds, roles))
     .filter((project): project is PanelProjectListItem => Boolean(project));
 }
 
@@ -186,30 +210,40 @@ export async function getPanelDashboardData(panelMemberId: string) {
   };
 }
 
+function termOf(rel: { term?: string } | { term?: string }[] | null | undefined): "first" | "second" {
+  const c = Array.isArray(rel) ? rel[0] : rel;
+  return c?.term === "first" ? "first" : "second";
+}
+
 export async function getPanelProjectDetail(projectId: string, panelMemberId: string) {
   const supabase = await createSupabaseServerClient();
 
-  const [{ data: assignment }, { data: project }] = await Promise.all([
+  const [{ data: assignments }, { data: project }] = await Promise.all([
     supabase
       .from("panel_assignments")
-      .select("id, project_id, assigned_at")
+      .select("id, project_id, assigned_at, role")
       .eq("project_id", projectId)
       .eq("panel_member_id", panelMemberId)
       .eq("is_active", true)
-      .is("revoked_at", null)
-      .maybeSingle(),
+      .is("revoked_at", null),
     supabase
       .from("projects")
       .select(
-        "id, title, abstract, status, supervisor_name, technologies_used, github_url, demo_video_url, submitted_at, profiles!projects_team_leader_id_fkey(full_name)",
+        "id, title, abstract, status, supervisor_name, technologies_used, github_url, demo_video_url, submitted_at, discussion_cycles(term), profiles!projects_team_leader_id_fkey(full_name)",
       )
       .eq("id", projectId)
       .maybeSingle(),
   ]);
 
-  if (!assignment || !project) return null;
+  const assignmentRows = (assignments || []) as { id: string; project_id: string; assigned_at: string; role: string }[];
+  if (assignmentRows.length === 0 || !project) return null;
 
-  const [{ data: teamMembers }, { data: files }, gradedProjectIds] = await Promise.all([
+  const roles: PanelRoles = {
+    committee: assignmentRows.some((a) => a.role !== "supervisor"),
+    supervisor: assignmentRows.some((a) => a.role === "supervisor"),
+  };
+
+  const [{ data: teamMembers }, { data: files }, { data: supervision }, gradedProjectIds] = await Promise.all([
     supabase
       .from("team_members")
       .select("id, full_name, student_id, national_id, program, role_in_team")
@@ -220,17 +254,24 @@ export async function getPanelProjectDetail(projectId: string, panelMemberId: st
       .select("id, file_type, file_name, storage_path, file_size, mime_type, created_at")
       .eq("project_id", projectId)
       .order("created_at", { ascending: false }),
+    roles.supervisor
+      ? supabase
+          .from("student_supervision_grades")
+          .select("team_member_id, first_semester_score, supervision_score")
+          .eq("project_id", projectId)
+      : Promise.resolve({ data: [] as SupervisionEntry[] }),
     getGradedProjectIds([projectId], panelMemberId),
   ]);
 
   const listItem = toProjectListItem(
     {
-      id: assignment.id,
-      project_id: assignment.project_id,
-      assigned_at: assignment.assigned_at,
+      id: assignmentRows[0].id,
+      project_id: assignmentRows[0].project_id,
+      assigned_at: assignmentRows[0].assigned_at,
       projects: project as unknown as ProjectRelation,
     },
     gradedProjectIds,
+    roles,
   );
 
   if (!listItem) return null;
@@ -248,6 +289,12 @@ export async function getPanelProjectDetail(projectId: string, panelMemberId: st
     technologies_used: project.technologies_used as string | null,
     github_url: project.github_url as string | null,
     demo_video_url: project.demo_video_url as string | null,
+    term: termOf((project as { discussion_cycles?: { term?: string } | { term?: string }[] }).discussion_cycles),
+    supervision: (supervision || []).map((s) => ({
+      team_member_id: s.team_member_id as string,
+      first_semester_score: Number(s.first_semester_score),
+      supervision_score: Number(s.supervision_score),
+    })),
     team_members: teamMembers || [],
     files: filesWithSignedUrls,
   } as PanelProjectDetail;
