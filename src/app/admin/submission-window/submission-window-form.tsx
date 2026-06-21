@@ -35,8 +35,25 @@ export function SubmissionWindowForm({ mode, windowData }: SubmissionWindowFormP
   const [state, formAction, isPending] = useActionState(saveSubmissionWindowAction, initialState);
   const isCreateMode = mode === "create";
 
+  const actionWrapper = (formData: FormData) => {
+    const opensAt = formData.get("opens_at") as string;
+    const closesAt = formData.get("closes_at") as string;
+    
+    // Parse the local datetime string into a proper Date object on the client (which knows the timezone),
+    // then convert to ISO UTC string so the server doesn't misinterpret the local time.
+    if (opensAt) formData.set("opens_at", new Date(opensAt).toISOString());
+    if (closesAt) formData.set("closes_at", new Date(closesAt).toISOString());
+    
+    // Start transition to avoid React warnings with async actionWrapper
+    import("react").then((React) => {
+      React.startTransition(() => {
+        formAction(formData);
+      });
+    });
+  };
+
   return (
-    <form action={formAction} className="space-y-5 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <form action={actionWrapper} className="space-y-5 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
       {!state.ok ? <Alert>{state.message}</Alert> : null}
       {state.ok && state.message ? <p className="text-sm text-emerald-700">{state.message}</p> : null}
       <input type="hidden" name="cycle_id" value={isCreateMode ? "" : windowData?.cycle_id || ""} />
