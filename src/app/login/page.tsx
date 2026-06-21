@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
@@ -218,6 +219,14 @@ export default function LoginPage() {
                   "تسجيل الدخول"
                 )}
               </Button>
+              {mode === "student" ? (
+                <p className="text-center text-sm text-slate-500">
+                  ليس لديك حساب طالب؟{" "}
+                  <Link href="/register" className="font-semibold text-[var(--brand-blue)] hover:underline">
+                    إنشاء حساب
+                  </Link>
+                </p>
+              ) : null}
             </form>
           </CardContent>
         </Card>
