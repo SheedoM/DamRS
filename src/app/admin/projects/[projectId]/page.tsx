@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowRight, FileText } from "lucide-react";
 
 import { StudentGradesForm } from "./student-grades-form";
+import { DeleteProjectButton } from "./delete-project-button";
 import { AssignPanelMemberForm, RevokeAssignmentForm } from "../assignment-forms";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -42,10 +43,21 @@ export default async function AdminProjectDetailPage({
   return (
     <AppShell title="تفاصيل المشروع" profile={profile}>
       <div className="space-y-5">
-        <Link href="/admin/projects" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "w-fit")}>
-          <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          العودة إلى المشاريع
-        </Link>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link href="/admin/projects" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "w-fit")}>
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            العودة إلى المشاريع
+          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/admin/projects/${project.id}/edit`}
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            >
+              تعديل المشروع
+            </Link>
+            <DeleteProjectButton projectId={project.id} />
+          </div>
+        </div>
         <Card data-tour="project-info">
           <CardHeader className="flex flex-row items-start justify-between gap-4">
             <div>

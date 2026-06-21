@@ -37,6 +37,30 @@ const pendingProjectSchema = z.object({
   leader_program: z.enum(programValues, { message: "اختر البرنامج." }),
 });
 
+// Lenient: admins may correct any field, including on incomplete pending
+// projects, so only the project number is required.
+const optionalText = z.string().trim().optional().transform((v) => v || null);
+const optionalProgram = z
+  .string()
+  .trim()
+  .optional()
+  .transform((v) => (v ? v : null))
+  .refine((v) => v === null || (programValues as readonly string[]).includes(v), "برنامج غير صالح.");
+
+const adminProjectEditSchema = z.object({
+  project_number: z.string().trim().min(1, "رقم المشروع مطلوب."),
+  title: optionalText,
+  title_en: optionalText,
+  supervisor_name: optionalText,
+  abstract: optionalText,
+  technologies_used: optionalText,
+  github_url: optionalText,
+  demo_video_url: optionalText,
+  leader_university_id: optionalText,
+  leader_full_name: optionalText,
+  leader_program: optionalProgram,
+});
+
 const bulkAssignSchema = z.object({
   panel_member_id: z.string().uuid(),
   project_ids: z.array(z.string().uuid()).min(1),
@@ -462,6 +486,140 @@ export async function createPendingProjectAction(
     ok: true,
     message: `تم إنشاء المشروع رقم «${parsed.data.project_number}». يمكن لقائد الفريق التسجيل الآن برقمه الجامعي والرقم القومي.`,
   };
+}
+
+// Admin edit of any project (incl. number, leader info, titles, team roster).
+export async function updateAdminProjectAction(
+  _previousState: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const { profile } = await requireRole(["admin"]);
+  const projectId = String(formData.get("project_id") || "");
+  if (!z.string().uuid().safeParse(projectId).success) {
+    return { ok: false, message: "معرّف المشروع غير صالح." };
+  }
+
+  const parsed = adminProjectEditSchema.safeParse({
+    project_number: formData.get("project_number"),
+    title: formData.get("title"),
+    title_en: formData.get("title_en"),
+    supervisor_name: formData.get("supervisor_name"),
+    abstract: formData.get("abstract"),
+    technologies_used: formData.get("technologies_used"),
+    github_url: formData.get("github_url"),
+    demo_video_url: formData.get("demo_video_url"),
+    leader_university_id: formData.get("leader_university_id"),
+    leader_full_name: formData.get("leader_full_name"),
+    leader_program: formData.get("leader_program"),
+  });
+  if (!parsed.success) {
+    return { ok: false, message: parsed.error.issues[0]?.message || "بيانات المشروع غير صالحة." };
+  }
+
+  // Parse team-member rows (lenient: national ID optional for admin edits).
+  const indexes = Array.from(formData.keys())
+    .map((key) => key.match(/^team_members\.(\d+)\.full_name$/)?.[1])
+    .filter((value): value is string => Boolean(value));
+  const teamMembers = indexes
+    .map((index) => ({
+      full_name: String(formData.get(`team_members.${index}.full_name`) || "").trim(),
+      student_id: String(formData.get(`team_members.${index}.student_id`) || "").trim(),
+      national_id: String(formData.get(`team_members.${index}.national_id`) || "").trim() || null,
+      program: String(formData.get(`team_members.${index}.program`) || "").trim() || null,
+      role_in_team: String(formData.get(`team_members.${index}.role_in_team`) || "member"),
+    }))
+    .filter((m) => m.full_name && m.student_id);
+
+  let adminClient;
+  try {
+    adminClient = createSupabaseAdminClient();
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : "مفتاح خدمة Supabase غير متوفر." };
+  }
+
+  const { data: existing } = await adminClient
+    .from("projects")
+    .select("id, cycle_id")
+    .eq("id", projectId)
+    .maybeSingle();
+  if (!existing) {
+    return { ok: false, message: "لم يتم العثور على المشروع." };
+  }
+
+  // Project number must stay unique within the cycle.
+  const { data: clash } = await adminClient
+    .from("projects")
+    .select("id")
+    .eq("cycle_id", existing.cycle_id)
+    .eq("project_number", parsed.data.project_number)
+    .neq("id", projectId)
+    .maybeSingle();
+  if (clash) {
+    return { ok: false, message: `رقم المشروع «${parsed.data.project_number}» مستخدم بالفعل في هذه الدورة.` };
+  }
+
+  const { error: updateError } = await adminClient
+    .from("projects")
+    .update({
+      project_number: parsed.data.project_number,
+      title: parsed.data.title,
+      title_en: parsed.data.title_en,
+      supervisor_name: parsed.data.supervisor_name,
+      abstract: parsed.data.abstract,
+      technologies_used: parsed.data.technologies_used,
+      github_url: parsed.data.github_url,
+      demo_video_url: parsed.data.demo_video_url,
+      leader_university_id: parsed.data.leader_university_id,
+      leader_full_name: parsed.data.leader_full_name,
+      leader_program: parsed.data.leader_program,
+    })
+    .eq("id", projectId);
+  if (updateError) {
+    return { ok: false, message: updateError.message };
+  }
+
+  // Replace the team roster with the submitted rows.
+  await adminClient.from("team_members").delete().eq("project_id", projectId);
+  if (teamMembers.length > 0) {
+    const { error: teamError } = await adminClient.from("team_members").insert(
+      teamMembers.map((m) => ({ ...m, project_id: projectId })),
+    );
+    if (teamError) {
+      return { ok: false, message: teamError.message };
+    }
+  }
+
+  await writeAuditLog(profile.id, "admin_updated_project", "project", projectId);
+  revalidatePath("/", "layout");
+  redirect(`/admin/projects/${projectId}?success=updated`);
+}
+
+export async function deleteAdminProjectAction(
+  _previousState: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const { profile } = await requireRole(["admin"]);
+  const projectId = String(formData.get("project_id") || "");
+  if (!z.string().uuid().safeParse(projectId).success) {
+    return { ok: false, message: "معرّف المشروع غير صالح." };
+  }
+
+  let adminClient;
+  try {
+    adminClient = createSupabaseAdminClient();
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : "مفتاح خدمة Supabase غير متوفر." };
+  }
+
+  // Cascades to team_members / files / panel_assignments / scores / supervision.
+  const { error } = await adminClient.from("projects").delete().eq("id", projectId);
+  if (error) {
+    return { ok: false, message: error.message };
+  }
+
+  await writeAuditLog(profile.id, "admin_deleted_project", "project", projectId);
+  revalidatePath("/", "layout");
+  redirect("/admin/projects?success=deleted");
 }
 
 export async function addEligibleStudentsAction(
