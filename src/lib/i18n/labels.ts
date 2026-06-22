@@ -49,7 +49,7 @@ export const assignmentRoleValues = ["committee", "committee_head", "supervisor"
 export type AssignmentRoleValue = (typeof assignmentRoleValues)[number];
 
 export const assignmentRoleLabels: Record<AssignmentRoleValue, string> = {
-  committee: "مناقش",
+  committee: "عضو",
   committee_head: "رئيس اللجنة",
   supervisor: "مشرف",
 };

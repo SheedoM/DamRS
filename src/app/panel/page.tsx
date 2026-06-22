@@ -108,7 +108,7 @@ export default async function PanelHomePage({
                       {project.roles.committee_head ? (
                         <Badge tone="success">رئيس اللجنة</Badge>
                       ) : project.roles.committee ? (
-                        <Badge tone="info">مناقش</Badge>
+                        <Badge tone="info">عضو</Badge>
                       ) : null}
                       {project.roles.supervisor ? <Badge tone="neutral">مشرف</Badge> : null}
                     </div>

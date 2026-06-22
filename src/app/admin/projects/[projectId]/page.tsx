@@ -133,7 +133,7 @@ export default async function AdminProjectDetailPage({
                     <p className="font-medium text-slate-950">{assignment.panel_member_name}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    {assignment.roles.committee ? <Badge tone="info">مناقش</Badge> : null}
+                    {assignment.roles.committee ? <Badge tone="info">عضو</Badge> : null}
                     {assignment.roles.committee_head ? <Badge tone="success">رئيس اللجنة</Badge> : null}
                     {assignment.roles.supervisor ? <Badge tone="neutral">مشرف</Badge> : null}
                     <RevokeAssignmentForm assignment={assignment} />
