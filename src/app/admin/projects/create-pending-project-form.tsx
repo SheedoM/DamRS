@@ -10,8 +10,9 @@ import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { PanelMember } from "@/lib/admin/queries";
+import { assignmentRoleOptions, type AssignmentRoleValue } from "@/lib/i18n/labels";
 
-type AssignmentRow = { panel_member_id: string; role: "committee" | "supervisor" };
+type AssignmentRow = { panel_member_id: string; role: AssignmentRoleValue };
 
 const initialState = { ok: true, message: "" };
 
@@ -102,8 +103,9 @@ export function CreatePendingProjectForm({ panelMembers }: { panelMembers: Panel
                     onChange={(e) => updateRow(i, "role", e.target.value as AssignmentRow["role"])}
                     className={`${selectCls} w-32`}
                   >
-                    <option value="committee">مناقش</option>
-                    <option value="supervisor">مشرف</option>
+                    {assignmentRoleOptions.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
                   </select>
                   <button
                     type="button"

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import type { AdminProjectRow } from "@/lib/admin/admin-projects";
 import type { Assignment, PanelMember } from "@/lib/admin/queries";
+import { assignmentRoleOptions } from "@/lib/i18n/labels";
 import { useAutoClearMessage } from "@/hooks/use-auto-clear-message";
 
 const initialState = { ok: true, message: "" };
@@ -55,6 +56,15 @@ export function AssignPanelMemberForm({
           <option value="">اختر عضو اللجنة</option>
           {panelMembers.map((member) => (
             <option key={member.id} value={member.id}>{member.full_name}</option>
+          ))}
+        </select>
+        <select
+          name="role"
+          defaultValue="committee"
+          className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
+        >
+          {assignmentRoleOptions.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
           ))}
         </select>
       </div>

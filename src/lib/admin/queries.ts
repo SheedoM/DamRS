@@ -28,7 +28,7 @@ export type Assignment = {
   panel_member_type: string | null;
   project_title: string;
   /** Collapsed roles this member holds on this project. */
-  roles: { committee: boolean; supervisor: boolean };
+  roles: { committee: boolean; committee_head: boolean; supervisor: boolean };
 };
 
 type RawAssignment = {
@@ -149,7 +149,9 @@ function toAssignment(assignment: RawAssignment): Assignment {
     panel_member_type: profile?.panel_member_type ?? null,
     project_title: project?.title || "مشروع غير معروف",
     roles: {
-      committee: assignment.role !== "supervisor",
+      // committee is the fallback so legacy/unknown roles still show a badge.
+      committee: assignment.role !== "supervisor" && assignment.role !== "committee_head",
+      committee_head: assignment.role === "committee_head",
       supervisor: assignment.role === "supervisor",
     },
   };
@@ -168,6 +170,7 @@ function collapseByMember(assignments: Assignment[]): Assignment[] {
     } else {
       existing.ids.push(...a.ids);
       existing.roles.committee = existing.roles.committee || a.roles.committee;
+      existing.roles.committee_head = existing.roles.committee_head || a.roles.committee_head;
       existing.roles.supervisor = existing.roles.supervisor || a.roles.supervisor;
     }
   }

@@ -41,6 +41,29 @@ export const panelMemberTypeOptions = panelMemberTypeValues.map((value) => ({
   label: panelMemberTypeLabels[value],
 }));
 
+// Per-assignment role on a project (panel_assignments.role). Distinct from the
+// account-level panel_member_type above: this is the hat a person wears on a
+// specific project. A committee head grades like a committee member.
+export const assignmentRoleValues = ["committee", "committee_head", "supervisor"] as const;
+
+export type AssignmentRoleValue = (typeof assignmentRoleValues)[number];
+
+export const assignmentRoleLabels: Record<AssignmentRoleValue, string> = {
+  committee: "مناقش",
+  committee_head: "رئيس اللجنة",
+  supervisor: "مشرف",
+};
+
+export const assignmentRoleOptions = assignmentRoleValues.map((value) => ({
+  value,
+  label: assignmentRoleLabels[value],
+}));
+
+export function assignmentRoleLabel(value: string | null | undefined): string {
+  if (!value) return "—";
+  return assignmentRoleLabels[value as AssignmentRoleValue] ?? value;
+}
+
 export const userRoleLabels: Record<string, string> = {
   admin: "مسؤول",
   student: "طالب",

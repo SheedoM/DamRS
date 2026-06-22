@@ -105,7 +105,11 @@ export default async function PanelHomePage({
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <Badge tone={reviewBadge.tone}>{reviewBadge.label}</Badge>
-                      {project.roles.committee ? <Badge tone="info">عضو لجنة</Badge> : null}
+                      {project.roles.committee_head ? (
+                        <Badge tone="success">رئيس اللجنة</Badge>
+                      ) : project.roles.committee ? (
+                        <Badge tone="info">مناقش</Badge>
+                      ) : null}
                       {project.roles.supervisor ? <Badge tone="neutral">مشرف</Badge> : null}
                     </div>
                     <p className="text-xs text-slate-500">تاريخ الإسناد {formatDate(project.assigned_at)}</p>

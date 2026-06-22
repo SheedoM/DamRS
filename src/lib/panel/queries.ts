@@ -28,7 +28,9 @@ type RawAssignment = {
   projects: ProjectRelation | ProjectRelation[] | null;
 };
 
-export type PanelRoles = { committee: boolean; supervisor: boolean };
+// `committee` = discussion grader (committee member OR committee head); it drives
+// the discussion-form routing. `committee_head` is a display-only designation.
+export type PanelRoles = { committee: boolean; committee_head: boolean; supervisor: boolean };
 
 export type PanelProjectListItem = {
   id: string;
@@ -176,12 +178,13 @@ export async function getPanelProjects(panelMemberId: string) {
   for (const a of assignments) {
     const entry = byProject.get(a.project_id) || {
       assignment: a,
-      roles: { committee: false, supervisor: false },
+      roles: { committee: false, committee_head: false, supervisor: false },
       totalAssignments: 0,
       finalizedAssignments: 0,
     };
     if (a.role === "supervisor") entry.roles.supervisor = true;
     else entry.roles.committee = true;
+    if (a.role === "committee_head") entry.roles.committee_head = true;
     entry.totalAssignments += 1;
     if (a.finalized_at) entry.finalizedAssignments += 1;
     byProject.set(a.project_id, entry);
@@ -306,6 +309,7 @@ export async function getPanelProjectDetail(projectId: string, panelMemberId: st
 
   const roles: PanelRoles = {
     committee: assignmentRows.some((a) => a.role !== "supervisor"),
+    committee_head: assignmentRows.some((a) => a.role === "committee_head"),
     supervisor: assignmentRows.some((a) => a.role === "supervisor"),
   };
 

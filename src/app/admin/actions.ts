@@ -12,7 +12,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions";
 import { writeAuditLog } from "@/lib/audit";
-import { programValues } from "@/lib/i18n/labels";
+import { programValues, assignmentRoleValues } from "@/lib/i18n/labels";
 
 
 
@@ -72,11 +72,13 @@ const adminProjectEditSchema = z.object({
 const bulkAssignSchema = z.object({
   panel_member_id: z.string().uuid(),
   project_ids: z.array(z.string().uuid()).min(1),
+  role: z.enum(assignmentRoleValues).default("committee"),
 });
 
 const assignPanelSchema = z.object({
   project_id: z.string().uuid(),
   panel_member_id: z.string().uuid(),
+  role: z.enum(assignmentRoleValues).default("committee"),
 });
 
 const revokeAssignmentSchema = z.object({
@@ -591,6 +593,17 @@ export async function createPendingProjectAction(
     if (raw) assignments = JSON.parse(raw as string);
   } catch { /* ignore malformed */ }
 
+  // Keep only valid roles; enforce one committee head on this new project.
+  let headSeen = false;
+  assignments = assignments.filter((a) => {
+    if (!(assignmentRoleValues as readonly string[]).includes(a.role)) return false;
+    if (a.role === "committee_head") {
+      if (headSeen) return false;
+      headSeen = true;
+    }
+    return true;
+  });
+
   const supabase = await createSupabaseServerClient();
   const { data: cycle } = await supabase
     .from("discussion_cycles")
@@ -861,6 +874,21 @@ export async function addEligibleStudentsAction(
   return { ok: true, message: `تمت إضافة ${ids.length} رقمًا جامعيًا إلى القائمة المعتمدة.` };
 }
 
+type ServerClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
+
+/** True if the project already has an active committee head (one head max). */
+async function projectHasActiveHead(supabase: ServerClient, projectId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from("panel_assignments")
+    .select("id")
+    .eq("project_id", projectId)
+    .eq("role", "committee_head")
+    .eq("is_active", true)
+    .is("revoked_at", null)
+    .maybeSingle();
+  return Boolean(data);
+}
+
 export async function assignPanelMemberAction(
   _previousState: ActionResult,
   formData: FormData,
@@ -869,24 +897,37 @@ export async function assignPanelMemberAction(
   const parsed = assignPanelSchema.safeParse({
     project_id: formData.get("project_id"),
     panel_member_id: formData.get("panel_member_id"),
+    role: formData.get("role") ?? undefined,
   });
 
   if (!parsed.success) {
     return { ok: false, message: "Choose a project and panel member." };
   }
 
+  const { role } = parsed.data;
   const supabase = await createSupabaseServerClient();
+
+  // Block only an identical (project, member, role) active row — a person may
+  // still hold a second role (e.g. supervisor + committee head) on the project.
   const { data: existing } = await supabase
     .from("panel_assignments")
     .select("id")
     .eq("project_id", parsed.data.project_id)
     .eq("panel_member_id", parsed.data.panel_member_id)
+    .eq("role", role)
     .eq("is_active", true)
     .is("revoked_at", null)
     .maybeSingle();
 
   if (existing) {
-    return { ok: false, message: "This panel member is already assigned to the project." };
+    return { ok: false, message: "هذا العضو مُسند بالفعل بهذا الدور لهذا المشروع." };
+  }
+
+  if (role === "committee_head") {
+    const headTaken = await projectHasActiveHead(supabase, parsed.data.project_id);
+    if (headTaken) {
+      return { ok: false, message: "يوجد رئيس لجنة معيّن بالفعل لهذا المشروع." };
+    }
   }
 
   const { data: assignment, error } = await supabase
@@ -894,6 +935,7 @@ export async function assignPanelMemberAction(
     .insert({
       project_id: parsed.data.project_id,
       panel_member_id: parsed.data.panel_member_id,
+      role,
       assigned_by: profile.id,
       is_active: true,
     })
@@ -923,15 +965,17 @@ export async function bulkAssignPanelMemberAction(
   const parsed = bulkAssignSchema.safeParse({
     panel_member_id: formData.get("panel_member_id"),
     project_ids: formData.get("project_ids")?.toString().split(",").filter(Boolean) ?? [],
+    role: formData.get("role") ?? undefined,
   });
 
   if (!parsed.success) {
     return { ok: false, message: "Choose projects and a panel member." };
   }
 
-  const { panel_member_id: panelMemberId, project_ids: projectIds } = parsed.data;
+  const { panel_member_id: panelMemberId, project_ids: projectIds, role } = parsed.data;
   const supabase = await createSupabaseServerClient();
   let assignedCount = 0;
+  let skippedHeadCount = 0;
 
   for (const projectId of projectIds) {
     const { data: existing } = await supabase
@@ -939,35 +983,44 @@ export async function bulkAssignPanelMemberAction(
       .select("id")
       .eq("project_id", projectId)
       .eq("panel_member_id", panelMemberId)
+      .eq("role", role)
       .eq("is_active", true)
       .is("revoked_at", null)
       .maybeSingle();
 
-    if (!existing) {
-      const { data: assignment, error } = await supabase
-        .from("panel_assignments")
-        .insert({
-          project_id: projectId,
-          panel_member_id: panelMemberId,
-          assigned_by: profile.id,
-          is_active: true,
-        })
-        .select("id")
-        .single();
+    if (existing) continue;
 
-      if (!error && assignment) {
-        await supabase.from("projects").update({ status: "assigned" }).eq("id", projectId);
-        await writeAuditLog(profile.id, "admin_assigned_panel_member", "panel_assignment", assignment.id, {
-          project_id: projectId,
-          panel_member_id: panelMemberId,
-        });
-        assignedCount++;
-      }
+    // Skip projects that already have a committee head (one head max).
+    if (role === "committee_head" && (await projectHasActiveHead(supabase, projectId))) {
+      skippedHeadCount++;
+      continue;
+    }
+
+    const { data: assignment, error } = await supabase
+      .from("panel_assignments")
+      .insert({
+        project_id: projectId,
+        panel_member_id: panelMemberId,
+        role,
+        assigned_by: profile.id,
+        is_active: true,
+      })
+      .select("id")
+      .single();
+
+    if (!error && assignment) {
+      await supabase.from("projects").update({ status: "assigned" }).eq("id", projectId);
+      await writeAuditLog(profile.id, "admin_assigned_panel_member", "panel_assignment", assignment.id, {
+        project_id: projectId,
+        panel_member_id: panelMemberId,
+      });
+      assignedCount++;
     }
   }
 
   revalidatePath("/admin/projects");
-  return { ok: true, message: `Assigned ${assignedCount} project(s).` };
+  const headNote = skippedHeadCount > 0 ? ` (تم تخطّي ${skippedHeadCount} مشروعًا لوجود رئيس لجنة بالفعل)` : "";
+  return { ok: true, message: `Assigned ${assignedCount} project(s).${headNote}` };
 }
 
 export async function revokeAssignmentAction(
