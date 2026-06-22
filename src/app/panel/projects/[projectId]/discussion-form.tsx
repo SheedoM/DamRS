@@ -4,7 +4,9 @@ import { useActionState, useMemo, useState } from "react";
 
 import { saveDiscussionScoresAction } from "./review-actions";
 import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { programLabel } from "@/lib/i18n/labels";
 import { discussionCriteria, calcDiscussionTotal, DISCUSSION_MAX } from "@/lib/review/grading";
 import type { OwnDiscussionScore } from "@/lib/panel/queries";
 
@@ -12,19 +14,22 @@ type Student = {
   id: string;
   full_name: string;
   student_id: string;
+  program?: string | null;
+  isLeader?: boolean;
 };
 
 type DiscussionFormProps = {
   projectId: string;
   students: Student[];
   existingScores: OwnDiscussionScore[];
+  locked?: boolean;
 };
 
 const initialState = { ok: true, message: "" };
 
 type ScoreMap = Record<string, Record<string, number>>;
 
-export function DiscussionForm({ projectId, students, existingScores }: DiscussionFormProps) {
+export function DiscussionForm({ projectId, students, existingScores, locked = false }: DiscussionFormProps) {
   const [state, formAction, isPending] = useActionState(saveDiscussionScoresAction, initialState);
 
   const initialScores = useMemo<ScoreMap>(() => {
@@ -65,8 +70,12 @@ export function DiscussionForm({ projectId, students, existingScores }: Discussi
           <div key={student.id} className="rounded-lg border border-slate-200 p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p className="font-semibold text-slate-950">{student.full_name}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-slate-950">{student.full_name}</p>
+                  {student.isLeader ? <Badge tone="info">قائد الفريق</Badge> : null}
+                </div>
                 <p className="text-sm text-slate-500">{student.student_id}</p>
+                {student.program ? <p className="text-xs text-slate-400">{programLabel(student.program)}</p> : null}
               </div>
               <p className="text-sm font-semibold text-[var(--brand-blue)]">
                 المجموع: {total} / {DISCUSSION_MAX}
@@ -86,7 +95,8 @@ export function DiscussionForm({ projectId, students, existingScores }: Discussi
                     step="0.5"
                     value={scores[student.id]?.[criterion.key] ?? 0}
                     onChange={handleChange(student.id, criterion.key)}
-                    className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none focus:border-[var(--brand-blue)] focus:ring-2 focus:ring-[var(--brand-blue)]/20"
+                    disabled={locked}
+                    className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none focus:border-[var(--brand-blue)] focus:ring-2 focus:ring-[var(--brand-blue)]/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
                   />
                 </label>
               ))}
@@ -95,9 +105,15 @@ export function DiscussionForm({ projectId, students, existingScores }: Discussi
         );
       })}
 
-      <Button type="submit" disabled={isPending}>
-        {isPending ? "جارٍ الحفظ..." : "حفظ التقييم"}
-      </Button>
+      {locked ? (
+        <p className="rounded-md bg-slate-50 p-3 text-sm text-slate-600">
+          باب التقييم مغلق حاليًا. لا يمكنك إدخال أو تعديل الدرجات حتى يفتحه المسؤول.
+        </p>
+      ) : (
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "جارٍ الحفظ..." : "حفظ التقييم"}
+        </Button>
+      )}
     </form>
   );
 }

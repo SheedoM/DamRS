@@ -4,13 +4,17 @@ import { useActionState, useState } from "react";
 
 import { saveSupervisionScoresAction } from "./review-actions";
 import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { programLabel } from "@/lib/i18n/labels";
 import type { SupervisionEntry } from "@/lib/panel/queries";
 
 type Student = {
   id: string;
   full_name: string;
   student_id: string;
+  program?: string | null;
+  isLeader?: boolean;
 };
 
 type SupervisionFormProps = {
@@ -18,11 +22,12 @@ type SupervisionFormProps = {
   term: "first" | "second";
   students: Student[];
   existing: SupervisionEntry[];
+  locked?: boolean;
 };
 
 const initialState = { ok: true, message: "" };
 
-export function SupervisionForm({ projectId, term, students, existing }: SupervisionFormProps) {
+export function SupervisionForm({ projectId, term, students, existing, locked = false }: SupervisionFormProps) {
   const [state, formAction, isPending] = useActionState(saveSupervisionScoresAction, initialState);
 
   const max = term === "first" ? 10 : 30;
@@ -50,8 +55,12 @@ export function SupervisionForm({ projectId, term, students, existing }: Supervi
         {students.map((student) => (
           <div key={student.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-slate-200 p-3">
             <div>
-              <p className="font-medium text-slate-950">{student.full_name}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-medium text-slate-950">{student.full_name}</p>
+                {student.isLeader ? <Badge tone="info">قائد الفريق</Badge> : null}
+              </div>
               <p className="text-sm text-slate-500">{student.student_id}</p>
+              {student.program ? <p className="text-xs text-slate-400">{programLabel(student.program)}</p> : null}
             </div>
             <label className="flex items-center gap-2 text-sm">
               <span className="text-slate-600">{label} / {max}</span>
@@ -66,16 +75,23 @@ export function SupervisionForm({ projectId, term, students, existing }: Supervi
                   const v = parseFloat(e.target.value);
                   setValues((prev) => ({ ...prev, [student.id]: isNaN(v) ? 0 : v }));
                 }}
-                className="h-10 w-24 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none focus:border-[var(--brand-blue)] focus:ring-2 focus:ring-[var(--brand-blue)]/20"
+                disabled={locked}
+                className="h-10 w-24 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none focus:border-[var(--brand-blue)] focus:ring-2 focus:ring-[var(--brand-blue)]/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
               />
             </label>
           </div>
         ))}
       </div>
 
-      <Button type="submit" disabled={isPending}>
-        {isPending ? "جارٍ الحفظ..." : "حفظ الدرجات"}
-      </Button>
+      {locked ? (
+        <p className="rounded-md bg-slate-50 p-3 text-sm text-slate-600">
+          باب التقييم مغلق حاليًا. لا يمكنك إدخال أو تعديل الدرجات حتى يفتحه المسؤول.
+        </p>
+      ) : (
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "جارٍ الحفظ..." : "حفظ الدرجات"}
+        </Button>
+      )}
     </form>
   );
 }

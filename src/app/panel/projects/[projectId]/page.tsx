@@ -4,7 +4,6 @@ import { ArrowRight, FileText } from "lucide-react";
 
 import { DiscussionForm } from "./discussion-form";
 import { SupervisionForm } from "./supervision-form";
-import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +14,7 @@ import {
   getOwnDiscussionScores,
   getPanelProjectDetail,
 } from "@/lib/panel/queries";
-import { programLabel, projectFileTypeLabel, projectStatusLabel } from "@/lib/i18n/labels";
+import { projectFileTypeLabel, projectStatusLabel } from "@/lib/i18n/labels";
 import { cn, formatFileSize } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -33,7 +32,16 @@ export default async function PanelProjectDetailPage({
   if (!project) {
     notFound();
   }
-  const existingScores = grading.isOpen ? await getOwnDiscussionScores(projectId, profile.id) : [];
+  // Fetch saved scores regardless of the window so the locked (read-only) view
+  // still shows what was entered; writes are blocked server-side when closed.
+  const existingScores = await getOwnDiscussionScores(projectId, profile.id);
+  const gradingStudents = project.team_members.map((member) => ({
+    id: member.id,
+    full_name: member.full_name,
+    student_id: member.student_id,
+    program: member.program,
+    isLeader: member.role_in_team === "team_leader",
+  }));
 
   return (
     <AppShell title="مراجعة المشروع" profile={profile}>
@@ -70,31 +78,6 @@ export default async function PanelProjectDetailPage({
           </CardContent>
         </Card>
 
-        <Card data-tour="panel-team">
-          <CardHeader><CardTitle>أعضاء الفريق</CardTitle></CardHeader>
-          <CardContent className="grid gap-3 sm:grid-cols-2">
-            {project.team_members.length > 0 ? project.team_members.map((member) => {
-              const isLeader = member.role_in_team === "team_leader";
-              return (
-                <div
-                  key={member.id}
-                  className={cn(
-                    "rounded-md border p-3",
-                    isLeader ? "border-[var(--brand-blue)] bg-blue-50/50" : "border-slate-200",
-                  )}
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="font-medium text-slate-950">{member.full_name}</p>
-                    {isLeader ? <Badge tone="info">قائد الفريق</Badge> : null}
-                  </div>
-                  <p className="text-sm text-slate-500">{member.student_id}</p>
-                  {member.program ? <p className="text-sm text-slate-500">{programLabel(member.program)}</p> : null}
-                </div>
-              );
-            }) : <p className="text-sm text-slate-500">لا يوجد طلاب في هذا المشروع.</p>}
-          </CardContent>
-        </Card>
-
         <Card data-tour="panel-files">
           <CardHeader><CardTitle>الملفات المرفوعة</CardTitle></CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
@@ -125,19 +108,12 @@ export default async function PanelProjectDetailPage({
               <CardTitle>تقييم المناقشة (عضو لجنة)</CardTitle>
             </CardHeader>
             <CardContent>
-              {grading.isOpen ? (
-                <DiscussionForm
-                  projectId={project.id}
-                  students={project.team_members.map((member) => ({
-                    id: member.id,
-                    full_name: member.full_name,
-                    student_id: member.student_id,
-                  }))}
-                  existingScores={existingScores}
-                />
-              ) : (
-                <Alert>باب التقييم مغلق حاليًا. لا يمكنك إدخال أو تعديل الدرجات حتى يفتحه المسؤول.</Alert>
-              )}
+              <DiscussionForm
+                projectId={project.id}
+                students={gradingStudents}
+                existingScores={existingScores}
+                locked={!grading.isOpen}
+              />
             </CardContent>
           </Card>
         ) : null}
@@ -148,20 +124,13 @@ export default async function PanelProjectDetailPage({
               <CardTitle>{project.term === "first" ? "أعمال الفصل (المشرف)" : "أعمال السنة (المشرف)"}</CardTitle>
             </CardHeader>
             <CardContent>
-              {grading.isOpen ? (
-                <SupervisionForm
-                  projectId={project.id}
-                  term={project.term}
-                  students={project.team_members.map((member) => ({
-                    id: member.id,
-                    full_name: member.full_name,
-                    student_id: member.student_id,
-                  }))}
-                  existing={project.supervision}
-                />
-              ) : (
-                <Alert>باب التقييم مغلق حاليًا. لا يمكنك إدخال أو تعديل الدرجات حتى يفتحه المسؤول.</Alert>
-              )}
+              <SupervisionForm
+                projectId={project.id}
+                term={project.term}
+                students={gradingStudents}
+                existing={project.supervision}
+                locked={!grading.isOpen}
+              />
             </CardContent>
           </Card>
         ) : null}
