@@ -41,8 +41,6 @@ const eligibleStudentsSchema = z.object({
 const pendingProjectSchema = z.object({
   project_number: z.string().trim().min(1, "رقم المشروع مطلوب."),
   leader_university_id: z.string().trim().min(3, "الرقم الجامعي لقائد الفريق مطلوب."),
-  leader_full_name: z.string().trim().min(2, "اسم قائد الفريق مطلوب."),
-  leader_program: z.enum(programValues, { message: "اختر البرنامج." }),
 });
 
 // Lenient: admins may correct any field, including on incomplete pending
@@ -578,8 +576,6 @@ export async function createPendingProjectAction(
   const parsed = pendingProjectSchema.safeParse({
     project_number: formData.get("project_number"),
     leader_university_id: formData.get("leader_university_id"),
-    leader_full_name: formData.get("leader_full_name"),
-    leader_program: formData.get("leader_program"),
   });
 
   if (!parsed.success) {
@@ -611,8 +607,6 @@ export async function createPendingProjectAction(
       cycle_id: cycle.id,
       project_number: parsed.data.project_number,
       leader_university_id: parsed.data.leader_university_id,
-      leader_full_name: parsed.data.leader_full_name,
-      leader_program: parsed.data.leader_program,
       team_leader_id: null,
       status: "draft",
     })

@@ -4,7 +4,6 @@ import { useActionState, useState } from "react";
 import { Plus } from "lucide-react";
 
 import { createPendingProjectAction } from "../actions";
-import { programOptions } from "@/lib/i18n/labels";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +11,6 @@ import { Label } from "@/components/ui/label";
 
 const initialState = { ok: true, message: "" };
 
-const selectClassName =
-  "flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
 export function CreatePendingProjectForm() {
   const [state, formAction, isPending] = useActionState(createPendingProjectAction, initialState);
@@ -49,21 +46,6 @@ export function CreatePendingProjectForm() {
             <div className="space-y-2">
               <Label htmlFor="leader_university_id">الرقم الجامعي لقائد الفريق</Label>
               <Input id="leader_university_id" name="leader_university_id" inputMode="numeric" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="leader_full_name">اسم قائد الفريق</Label>
-              <Input id="leader_full_name" name="leader_full_name" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="leader_program">البرنامج</Label>
-              <select id="leader_program" name="leader_program" required className={selectClassName} defaultValue="">
-                <option value="" disabled>اختر البرنامج</option>
-                {programOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
