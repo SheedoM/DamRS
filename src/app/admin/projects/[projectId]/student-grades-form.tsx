@@ -4,7 +4,9 @@ import { useActionState, useState } from "react";
 
 import { saveStudentGradesAction } from "../../actions";
 import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { programLabel } from "@/lib/i18n/labels";
 import type { ProjectStudentGrade } from "@/lib/admin/student-grades";
 import {
   FIRST_SEMESTER_MAX,
@@ -81,8 +83,14 @@ export function StudentGradesForm({
               return (
                 <tr key={student.teamMemberId}>
                   <td className="px-3 py-2">
-                    <p className="font-medium text-slate-950">{student.fullName}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-slate-950">{student.fullName}</p>
+                      {student.isLeader ? <Badge tone="info">قائد الفريق</Badge> : null}
+                    </div>
                     <p className="text-xs text-slate-500">{student.studentId}</p>
+                    {student.program ? (
+                      <p className="text-xs text-slate-400">{programLabel(student.program)}</p>
+                    ) : null}
                   </td>
                   {isSecond ? (
                     <td className="px-3 py-2 text-slate-700">

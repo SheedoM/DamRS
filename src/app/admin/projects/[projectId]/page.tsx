@@ -14,7 +14,6 @@ import { requireRole } from "@/lib/auth/require-role";
 import { getAdminProjectDetail, getPanelMembers } from "@/lib/admin/queries";
 import { getProjectGradingBreakdown, getProjectStudentGrades, getProjectTerm } from "@/lib/admin/student-grades";
 import {
-  programLabel,
   projectFileTypeLabel,
   projectStatusLabel,
 } from "@/lib/i18n/labels";
@@ -95,31 +94,6 @@ export default async function AdminProjectDetailPage({
               {project.github_url ? <a className={cn(buttonVariants({ variant: "outline", size: "sm" }))} href={project.github_url} target="_blank" rel="noreferrer">GitHub</a> : null}
               {project.demo_video_url ? <a className={cn(buttonVariants({ variant: "outline", size: "sm" }))} href={project.demo_video_url} target="_blank" rel="noreferrer">فيديو العرض</a> : null}
             </div>
-          </CardContent>
-        </Card>
-
-        <Card data-tour="project-team">
-          <CardHeader><CardTitle>أعضاء الفريق</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            {project.team_members.length > 0 ? project.team_members.map((member) => {
-              const isLeader = member.role_in_team === "team_leader";
-              return (
-                <div
-                  key={member.id}
-                  className={cn(
-                    "rounded-md border p-3",
-                    isLeader ? "border-[var(--brand-blue)] bg-blue-50/50" : "border-slate-200",
-                  )}
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="font-medium text-slate-950">{member.full_name}</p>
-                    {isLeader ? <Badge tone="info">قائد الفريق</Badge> : null}
-                  </div>
-                  <p className="text-sm text-slate-500">{member.student_id}</p>
-                  {member.program ? <p className="text-sm text-slate-500">{programLabel(member.program)}</p> : null}
-                </div>
-              );
-            }) : <p className="text-sm text-slate-500">لا يوجد طلاب في هذا المشروع.</p>}
           </CardContent>
         </Card>
 

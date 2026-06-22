@@ -5,6 +5,8 @@ export type ProjectStudentGrade = {
   teamMemberId: string;
   fullName: string;
   studentId: string;
+  program: string | null;
+  isLeader: boolean;
   discussionSum: number; // Σ evaluators' 20-mark totals (→ 60 with three)
   evaluatorsSubmitted: number;
   firstSemester: number;
@@ -34,7 +36,7 @@ export async function getProjectStudentGrades(
   const [{ data: members }, { data: scores }, { data: supervision }] = await Promise.all([
     supabase
       .from("team_members")
-      .select("id, full_name, student_id")
+      .select("id, full_name, student_id, program, role_in_team")
       .eq("project_id", projectId)
       .order("created_at", { ascending: true }),
     supabase
@@ -75,6 +77,8 @@ export async function getProjectStudentGrades(
       teamMemberId: id,
       fullName: member.full_name as string,
       studentId: member.student_id as string,
+      program: (member.program as string | null) ?? null,
+      isLeader: member.role_in_team === "team_leader",
       discussionSum,
       evaluatorsSubmitted: discussionTotals.length,
       firstSemester: sup.firstSemester,
