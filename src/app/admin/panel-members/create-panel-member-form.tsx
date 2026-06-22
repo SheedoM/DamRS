@@ -8,12 +8,8 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { panelMemberTypeOptions } from "@/lib/i18n/labels";
 
 const initialState = { ok: true, message: "" };
-
-const selectClassName =
-  "flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2";
 
 export function CreatePanelMemberForm() {
   const [state, formAction, isPending] = useActionState(createPanelMemberAction, initialState);
@@ -65,19 +61,6 @@ export function CreatePanelMemberForm() {
             <div className="space-y-2">
               <Label htmlFor="email">البريد الإلكتروني</Label>
               <Input id="email" name="email" type="email" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="panel_member_type">نوع العضو</Label>
-              <select id="panel_member_type" name="panel_member_type" className={selectClassName} required defaultValue="">
-                <option value="" disabled>
-                  اختر النوع
-                </option>
-                {panelMemberTypeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="department">القسم / الجهة</Label>

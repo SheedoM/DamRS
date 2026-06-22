@@ -24,14 +24,12 @@ const createPanelMemberSchema = z.object({
   full_name: z.string().trim().min(2),
   email: z.string().trim().email(),
   department: z.string().trim().min(2),
-  panel_member_type: z.enum(["supervisor", "referee", "committee_head"]),
 });
 
 const updatePanelMemberSchema = z.object({
   panel_member_id: z.string().uuid(),
   full_name: z.string().trim().min(2, "اسم عضو اللجنة مطلوب."),
   department: z.string().trim().optional().transform((v) => v || null),
-  panel_member_type: z.enum(["supervisor", "referee", "committee_head"]),
 });
 
 const eligibleStudentsSchema = z.object({
@@ -317,7 +315,6 @@ export async function createPanelMemberAction(
     full_name: formData.get("full_name"),
     email: formData.get("email"),
     department: formData.get("department"),
-    panel_member_type: formData.get("panel_member_type"),
   });
 
   if (!parsed.success) {
@@ -356,7 +353,6 @@ export async function createPanelMemberAction(
     email: parsed.data.email,
     role: "panel_member",
     department: parsed.data.department,
-    panel_member_type: parsed.data.panel_member_type,
     temp_password: tempPassword,
   });
 
@@ -378,7 +374,6 @@ export async function updatePanelMemberAction(
     panel_member_id: formData.get("panel_member_id"),
     full_name: formData.get("full_name"),
     department: formData.get("department"),
-    panel_member_type: formData.get("panel_member_type"),
   });
   if (!parsed.success) {
     return { ok: false, message: parsed.error.issues[0]?.message || "بيانات عضو اللجنة غير صالحة." };
@@ -390,7 +385,6 @@ export async function updatePanelMemberAction(
     .update({
       full_name: parsed.data.full_name,
       department: parsed.data.department,
-      panel_member_type: parsed.data.panel_member_type,
     })
     .eq("id", parsed.data.panel_member_id)
     .eq("role", "panel_member");

@@ -4,7 +4,7 @@ import { useActionState, useEffect } from "react";
 import { bulkAssignPanelMemberAction } from "../actions";
 import { Button } from "@/components/ui/button";
 import type { PanelMember } from "@/lib/admin/queries";
-import { assignmentRoleOptions, panelMemberTypeLabel } from "@/lib/i18n/labels";
+import { assignmentRoleOptions } from "@/lib/i18n/labels";
 
 type BulkAssignFormProps = {
   selectedProjectIds: string[];
@@ -34,7 +34,7 @@ export function BulkAssignForm({ selectedProjectIds, panelMembers, onSuccess }: 
         <option value="">اختر عضو اللجنة...</option>
         {panelMembers.map((member) => (
           <option key={member.id} value={member.id}>
-            {member.full_name} ({panelMemberTypeLabel(member.panel_member_type)})
+            {member.full_name}
           </option>
         ))}
       </select>

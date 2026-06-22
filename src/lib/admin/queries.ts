@@ -8,7 +8,6 @@ export type PanelMember = {
   full_name: string;
   email: string;
   department: string | null;
-  panel_member_type: string | null;
   temp_password?: string | null;
 };
 
@@ -25,7 +24,6 @@ export type Assignment = {
   is_active: boolean;
   panel_member_name: string;
   panel_member_email: string;
-  panel_member_type: string | null;
   project_title: string;
   /** Collapsed roles this member holds on this project. */
   roles: { committee: boolean; committee_head: boolean; supervisor: boolean };
@@ -40,8 +38,8 @@ type RawAssignment = {
   is_active: boolean;
   role: string | null;
   profiles:
-    | { full_name: string; email: string; panel_member_type: string | null }
-    | { full_name: string; email: string; panel_member_type: string | null }[]
+    | { full_name: string; email: string }
+    | { full_name: string; email: string }[]
     | null;
   projects: { title: string } | { title: string }[] | null;
 };
@@ -146,7 +144,6 @@ function toAssignment(assignment: RawAssignment): Assignment {
     is_active: assignment.is_active,
     panel_member_name: profile?.full_name || "عضو لجنة غير معروف",
     panel_member_email: profile?.email || "",
-    panel_member_type: profile?.panel_member_type ?? null,
     project_title: project?.title || "مشروع غير معروف",
     roles: {
       // committee is the fallback so legacy/unknown roles still show a badge.
@@ -246,7 +243,7 @@ export async function getPanelMembers() {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("profiles")
-    .select("id, full_name, email, department, panel_member_type, temp_password")
+    .select("id, full_name, email, department, temp_password")
     .eq("role", "panel_member")
     .order("full_name", { ascending: true });
 
@@ -257,7 +254,7 @@ export async function getAssignmentsForProject(projectId: string) {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("panel_assignments")
-    .select("id, project_id, panel_member_id, assigned_at, revoked_at, is_active, role, profiles!panel_assignments_panel_member_id_fkey(full_name, email, panel_member_type), projects(title)")
+    .select("id, project_id, panel_member_id, assigned_at, revoked_at, is_active, role, profiles!panel_assignments_panel_member_id_fkey(full_name, email), projects(title)")
     .eq("project_id", projectId)
     .order("assigned_at", { ascending: false });
 
@@ -269,7 +266,7 @@ export async function getAllAssignments() {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase
     .from("panel_assignments")
-    .select("id, project_id, panel_member_id, assigned_at, revoked_at, is_active, profiles!panel_assignments_panel_member_id_fkey(full_name, email, panel_member_type), projects(title)")
+    .select("id, project_id, panel_member_id, assigned_at, revoked_at, is_active, profiles!panel_assignments_panel_member_id_fkey(full_name, email), projects(title)")
     .order("assigned_at", { ascending: false });
 
   return ((data || []) as unknown as RawAssignment[]).map(toAssignment);

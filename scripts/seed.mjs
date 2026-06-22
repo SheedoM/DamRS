@@ -147,19 +147,19 @@ async function seed() {
   // Panel members (committee evaluators)
   const panel = {};
   panel.rabie = await createUser("rabie" + SEED_DOMAIN, "د. أحمد محمد ربيع", "panel_member", {
-    department: "علوم الحاسب", panel_member_type: "supervisor",
+    department: "علوم الحاسب",
   });
   panel.mona = await createUser("mona" + SEED_DOMAIN, "د. منى السيد حسن", "panel_member", {
-    department: "نظم المعلومات", panel_member_type: "supervisor",
+    department: "نظم المعلومات",
   });
   panel.khaled = await createUser("khaled" + SEED_DOMAIN, "د. خالد إبراهيم فؤاد", "panel_member", {
-    department: "تكنولوجيا المعلومات", panel_member_type: "referee",
+    department: "تكنولوجيا المعلومات",
   });
   panel.sara = await createUser("sara" + SEED_DOMAIN, "د. سارة عبد الله النجار", "panel_member", {
-    department: "الذكاء الاصطناعي", panel_member_type: "referee",
+    department: "الذكاء الاصطناعي",
   });
   panel.wael = await createUser("wael" + SEED_DOMAIN, "أ.د. وائل عبد القادر عوض", "panel_member", {
-    department: "كلية الحاسبات والمعلومات بدمياط", panel_member_type: "committee_head",
+    department: "كلية الحاسبات والمعلومات بدمياط",
   });
 
   // ---- project definitions ----

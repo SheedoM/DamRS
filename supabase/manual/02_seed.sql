@@ -38,8 +38,8 @@ begin
   insert into public.profiles (id, full_name, email, role, department)
   values (v_admin, 'Wael Abd El Kader', 'wael.admin@damrs.edu', 'admin', v_dept);
 
-  insert into public.profiles (id, full_name, email, role, department, panel_member_type, temp_password)
-  values (v_panel, 'Wael Abd El Kader', 'wael.panel@damrs.edu', 'panel_member', v_dept, 'committee_head', 'WaelPanel#2026');
+  insert into public.profiles (id, full_name, email, role, department, temp_password)
+  values (v_panel, 'Wael Abd El Kader', 'wael.panel@damrs.edu', 'panel_member', v_dept, 'WaelPanel#2026');
 
   insert into public.profiles (id, full_name, email, role, student_id, national_id, program)
   values (v_student, 'محمود سامي', '20210001@damrs.edu', 'student', '20210001', '30203150100015', 'computer_science');
