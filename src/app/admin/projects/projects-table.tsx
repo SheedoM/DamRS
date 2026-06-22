@@ -80,10 +80,7 @@ const columns = [
   columnHelper.accessor("title", {
     header: "المشروع",
     cell: (info) => (
-      <div>
-        <p className="font-medium text-slate-950">{info.getValue() || "—"}</p>
-        <p className="text-xs text-slate-500">{info.row.original.team_leader_name}</p>
-      </div>
+      <span className="font-medium text-slate-950">{info.getValue() || "—"}</span>
     ),
   }),
   columnHelper.accessor("team_leader_student_id", {
