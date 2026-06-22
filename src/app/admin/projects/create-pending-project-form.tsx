@@ -6,6 +6,7 @@ import { Plus, X } from "lucide-react";
 import { createPendingProjectAction } from "../actions";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { PanelMember } from "@/lib/admin/queries";
@@ -62,17 +63,15 @@ export function CreatePendingProjectForm({ panelMembers }: { panelMembers: Panel
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="leader_university_id">
-                الرقم الجامعي لقائد الفريق <span className="text-red-500">*</span>
-              </Label>
-              <Input id="leader_university_id" name="leader_university_id" inputMode="numeric" required />
+              <Label htmlFor="leader_university_id">الرقم الجامعي لقائد الفريق</Label>
+              <Input id="leader_university_id" name="leader_university_id" inputMode="numeric" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="project_number">رقم المشروع (اختياري)</Label>
+              <Label htmlFor="project_number">رقم المشروع</Label>
               <Input id="project_number" name="project_number" />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="title">عنوان المشروع (اختياري)</Label>
+              <Label htmlFor="title">عنوان المشروع</Label>
               <Input id="title" name="title" />
             </div>
           </div>
@@ -80,7 +79,7 @@ export function CreatePendingProjectForm({ panelMembers }: { panelMembers: Panel
           {panelMembers.length > 0 && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>الإسناد (اختياري)</Label>
+                <Label>الإسناد</Label>
                 <Button type="button" variant="outline" size="sm" onClick={addRow}>
                   <Plus className="h-3 w-3" />
                   إضافة
@@ -119,9 +118,15 @@ export function CreatePendingProjectForm({ panelMembers }: { panelMembers: Panel
           )}
 
           <div className="flex flex-wrap gap-2">
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "جارٍ الإنشاء..." : "إنشاء المشروع"}
-            </Button>
+            <ConfirmSubmitButton
+              title="إنشاء المشروع؟"
+              message="تأكد من صحة البيانات المدخلة قبل الإنشاء."
+              confirmLabel="إنشاء"
+              pending={isPending}
+              pendingLabel="جارٍ الإنشاء..."
+            >
+              إنشاء المشروع
+            </ConfirmSubmitButton>
             <Button
               type="button"
               variant="ghost"
