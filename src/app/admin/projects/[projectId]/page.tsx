@@ -5,6 +5,7 @@ import { ArrowRight, FileText } from "lucide-react";
 import { StudentGradesForm } from "./student-grades-form";
 import { GradingBreakdown } from "./grading-breakdown";
 import { DeleteProjectButton } from "./delete-project-button";
+import { ProjectStatusControl } from "./project-status-control";
 import { AssignPanelMemberForm, RevokeAssignmentForm } from "../assignment-forms";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import {
   projectFileTypeLabel,
   projectStatusLabel,
 } from "@/lib/i18n/labels";
+import { getMissingSubmissionRequirements } from "@/lib/project/submission.schema";
 import { cn, formatFileSize } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +43,19 @@ export default async function AdminProjectDetailPage({
   }
 
   const activeAssignments = project.assignments.filter((a) => a.is_active && !a.revoked_at);
+
+  const missingRequirements = getMissingSubmissionRequirements({
+    title: project.title || null,
+    title_en: project.title_en,
+    abstract: project.abstract || null,
+    supervisor_name: project.supervisor_name || null,
+    demo_video_url: project.demo_video_url,
+    source_code_url: project.source_code_url,
+    hasLegacySourceZip: project.files.some((file) => file.file_type === "source_code_zip"),
+    teamMemberCount: project.team_members.length,
+    fileTypes: project.files.map((file) => file.file_type),
+  });
+  const isComplete = missingRequirements.length === 0;
 
   return (
     <AppShell title="تفاصيل المشروع" profile={profile}>
@@ -95,6 +110,30 @@ export default async function AdminProjectDetailPage({
               {project.demo_video_url ? <a className={cn(buttonVariants({ variant: "outline", size: "sm" }))} href={project.demo_video_url} target="_blank" rel="noreferrer">فيديو العرض</a> : null}
               {project.source_code_url ? <a className={cn(buttonVariants({ variant: "outline", size: "sm" }))} href={project.source_code_url} target="_blank" rel="noreferrer">الكود المصدري</a> : null}
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>جاهزية التسليم</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            {project.status === "submitted" ? (
+              <p className="text-sm text-emerald-700">
+                المشروع مُسلَّم
+                {project.submitted_at ? ` بتاريخ ${new Date(project.submitted_at).toLocaleString("ar-EG")}` : ""}.
+              </p>
+            ) : missingRequirements.length > 0 ? (
+              <div>
+                <p className="text-sm font-medium text-slate-900">العناصر الناقصة:</p>
+                <ul className="mt-2 list-disc space-y-1 pr-5 text-sm text-slate-600">
+                  {missingRequirements.map((item) => <li key={item}>{item}</li>)}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-sm text-emerald-700">
+                جميع البيانات والملفات المطلوبة مكتملة — يمكنك تعليم المشروع كمُسلَّم.
+              </p>
+            )}
+            <ProjectStatusControl projectId={project.id} status={project.status} isComplete={isComplete} />
           </CardContent>
         </Card>
 

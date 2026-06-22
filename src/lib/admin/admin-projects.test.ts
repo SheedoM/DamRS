@@ -18,6 +18,7 @@ function makeProject(overrides: Partial<AdminProjectRow>): AdminProjectRow {
     department: "Computer Science",
     supervisor_name: "Dr. X",
     team_leader_name: "Student X",
+    team_leader_student_id: null,
     active_assignment_count: 0,
     team_member_count: 0,
     discussion_required_count: 0,
@@ -26,6 +27,7 @@ function makeProject(overrides: Partial<AdminProjectRow>): AdminProjectRow {
     supervision_completed_count: 0,
     grading_status: "not_graded",
     submitted_at: "2026-06-01T10:00:00.000Z",
+    is_complete: false,
     ...overrides,
   };
 }

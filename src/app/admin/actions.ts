@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireRole } from "@/lib/auth/require-role";
-import { projectFormSchema } from "@/lib/project/submission.schema";
+import { projectFormSchema, getMissingSubmissionRequirements } from "@/lib/project/submission.schema";
 import { discussionCriteria, discussionScoreSchema } from "@/lib/review/grading";
 import { getAppSettings } from "@/lib/admin/app-settings";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -77,6 +77,11 @@ const assignPanelSchema = z.object({
   project_id: z.string().uuid(),
   panel_member_id: z.string().uuid(),
   role: z.enum(assignmentRoleValues).default("committee"),
+});
+
+const setProjectStatusSchema = z.object({
+  project_id: z.string().uuid(),
+  target: z.enum(["submitted", "draft"]),
 });
 
 const revokeAssignmentSchema = z.object({
@@ -1060,6 +1065,95 @@ export async function revokeAssignmentAction(
   }
   revalidatePath("/", "layout");
   return { ok: true, message: "Assignment revoked." };
+}
+
+// Admin fallback to move a project between draft <-> submitted. Marking as
+// submitted re-runs the SAME completeness check students go through, so the
+// rules stay identical and a project can't be force-submitted while incomplete.
+// Reverting to draft re-opens the project for the student to edit.
+export async function adminSetProjectStatusAction(
+  _previousState: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const { profile } = await requireRole(["admin"]);
+  const parsed = setProjectStatusSchema.safeParse({
+    project_id: formData.get("project_id"),
+    target: formData.get("target"),
+  });
+
+  if (!parsed.success) {
+    return { ok: false, message: "طلب غير صالح." };
+  }
+
+  const { project_id: projectId, target } = parsed.data;
+  const supabase = await createSupabaseServerClient();
+
+  if (target === "draft") {
+    const { error } = await supabase
+      .from("projects")
+      .update({ status: "draft", submitted_at: null })
+      .eq("id", projectId);
+    if (error) {
+      return { ok: false, message: error.message };
+    }
+    await writeAuditLog(profile.id, "admin_reverted_project_to_draft", "project", projectId);
+    revalidatePath("/", "layout");
+    return { ok: true, message: "تمت إعادة المشروع إلى مسودة. يمكن للطالب التعديل الآن." };
+  }
+
+  // target === "submitted": validate completeness with the shared requirement set.
+  const { data: project, error: projectError } = await supabase
+    .from("projects")
+    .select("id, title, title_en, abstract, supervisor_name, demo_video_url, source_code_url, submitted_at")
+    .eq("id", projectId)
+    .single();
+
+  if (projectError || !project) {
+    return { ok: false, message: projectError?.message || "لم يتم العثور على المشروع." };
+  }
+
+  const [{ count: teamMemberCount }, { data: files }] = await Promise.all([
+    supabase
+      .from("team_members")
+      .select("id", { count: "exact", head: true })
+      .eq("project_id", projectId),
+    supabase
+      .from("project_files")
+      .select("file_type")
+      .eq("project_id", projectId),
+  ]);
+
+  const missing = getMissingSubmissionRequirements({
+    title: project.title as string | null,
+    title_en: project.title_en as string | null,
+    abstract: project.abstract as string | null,
+    supervisor_name: project.supervisor_name as string | null,
+    demo_video_url: project.demo_video_url as string | null,
+    source_code_url: project.source_code_url as string | null,
+    hasLegacySourceZip: (files || []).some((file) => String(file.file_type) === "source_code_zip"),
+    teamMemberCount: teamMemberCount || 0,
+    fileTypes: (files || []).map((file) => String(file.file_type)),
+  });
+
+  if (missing.length > 0) {
+    return { ok: false, message: `لا يمكن تعليم المشروع كمُسلَّم. العناصر الناقصة: ${missing.join("، ")}.` };
+  }
+
+  const { error: submitError } = await supabase
+    .from("projects")
+    .update({
+      status: "submitted",
+      submitted_at: (project.submitted_at as string | null) ?? new Date().toISOString(),
+    })
+    .eq("id", projectId);
+
+  if (submitError) {
+    return { ok: false, message: submitError.message };
+  }
+
+  await writeAuditLog(profile.id, "admin_marked_project_submitted", "project", projectId);
+  revalidatePath("/", "layout");
+  return { ok: true, message: "تم تعليم المشروع كمُسلَّم." };
 }
 
 export async function saveSubmissionWindowAction(

@@ -96,9 +96,14 @@ const columns = [
       info.row.original.awaiting_leader ? (
         <Badge tone="warning">بانتظار القائد</Badge>
       ) : (
-        <Badge tone={info.getValue() === "submitted" ? "success" : "info"}>
-          {projectStatusLabel(info.getValue())}
-        </Badge>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Badge tone={info.getValue() === "submitted" ? "success" : "info"}>
+            {projectStatusLabel(info.getValue())}
+          </Badge>
+          {info.getValue() === "draft" && info.row.original.is_complete ? (
+            <Badge tone="success">جاهزة للتسليم</Badge>
+          ) : null}
+        </div>
       ),
   }),
   columnHelper.accessor("supervisor_name", {

@@ -1,6 +1,7 @@
 import { getGradingProgress, type AdminProjectRow } from "./admin-projects";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSignedUrlForProjectFile } from "@/lib/project/storage";
+import { getMissingSubmissionRequirements } from "@/lib/project/submission.schema";
 import { firstRelation } from "@/lib/utils";
 
 export type PanelMember = {
@@ -75,9 +76,12 @@ type RawProject = {
   project_number: string | null;
   title: string | null;
   title_en: string | null;
+  abstract: string | null;
   status: string;
   department: string | null;
   supervisor_name: string | null;
+  demo_video_url: string | null;
+  source_code_url: string | null;
   submitted_at: string | null;
   team_leader_id: string | null;
   leader_full_name: string | null;
@@ -85,6 +89,7 @@ type RawProject = {
   profiles: { full_name: string; student_id: string | null } | null;
   panel_assignments: { panel_member_id: string }[] | null;
   team_members: { id: string }[] | null;
+  project_files: { file_type: string }[] | null;
   student_discussion_scores: { panel_member_id: string; team_member_id: string }[] | null;
   student_supervision_grades: { team_member_id: string }[] | null;
 };
@@ -108,6 +113,20 @@ function toProjectRow(project: RawProject): AdminProjectRow {
 
   const awaitingLeader = !project.team_leader_id;
 
+  const fileTypes = (project.project_files || []).map((file) => file.file_type);
+  const isComplete =
+    getMissingSubmissionRequirements({
+      title: project.title,
+      title_en: project.title_en,
+      abstract: project.abstract,
+      supervisor_name: project.supervisor_name,
+      demo_video_url: project.demo_video_url,
+      source_code_url: project.source_code_url,
+      hasLegacySourceZip: fileTypes.includes("source_code_zip"),
+      teamMemberCount: teamMemberCount,
+      fileTypes,
+    }).length === 0;
+
   return {
     id: project.id,
     project_number: project.project_number,
@@ -125,6 +144,7 @@ function toProjectRow(project: RawProject): AdminProjectRow {
     ...counts,
     grading_status: getGradingProgress(counts),
     submitted_at: project.submitted_at,
+    is_complete: isComplete,
   };
 }
 
@@ -175,7 +195,7 @@ function collapseByMember(assignments: Assignment[]): Assignment[] {
 }
 
 const PROJECT_ROW_SELECT =
-  "id, project_number, title, title_en, status, department, supervisor_name, submitted_at, team_leader_id, leader_full_name, leader_university_id, profiles!projects_team_leader_id_fkey(full_name, student_id), panel_assignments!left(panel_member_id), team_members(id), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)";
+  "id, project_number, title, title_en, abstract, status, department, supervisor_name, demo_video_url, source_code_url, submitted_at, team_leader_id, leader_full_name, leader_university_id, profiles!projects_team_leader_id_fkey(full_name, student_id), panel_assignments!left(panel_member_id), team_members(id), project_files(file_type), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)";
 
 export async function getAdminProjects() {
   const supabase = await createSupabaseServerClient();
@@ -194,7 +214,7 @@ export async function getAdminProjectDetail(projectId: string) {
   const { data: project } = await supabase
     .from("projects")
     .select(
-      "id, project_number, title, title_en, abstract, status, department, supervisor_name, technologies_used, github_url, demo_video_url, source_code_url, submitted_at, team_leader_id, leader_full_name, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(panel_member_id), team_members(id), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)",
+      "id, project_number, title, title_en, abstract, status, department, supervisor_name, technologies_used, github_url, demo_video_url, source_code_url, submitted_at, team_leader_id, leader_full_name, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(panel_member_id), team_members(id), project_files(file_type), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)",
     )
     .is("panel_assignments.revoked_at", null)
     .eq("panel_assignments.is_active", true)

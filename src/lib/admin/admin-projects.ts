@@ -27,6 +27,9 @@ export type AdminProjectRow = {
   supervision_completed_count: number;
   grading_status: GradingProgress;
   submitted_at: string | null;
+  // True when the project meets the same requirements the student submit check
+  // enforces — i.e. it could be marked submitted right now.
+  is_complete: boolean;
 };
 
 export type AdminProjectFilters = {
