@@ -39,8 +39,9 @@ const eligibleStudentsSchema = z.object({
 });
 
 const pendingProjectSchema = z.object({
-  project_number: z.string().trim().min(1, "رقم المشروع مطلوب."),
   leader_university_id: z.string().trim().min(3, "الرقم الجامعي لقائد الفريق مطلوب."),
+  project_number: z.string().trim().optional().transform((v) => v || null),
+  title: z.string().trim().optional().transform((v) => v || null),
 });
 
 // Lenient: admins may correct any field, including on incomplete pending
@@ -576,11 +577,19 @@ export async function createPendingProjectAction(
   const parsed = pendingProjectSchema.safeParse({
     project_number: formData.get("project_number"),
     leader_university_id: formData.get("leader_university_id"),
+    title: formData.get("title"),
   });
 
   if (!parsed.success) {
     return { ok: false, message: parsed.error.issues[0]?.message || "بيانات المشروع غير صالحة." };
   }
+
+  type AssignmentInput = { panel_member_id: string; role: string };
+  let assignments: AssignmentInput[] = [];
+  try {
+    const raw = formData.get("assignments");
+    if (raw) assignments = JSON.parse(raw as string);
+  } catch { /* ignore malformed */ }
 
   const supabase = await createSupabaseServerClient();
   const { data: cycle } = await supabase
@@ -607,6 +616,7 @@ export async function createPendingProjectAction(
       cycle_id: cycle.id,
       project_number: parsed.data.project_number,
       leader_university_id: parsed.data.leader_university_id,
+      title: parsed.data.title,
       team_leader_id: null,
       status: "draft",
     })
@@ -614,18 +624,47 @@ export async function createPendingProjectAction(
     .single();
 
   if (projectError || !createdProject) {
-    // 23505 = unique_violation (duplicate project_number within the cycle).
     if (projectError?.code === "23505") {
       return { ok: false, message: `رقم المشروع «${parsed.data.project_number}» مستخدم بالفعل في هذه الدورة.` };
     }
     return { ok: false, message: projectError?.message || "تعذّر إنشاء المشروع." };
   }
 
-  await writeAuditLog(profile.id, "admin_created_pending_project", "project", createdProject.id as string);
+  const projectId = createdProject.id as string;
+
+  if (assignments.length > 0) {
+    await adminClient.from("panel_assignments").insert(
+      assignments.map((a) => ({
+        project_id: projectId,
+        panel_member_id: a.panel_member_id,
+        role: a.role,
+        assigned_by: profile.id,
+        is_active: true,
+      })),
+    );
+
+    const supervisorId = assignments.find((a) => a.role === "supervisor")?.panel_member_id;
+    if (supervisorId) {
+      const { data: sup } = await adminClient
+        .from("profiles")
+        .select("full_name")
+        .eq("id", supervisorId)
+        .single();
+      if (sup?.full_name) {
+        await adminClient.from("projects").update({ supervisor_name: sup.full_name, status: "assigned" }).eq("id", projectId);
+      } else {
+        await adminClient.from("projects").update({ status: "assigned" }).eq("id", projectId);
+      }
+    } else {
+      await adminClient.from("projects").update({ status: "assigned" }).eq("id", projectId);
+    }
+  }
+
+  await writeAuditLog(profile.id, "admin_created_pending_project", "project", projectId);
   revalidatePath("/", "layout");
   return {
     ok: true,
-    message: `تم إنشاء المشروع رقم «${parsed.data.project_number}». يمكن لقائد الفريق التسجيل الآن برقمه الجامعي والرقم القومي.`,
+    message: `تم إنشاء المشروع${parsed.data.project_number ? ` رقم «${parsed.data.project_number}»` : ""}. يمكن لقائد الفريق التسجيل الآن برقمه الجامعي والرقم القومي.`,
   };
 }
 

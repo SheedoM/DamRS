@@ -20,10 +20,11 @@ export function DeleteProjectButton({ projectId }: { projectId: string }) {
         message="سيؤدي هذا إلى حذف المشروع وكل بياناته نهائيًا: أعضاء الفريق، الملفات، إسنادات اللجنة، والدرجات. لا يمكن التراجع."
         confirmLabel="حذف نهائي"
         variant="outline"
+        size="sm"
         pending={isPending}
         pendingLabel="جارٍ الحذف..."
       >
-        حذف المشروع
+        حذف
       </ConfirmSubmitButton>
     </form>
   );

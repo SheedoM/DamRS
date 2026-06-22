@@ -29,6 +29,7 @@ import {
   type SubmissionFilter,
 } from "@/lib/admin/admin-projects";
 import { BulkAssignForm } from "./bulk-assign-form";
+import { DeleteProjectButton } from "./[projectId]/delete-project-button";
 import type { PanelMember } from "@/lib/admin/queries";
 import { gradingStatusLabel, projectStatusLabel } from "@/lib/i18n/labels";
 import { cn } from "@/lib/utils";
@@ -126,12 +127,15 @@ const columns = [
     id: "actions",
     header: "",
     cell: (info) => (
-      <Link
-        href={`/admin/projects/${info.row.original.id}`}
-        className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-      >
-        فتح
-      </Link>
+      <div className="flex items-center gap-2">
+        <Link
+          href={`/admin/projects/${info.row.original.id}`}
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+        >
+          فتح
+        </Link>
+        <DeleteProjectButton projectId={info.row.original.id} />
+      </div>
     ),
   }),
 ];

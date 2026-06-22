@@ -31,7 +31,7 @@ export default async function AdminProjectsPage({
     <AppShell title="المشاريع" profile={profile}>
       <div className="space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3" data-tour="admin-projects-create">
-          <CreatePendingProjectForm />
+          <CreatePendingProjectForm panelMembers={panelMembers} />
           <Link
             href="/admin/projects/new"
             className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
