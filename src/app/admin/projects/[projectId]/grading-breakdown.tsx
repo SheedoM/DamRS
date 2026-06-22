@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 
 import { overrideDiscussionScoresAction } from "../../actions";
 import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { discussionCriteria, DISCUSSION_MAX } from "@/lib/review/grading";
 import type { StudentBreakdown } from "@/lib/admin/student-grades";
@@ -53,7 +54,10 @@ export function GradingBreakdown({
 
       {students.map((student) => (
         <div key={student.teamMemberId} className="rounded-lg border border-slate-200 p-4">
-          <p className="font-semibold text-slate-950">{student.fullName}</p>
+          <div className="flex items-center gap-2">
+            <p className="font-semibold text-slate-950">{student.fullName}</p>
+            {student.isLeader ? <Badge tone="info">قائد الفريق</Badge> : null}
+          </div>
           <p className="mb-3 text-xs text-slate-500">{student.studentId}</p>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-right text-sm">

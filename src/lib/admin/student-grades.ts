@@ -113,6 +113,7 @@ export type StudentBreakdown = {
   teamMemberId: string;
   fullName: string;
   studentId: string;
+  isLeader: boolean;
   evaluators: EvaluatorScore[];
 };
 
@@ -129,7 +130,7 @@ export async function getProjectGradingBreakdown(projectId: string): Promise<Stu
       .is("revoked_at", null),
     supabase
       .from("team_members")
-      .select("id, full_name, student_id")
+      .select("id, full_name, student_id, role_in_team")
       .eq("project_id", projectId)
       .order("created_at", { ascending: true }),
     supabase
@@ -154,6 +155,7 @@ export async function getProjectGradingBreakdown(projectId: string): Promise<Stu
     teamMemberId: m.id as string,
     fullName: m.full_name as string,
     studentId: m.student_id as string,
+    isLeader: m.role_in_team === "team_leader",
     evaluators: [...evaluators.entries()].map(([panelMemberId, name]) => {
       const s = scoreByKey.get(`${panelMemberId}|${m.id}`);
       return {
