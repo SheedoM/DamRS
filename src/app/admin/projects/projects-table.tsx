@@ -82,7 +82,7 @@ const columns = [
     cell: (info) => (
       <div>
         <p className="font-medium text-slate-950">{info.getValue() || "—"}</p>
-        <p className="text-xs text-slate-500">{info.row.original.team_leader_name}</p>
+        <p className="text-xs text-slate-500">{info.row.original.team_leader_student_id || "—"}</p>
       </div>
     ),
   }),
