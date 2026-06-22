@@ -14,13 +14,33 @@ export function getPanelProjectReviewBadge(graded: boolean): PanelProjectReviewB
 
 export function filterPanelProjects(
   projects: PanelProjectListItem[],
-  filters: { review?: PanelProjectReviewFilter },
+  filters: { review?: PanelProjectReviewFilter; status?: string },
 ) {
-  if (!filters.review || filters.review === "all") return projects;
+  let result = projects;
 
-  return projects.filter((project) =>
-    filters.review === "graded" ? project.graded : !project.graded,
-  );
+  if (filters.review && filters.review !== "all") {
+    result = result.filter((project) =>
+      filters.review === "graded" ? project.graded : !project.graded,
+    );
+  }
+
+  if (filters.status && filters.status !== "all") {
+    result = result.filter((project) => project.status === filters.status);
+  }
+
+  return result;
+}
+
+// The distinct project statuses present among the assigned projects, ordered by
+// the canonical lifecycle so the filter chips read sensibly.
+const STATUS_ORDER = ["draft", "submitted", "assigned", "draft_reviewed", "final_reviewed", "completed"];
+
+export function getPanelProjectStatuses(projects: PanelProjectListItem[]): string[] {
+  const present = new Set(projects.map((project) => project.status));
+  const ordered = STATUS_ORDER.filter((status) => present.has(status));
+  // Include any statuses not in the canonical list (defensive), preserving order.
+  const extras = [...present].filter((status) => !STATUS_ORDER.includes(status));
+  return [...ordered, ...extras];
 }
 
 export function getPanelDashboardStats(projects: { graded: boolean }[]) {
