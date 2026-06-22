@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 
-import { registerStudentAction, type StudentRegistrationActionResult } from "./actions";
+import { registerStudentAction, checkUniversityIdAction, type StudentRegistrationActionResult } from "./actions";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -15,10 +15,12 @@ import { Spinner } from "@/components/ui/spinner";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 const initialState: StudentRegistrationActionResult = { ok: true, message: "" };
+const checkInitial = { ok: true, message: "" };
 
 export default function RegisterPage() {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(registerStudentAction, initialState);
+  const [checkState, checkFormAction, isChecking] = useActionState(checkUniversityIdAction, checkInitial);
   const [autoLoginError, setAutoLoginError] = useState<string | null>(null);
   const [isRedirecting, setIsRedirecting] = useState(false);
 
@@ -87,6 +89,25 @@ export default function RegisterPage() {
                 <Alert>{autoLoginError}</Alert>
               </div>
             ) : null}
+
+            <form action={checkFormAction} className="mb-6 space-y-2 rounded-md border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-medium text-slate-500">التحقق من الرقم الجامعي (للمشرف فقط)</p>
+              <div className="flex gap-2">
+                <Input name="student_id" inputMode="numeric" placeholder="أدخل الرقم الجامعي للتحقق" className="flex-1" />
+                <button
+                  type="submit"
+                  disabled={isChecking}
+                  className="rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  {isChecking ? "..." : "تحقق"}
+                </button>
+              </div>
+              {checkState.message ? (
+                <p className={`text-xs ${checkState.ok ? "text-emerald-700" : "text-red-600"}`}>
+                  {checkState.message}
+                </p>
+              ) : null}
+            </form>
 
             <form className="space-y-4" action={formAction}>
               <div className="space-y-2">

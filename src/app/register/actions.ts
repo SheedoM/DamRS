@@ -2,6 +2,81 @@
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { ActionResult } from "@/lib/actions";
+
+export type CheckUniversityIdResult = { ok: boolean; message: string };
+
+export async function checkUniversityIdAction(
+  _prev: CheckUniversityIdResult,
+  formData: FormData,
+): Promise<CheckUniversityIdResult> {
+  const studentId = String(formData.get("student_id") || "").trim();
+  if (studentId.length < 3) {
+    return { ok: false, message: "أدخل الرقم الجامعي." };
+  }
+
+  let adminClient;
+  try {
+    adminClient = createSupabaseAdminClient();
+  } catch {
+    return { ok: false, message: "خطأ في الاتصال بالخادم." };
+  }
+
+  const { data: cycle } = await adminClient
+    .from("discussion_cycles")
+    .select("id")
+    .eq("is_active", true)
+    .limit(1)
+    .maybeSingle();
+
+  if (!cycle) {
+    return { ok: false, message: "لا توجد دورة مناقشة مفعّلة حاليًا." };
+  }
+
+  const { data: pendingProject } = await adminClient
+    .from("projects")
+    .select("id, title, project_number")
+    .eq("cycle_id", cycle.id)
+    .eq("leader_university_id", studentId)
+    .is("team_leader_id", null)
+    .maybeSingle();
+
+  if (pendingProject) {
+    const label = pendingProject.title || pendingProject.project_number || "—";
+    return { ok: true, message: `الرقم الجامعي معرَّف في النظام ومرتبط بمشروع «${label}». يمكن لصاحبه إنشاء حساب.` };
+  }
+
+  // Check if the leader already claimed a project (account already created)
+  const { data: claimedProject } = await adminClient
+    .from("projects")
+    .select("id")
+    .eq("cycle_id", cycle.id)
+    .eq("leader_university_id", studentId)
+    .not("team_leader_id", "is", null)
+    .maybeSingle();
+
+  if (claimedProject) {
+    return { ok: false, message: "هذا الرقم الجامعي مرتبط بمشروع وقد تم التسجيل به بالفعل." };
+  }
+
+  const { data: eligible } = await adminClient
+    .from("eligible_students")
+    .select("id, claimed_by")
+    .eq("cycle_id", cycle.id)
+    .eq("university_id", studentId)
+    .maybeSingle();
+
+  if (eligible) {
+    if (eligible.claimed_by) {
+      return { ok: false, message: "هذا الرقم الجامعي موجود في قائمة المعتمدين وقد تم استخدامه للتسجيل بالفعل." };
+    }
+    return { ok: true, message: "الرقم الجامعي موجود في قائمة المعتمدين ويمكن التسجيل به." };
+  }
+
+  return {
+    ok: false,
+    message: "لا يوجد مشروع مرتبط بهذا الرقم الجامعي في النظام. تأكد من إضافة المشروع أولاً من لوحة الإدارة.",
+  };
+}
 import {
   buildStudentAuthCredentials,
   buildStudentProfileInsert,
