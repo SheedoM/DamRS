@@ -68,6 +68,7 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
       technologies_used: project?.technologies_used || "",
       github_url: project?.github_url || "",
       demo_video_url: project?.demo_video_url || "",
+      source_code_url: project?.source_code_url || "",
       team_members:
         teamMembers.length > 0
           ? teamMembers.map((member) => ({
@@ -151,10 +152,16 @@ export function ProjectForm({ mode, project, teamMembers = [], maxTeamMembers }:
             <Input id="github_url" type="url" {...register("github_url")} />
             <FieldError message={errors.github_url?.message} />
           </div>
-          <div className="space-y-2 md:col-span-2">
+          <div className="space-y-2">
             <Label htmlFor="demo_video_url">رابط فيديو العرض</Label>
             <Input id="demo_video_url" type="url" {...register("demo_video_url")} />
             <FieldError message={errors.demo_video_url?.message} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="source_code_url">رابط الكود المصدري</Label>
+            <Input id="source_code_url" type="url" {...register("source_code_url")} />
+            <p className="text-xs text-slate-500">ارفع الكود على Google Drive أو أي خدمة سحابية وألصق الرابط هنا.</p>
+            <FieldError message={errors.source_code_url?.message} />
           </div>
         </div>
       </section>

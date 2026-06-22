@@ -64,6 +64,7 @@ const adminProjectEditSchema = z.object({
   technologies_used: optionalText,
   github_url: optionalText,
   demo_video_url: optionalText,
+  source_code_url: optionalText,
   leader_university_id: optionalText,
   leader_full_name: optionalText,
   leader_program: optionalProgram,
@@ -460,6 +461,7 @@ export async function createAdminProjectAction(
     technologies_used: formData.get("technologies_used"),
     github_url: formData.get("github_url"),
     demo_video_url: formData.get("demo_video_url"),
+    source_code_url: formData.get("source_code_url"),
     team_members,
   });
 
@@ -653,6 +655,7 @@ export async function updateAdminProjectAction(
     technologies_used: formData.get("technologies_used"),
     github_url: formData.get("github_url"),
     demo_video_url: formData.get("demo_video_url"),
+    source_code_url: formData.get("source_code_url"),
     leader_university_id: formData.get("leader_university_id"),
     leader_full_name: formData.get("leader_full_name"),
     leader_program: formData.get("leader_program"),
@@ -713,6 +716,7 @@ export async function updateAdminProjectAction(
       technologies_used: parsed.data.technologies_used,
       github_url: parsed.data.github_url,
       demo_video_url: parsed.data.demo_video_url,
+      source_code_url: parsed.data.source_code_url,
       leader_university_id: parsed.data.leader_university_id,
       leader_full_name: parsed.data.leader_full_name,
       leader_program: parsed.data.leader_program,
@@ -1106,4 +1110,3 @@ export async function closeSubmissionWindowNowAction(
   revalidatePath("/", "layout");
   return { ok: true, message: "تم إغلاق نافذة التسليم." };
 }
-

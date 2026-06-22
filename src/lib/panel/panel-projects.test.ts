@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { filterPanelProjects, getPanelProjectReviewBadge, type PanelProjectReviewFilter } from "./panel-projects";
+import { filterPanelProjects, getPanelProjectReviewBadge, type PanelProjectGradingState, type PanelProjectReviewFilter } from "./panel-projects";
 
 const baseProject = {
   status: "assigned",
@@ -12,23 +12,25 @@ const baseProject = {
   roles: { committee: true, supervisor: false },
 };
 
-const projects = [
-  { ...baseProject, id: "p1", title: "Graded", graded: true },
-  { ...baseProject, id: "p2", title: "Pending one", graded: false },
-  { ...baseProject, id: "p3", title: "Pending two", graded: false },
+const projects: (typeof baseProject & { id: string; title: string; gradingState: PanelProjectGradingState })[] = [
+  { ...baseProject, id: "p1", title: "Final", gradingState: "final" },
+  { ...baseProject, id: "p2", title: "Draft", gradingState: "draft" },
+  { ...baseProject, id: "p3", title: "Not graded", gradingState: "none" },
 ];
 
 describe("panel project filters", () => {
   it.each([
     ["all", ["p1", "p2", "p3"]],
-    ["graded", ["p1"]],
-    ["pending", ["p2", "p3"]],
+    ["final", ["p1"]],
+    ["partial", ["p2"]],
+    ["not_graded", ["p3"]],
   ] satisfies [PanelProjectReviewFilter, string[]][])("filters %s projects", (review, expectedIds) => {
     expect(filterPanelProjects(projects, { review }).map((project) => project.id)).toEqual(expectedIds);
   });
 
-  it("builds a graded/not-graded badge", () => {
-    expect(getPanelProjectReviewBadge(true)).toEqual({ label: "تم التقييم", tone: "success" });
-    expect(getPanelProjectReviewBadge(false)).toEqual({ label: "بانتظار التقييم", tone: "warning" });
+  it("builds a badge for each grading state", () => {
+    expect(getPanelProjectReviewBadge("none")).toEqual({ label: "بانتظار التقييم", tone: "warning" });
+    expect(getPanelProjectReviewBadge("draft")).toEqual({ label: "مسودة محفوظة", tone: "info" });
+    expect(getPanelProjectReviewBadge("final")).toEqual({ label: "تم الاعتماد", tone: "success" });
   });
 });

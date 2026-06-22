@@ -23,6 +23,8 @@ export function ConfirmSubmitButton({
   pendingLabel,
   disabled,
   children,
+  name,
+  value,
   ...buttonProps
 }: ConfirmSubmitButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -66,7 +68,15 @@ export function ConfirmSubmitButton({
 
   return (
     <>
-      <button ref={submitRef} type="submit" className="hidden" tabIndex={-1} aria-hidden="true" />
+      <button
+        ref={submitRef}
+        type="submit"
+        name={name}
+        value={value}
+        className="hidden"
+        tabIndex={-1}
+        aria-hidden="true"
+      />
       <Button
         {...buttonProps}
         ref={triggerRef}

@@ -115,7 +115,7 @@ export function FileUploadForm({
       />
       <div>
         <p className="text-sm font-medium text-slate-900">{label}</p>
-        <p className="mt-1 text-xs text-slate-500">اختر ملفًا وسيتم رفعه فورًا.</p>
+        <p className="mt-1 text-xs text-slate-500">اختر ملفًا وسيتم رفعه فورًا. الحد الأقصى: {formatFileSize(maxSizeBytes)}.</p>
       </div>
 
       {existingFile ? (

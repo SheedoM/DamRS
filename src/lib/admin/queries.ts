@@ -51,6 +51,7 @@ export type AdminProjectDetail = AdminProjectRow & {
   technologies_used: string | null;
   github_url: string | null;
   demo_video_url: string | null;
+  source_code_url: string | null;
   team_members: {
     id: string;
     full_name: string;
@@ -191,7 +192,7 @@ export async function getAdminProjectDetail(projectId: string) {
   const { data: project } = await supabase
     .from("projects")
     .select(
-      "id, project_number, title, title_en, abstract, status, department, supervisor_name, technologies_used, github_url, demo_video_url, submitted_at, team_leader_id, leader_full_name, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(panel_member_id), team_members(id), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)",
+      "id, project_number, title, title_en, abstract, status, department, supervisor_name, technologies_used, github_url, demo_video_url, source_code_url, submitted_at, team_leader_id, leader_full_name, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(panel_member_id), team_members(id), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)",
     )
     .is("panel_assignments.revoked_at", null)
     .eq("panel_assignments.is_active", true)
@@ -229,6 +230,7 @@ export async function getAdminProjectDetail(projectId: string) {
     technologies_used: project.technologies_used as string | null,
     github_url: project.github_url as string | null,
     demo_video_url: project.demo_video_url as string | null,
+    source_code_url: project.source_code_url as string | null,
     team_members: teamMembers || [],
     files: filesWithSignedUrls,
     assignments: mappedAssignments,

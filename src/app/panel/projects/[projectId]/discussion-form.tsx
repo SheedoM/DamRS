@@ -6,6 +6,7 @@ import { saveDiscussionScoresAction } from "./review-actions";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { programLabel } from "@/lib/i18n/labels";
 import { discussionCriteria, calcDiscussionTotal, DISCUSSION_MAX } from "@/lib/review/grading";
 import type { OwnDiscussionScore } from "@/lib/panel/queries";
@@ -23,13 +24,14 @@ type DiscussionFormProps = {
   students: Student[];
   existingScores: OwnDiscussionScore[];
   locked?: boolean;
+  finalized?: boolean;
 };
 
 const initialState = { ok: true, message: "" };
 
 type ScoreMap = Record<string, Record<string, number>>;
 
-export function DiscussionForm({ projectId, students, existingScores, locked = false }: DiscussionFormProps) {
+export function DiscussionForm({ projectId, students, existingScores, locked = false, finalized = false }: DiscussionFormProps) {
   const [state, formAction, isPending] = useActionState(saveDiscussionScoresAction, initialState);
 
   const initialScores = useMemo<ScoreMap>(() => {
@@ -63,6 +65,7 @@ export function DiscussionForm({ projectId, students, existingScores, locked = f
 
       {!state.ok ? <Alert>{state.message}</Alert> : null}
       {state.ok && state.message ? <p className="text-sm text-emerald-700">{state.message}</p> : null}
+      {finalized ? <Badge tone="success">تم الاعتماد</Badge> : null}
 
       {students.map((student) => {
         const total = calcDiscussionTotal(scores[student.id] || {});
@@ -110,9 +113,22 @@ export function DiscussionForm({ projectId, students, existingScores, locked = f
           باب التقييم مغلق حاليًا. لا يمكنك إدخال أو تعديل الدرجات حتى يفتحه المسؤول.
         </p>
       ) : (
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "جارٍ الحفظ..." : "حفظ التقييم"}
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button type="submit" name="intent" value="draft" variant="outline" disabled={isPending}>
+            {isPending ? "جارٍ الحفظ..." : "حفظ كمسودة"}
+          </Button>
+          <ConfirmSubmitButton
+            name="intent"
+            value="finalize"
+            pending={isPending}
+            pendingLabel="جارٍ الاعتماد..."
+            title="اعتماد درجات المناقشة"
+            message="سيتم اعتماد درجاتك لهذا المشروع ويمكنك إعادة حفظها كمسودة لاحقًا ما دام باب التقييم مفتوحًا."
+            confirmLabel="اعتماد الدرجات"
+          >
+            اعتماد الدرجات
+          </ConfirmSubmitButton>
+        </div>
       )}
     </form>
   );

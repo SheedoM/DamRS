@@ -19,7 +19,7 @@ export default async function AdminProjectEditPage({
   const { data: project } = await supabase
     .from("projects")
     .select(
-      "id, project_number, title, title_en, supervisor_name, abstract, technologies_used, github_url, demo_video_url, leader_university_id, leader_full_name, leader_program",
+      "id, project_number, title, title_en, supervisor_name, abstract, technologies_used, github_url, demo_video_url, source_code_url, leader_university_id, leader_full_name, leader_program",
     )
     .eq("id", projectId)
     .maybeSingle();

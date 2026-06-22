@@ -20,7 +20,7 @@ import { cn, formatDate } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 function normalizeReviewFilter(value?: string): PanelProjectReviewFilter {
-  if (value === "graded" || value === "pending") return value;
+  if (value === "not_graded" || value === "partial" || value === "final") return value;
   return "all";
 }
 
@@ -61,7 +61,7 @@ export default async function PanelHomePage({
         <Card data-tour="panel-assigned">
           <CardHeader>
             <CardTitle>
-              المشاريع المسندة إليك ({stats.assignedProjects}) · بانتظار التقييم ({stats.pendingProjects})
+              المشاريع المسندة إليك ({stats.assignedProjects}) · معتمد ({stats.finalizedProjects}) · بانتظار الاعتماد ({stats.pendingProjects})
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -69,8 +69,9 @@ export default async function PanelHomePage({
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-medium text-slate-500">التقييم:</span>
                 <Link href={panelFilterHref("all", statusFilter)} className={cn(buttonVariants({ variant: reviewFilter === "all" ? "default" : "ghost", size: "sm" }))}>الكل</Link>
-                <Link href={panelFilterHref("pending", statusFilter)} className={cn(buttonVariants({ variant: reviewFilter === "pending" ? "default" : "ghost", size: "sm" }))}>بانتظار التقييم</Link>
-                <Link href={panelFilterHref("graded", statusFilter)} className={cn(buttonVariants({ variant: reviewFilter === "graded" ? "default" : "ghost", size: "sm" }))}>تم التقييم</Link>
+                <Link href={panelFilterHref("not_graded", statusFilter)} className={cn(buttonVariants({ variant: reviewFilter === "not_graded" ? "default" : "ghost", size: "sm" }))}>لم يُقيَّم</Link>
+                <Link href={panelFilterHref("partial", statusFilter)} className={cn(buttonVariants({ variant: reviewFilter === "partial" ? "default" : "ghost", size: "sm" }))}>مسودة</Link>
+                <Link href={panelFilterHref("final", statusFilter)} className={cn(buttonVariants({ variant: reviewFilter === "final" ? "default" : "ghost", size: "sm" }))}>معتمد</Link>
               </div>
               {availableStatuses.length > 1 ? (
                 <div className="flex flex-wrap items-center gap-2">
@@ -85,7 +86,7 @@ export default async function PanelHomePage({
               ) : null}
             </div>
             {filteredProjects.length > 0 ? filteredProjects.map((project) => {
-              const reviewBadge = getPanelProjectReviewBadge(project.graded);
+              const reviewBadge = getPanelProjectReviewBadge(project.gradingState);
               return (
                 <div
                   key={project.id}

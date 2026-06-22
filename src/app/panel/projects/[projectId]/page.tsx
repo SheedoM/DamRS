@@ -74,6 +74,9 @@ export default async function PanelProjectDetailPage({
               {project.demo_video_url ? (
                 <a className={cn(buttonVariants({ variant: "outline", size: "sm" }))} href={project.demo_video_url} target="_blank" rel="noreferrer">فيديو العرض</a>
               ) : null}
+              {project.source_code_url ? (
+                <a className={cn(buttonVariants({ variant: "outline", size: "sm" }))} href={project.source_code_url} target="_blank" rel="noreferrer">الكود المصدري</a>
+              ) : null}
             </div>
           </CardContent>
         </Card>
@@ -113,6 +116,7 @@ export default async function PanelProjectDetailPage({
                 students={gradingStudents}
                 existingScores={existingScores}
                 locked={!grading.isOpen}
+                finalized={project.finalized.committee}
               />
             </CardContent>
           </Card>
@@ -130,6 +134,7 @@ export default async function PanelProjectDetailPage({
                 students={gradingStudents}
                 existing={project.supervision}
                 locked={!grading.isOpen}
+                finalized={project.finalized.supervisor}
               />
             </CardContent>
           </Card>

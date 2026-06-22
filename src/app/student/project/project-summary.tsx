@@ -34,7 +34,6 @@ const requiredUploads: {
   maxSizeBytes: number;
 }[] = [
   { fileType: "documentation_pdf", label: "مستند المشروع (PDF)", accept: "application/pdf", maxSizeBytes: 50 * 1024 * 1024 },
-  { fileType: "source_code_zip", label: "الكود المصدري (ZIP)", accept: ".zip,application/zip,application/x-zip-compressed", maxSizeBytes: 100 * 1024 * 1024 },
   { fileType: "presentation_file", label: "ملف العرض التقديمي (اختياري)", accept: ".pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation", maxSizeBytes: 50 * 1024 * 1024 },
 ];
 
@@ -47,6 +46,8 @@ export function ProjectSummary({ project, teamMembers, files, uploadedBy }: Proj
     abstract: project.abstract,
     supervisor_name: project.supervisor_name,
     demo_video_url: project.demo_video_url,
+    source_code_url: project.source_code_url,
+    hasLegacySourceZip: files.some((file) => file.file_type === "source_code_zip"),
     teamMemberCount: teamMembers.length,
     fileTypes: files.map((file) => file.file_type),
   });
@@ -68,7 +69,8 @@ export function ProjectSummary({ project, teamMembers, files, uploadedBy }: Proj
     isBlank(project.title_en) ||
     isBlank(project.abstract) ||
     isBlank(project.supervisor_name) ||
-    isBlank(project.demo_video_url);
+    isBlank(project.demo_video_url) ||
+    (isBlank(project.source_code_url) && !fileByType.has("source_code_zip"));
 
   return (
     <div className="space-y-5">
@@ -169,6 +171,18 @@ export function ProjectSummary({ project, teamMembers, files, uploadedBy }: Proj
                 {project.demo_video_url ? (
                   <a className="inline-flex items-center gap-1 text-[var(--brand-blue)]" href={project.demo_video_url} target="_blank" rel="noreferrer">
                     فتح العرض <ExternalLink className="h-3 w-3" />
+                  </a>
+                ) : "غير متوفر"}
+              </p>
+              <p>
+                <span className="font-medium text-slate-900">الكود المصدري:</span>{" "}
+                {project.source_code_url ? (
+                  <a className="inline-flex items-center gap-1 text-[var(--brand-blue)]" href={project.source_code_url} target="_blank" rel="noreferrer">
+                    فتح الرابط <ExternalLink className="h-3 w-3" />
+                  </a>
+                ) : fileByType.get("source_code_zip")?.signedUrl ? (
+                  <a className="inline-flex items-center gap-1 text-[var(--brand-blue)]" href={fileByType.get("source_code_zip")?.signedUrl || ""} target="_blank" rel="noreferrer">
+                    فتح ملف ZIP السابق <FileText className="h-3 w-3" />
                   </a>
                 ) : "غير متوفر"}
               </p>

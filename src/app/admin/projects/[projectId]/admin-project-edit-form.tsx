@@ -24,6 +24,7 @@ export type AdminEditableProject = {
   technologies_used: string | null;
   github_url: string | null;
   demo_video_url: string | null;
+  source_code_url: string | null;
   leader_university_id: string | null;
   leader_full_name: string | null;
   leader_program: string | null;
@@ -112,6 +113,10 @@ export function AdminProjectEditForm({
           <div className="space-y-2 md:col-span-2">
             <Label htmlFor="demo_video_url">رابط فيديو العرض</Label>
             <Input id="demo_video_url" name="demo_video_url" defaultValue={project.demo_video_url || ""} />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="source_code_url">رابط الكود المصدري</Label>
+            <Input id="source_code_url" name="source_code_url" defaultValue={project.source_code_url || ""} />
           </div>
         </div>
       </section>

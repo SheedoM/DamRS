@@ -1,15 +1,22 @@
 import type { PanelProjectListItem } from "./queries";
 
-export type PanelProjectReviewFilter = "all" | "graded" | "pending";
+export type PanelProjectGradingState = "none" | "draft" | "final";
+export type PanelProjectReviewFilter = "all" | "not_graded" | "partial" | "final";
 export type PanelProjectReviewBadge = {
-  label: "تم التقييم" | "بانتظار التقييم";
-  tone: "success" | "warning";
+  label: "بانتظار التقييم" | "مسودة محفوظة" | "تم الاعتماد";
+  tone: "success" | "warning" | "info";
 };
 
-export function getPanelProjectReviewBadge(graded: boolean): PanelProjectReviewBadge {
-  return graded
-    ? { label: "تم التقييم", tone: "success" }
-    : { label: "بانتظار التقييم", tone: "warning" };
+export function getPanelProjectReviewBadge(state: PanelProjectGradingState): PanelProjectReviewBadge {
+  switch (state) {
+    case "draft":
+      return { label: "مسودة محفوظة", tone: "info" };
+    case "final":
+      return { label: "تم الاعتماد", tone: "success" };
+    case "none":
+    default:
+      return { label: "بانتظار التقييم", tone: "warning" };
+  }
 }
 
 export function filterPanelProjects(
@@ -19,9 +26,12 @@ export function filterPanelProjects(
   let result = projects;
 
   if (filters.review && filters.review !== "all") {
-    result = result.filter((project) =>
-      filters.review === "graded" ? project.graded : !project.graded,
-    );
+    const stateByFilter: Record<Exclude<PanelProjectReviewFilter, "all">, PanelProjectGradingState> = {
+      not_graded: "none",
+      partial: "draft",
+      final: "final",
+    };
+    result = result.filter((project) => project.gradingState === stateByFilter[filters.review as Exclude<PanelProjectReviewFilter, "all">]);
   }
 
   if (filters.status && filters.status !== "all") {
@@ -43,10 +53,12 @@ export function getPanelProjectStatuses(projects: PanelProjectListItem[]): strin
   return [...ordered, ...extras];
 }
 
-export function getPanelDashboardStats(projects: { graded: boolean }[]) {
+export function getPanelDashboardStats(projects: { gradingState: PanelProjectGradingState }[]) {
+  const finalizedProjects = projects.filter((project) => project.gradingState === "final").length;
+
   return {
     assignedProjects: projects.length,
-    gradedProjects: projects.filter((project) => project.graded).length,
-    pendingProjects: projects.filter((project) => !project.graded).length,
+    finalizedProjects,
+    pendingProjects: projects.length - finalizedProjects,
   };
 }

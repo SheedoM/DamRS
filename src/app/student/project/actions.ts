@@ -58,6 +58,7 @@ function parseProjectForm(formData: FormData) {
     technologies_used: formData.get("technologies_used"),
     github_url: formData.get("github_url"),
     demo_video_url: formData.get("demo_video_url"),
+    source_code_url: formData.get("source_code_url"),
     team_members,
   });
 }
@@ -204,7 +205,7 @@ export async function submitProjectAction(
   const supabase = await createSupabaseServerClient();
   const { data: project, error: projectError } = await supabase
     .from("projects")
-    .select("id, title, title_en, abstract, supervisor_name, demo_video_url")
+    .select("id, title, title_en, abstract, supervisor_name, demo_video_url, source_code_url")
     .eq("id", parsed.data.projectId)
     .single();
 
@@ -229,6 +230,8 @@ export async function submitProjectAction(
     abstract: project.abstract as string | null,
     supervisor_name: project.supervisor_name as string | null,
     demo_video_url: project.demo_video_url as string | null,
+    source_code_url: project.source_code_url as string | null,
+    hasLegacySourceZip: (files || []).some((file) => String(file.file_type) === "source_code_zip"),
     teamMemberCount: teamMemberCount || 0,
     fileTypes: (files || []).map((file) => String(file.file_type)),
   });

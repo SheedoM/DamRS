@@ -12,7 +12,6 @@ export type RequiredProjectFileType = (typeof projectFileTypes)[number];
 
 export const requiredSubmissionFileTypes = [
   "documentation_pdf",
-  "source_code_zip",
 ] as const;
 
 type RequiredSubmissionFileType = (typeof requiredSubmissionFileTypes)[number];
@@ -37,6 +36,7 @@ export const projectFormSchema = z.object({
     .transform((value) => value || null)
     .pipe(z.string().url("رابط غير صالح.").nullable()),
   demo_video_url: z.string().trim().url("رابط فيديو العرض يجب أن يكون رابطًا صالحًا."),
+  source_code_url: z.string().trim().url("رابط الكود المصدري يجب أن يكون رابطًا صالحًا."),
   team_members: z.array(teamMemberSchema)
     .min(1, "يجب إضافة عضو واحد على الأقل.")
     .refine(
@@ -54,13 +54,14 @@ type SubmissionRequirementInput = {
   abstract: string | null;
   supervisor_name: string | null;
   demo_video_url: string | null;
+  source_code_url: string | null;
+  hasLegacySourceZip: boolean;
   teamMemberCount: number;
   fileTypes: string[];
 };
 
 const requiredFileLabels: Record<RequiredSubmissionFileType, string> = {
   documentation_pdf: "مستند المشروع (PDF)",
-  source_code_zip: "الكود المصدري (ZIP)",
 };
 
 function isBlank(value: string | null) {
@@ -75,6 +76,7 @@ export function getMissingSubmissionRequirements(input: SubmissionRequirementInp
   if (isBlank(input.abstract)) missing.push("ملخص المشروع");
   if (isBlank(input.supervisor_name)) missing.push("اسم المشرف");
   if (isBlank(input.demo_video_url)) missing.push("رابط فيديو العرض");
+  if (isBlank(input.source_code_url) && !input.hasLegacySourceZip) missing.push("رابط الكود المصدري");
   if (input.teamMemberCount < 1) missing.push("عضو فريق واحد على الأقل");
 
   for (const fileType of requiredSubmissionFileTypes) {

@@ -22,6 +22,7 @@ describe("project submission validation", () => {
       technologies_used: "Next.js, Supabase, Python",
       github_url: "https://github.com/example/smart-attendance",
       demo_video_url: "https://youtu.be/example",
+      source_code_url: "https://drive.google.com/file/d/source",
       team_members: [
         {
           full_name: "Student One",
@@ -43,6 +44,8 @@ describe("project submission validation", () => {
       abstract: "",
       supervisor_name: "",
       demo_video_url: "",
+      source_code_url: "",
+      hasLegacySourceZip: false,
       teamMemberCount: 0,
       fileTypes: ["documentation_pdf"],
     });
@@ -51,18 +54,36 @@ describe("project submission validation", () => {
       "ملخص المشروع",
       "اسم المشرف",
       "رابط فيديو العرض",
+      "رابط الكود المصدري",
       "عضو فريق واحد على الأقل",
-      "الكود المصدري (ZIP)",
     ]);
   });
 
-  it("returns no missing requirements when required PDF and ZIP are uploaded", () => {
+  it("returns no missing requirements when required PDF and source link are present", () => {
     const missing = getMissingSubmissionRequirements({
       title: "Smart Attendance System",
       title_en: "Smart Attendance System",
       abstract: "Complete abstract",
       supervisor_name: "Dr. Example",
       demo_video_url: "https://drive.google.com/file/d/example",
+      source_code_url: "https://drive.google.com/file/d/source",
+      hasLegacySourceZip: false,
+      teamMemberCount: 3,
+      fileTypes: ["documentation_pdf"],
+    });
+
+    expect(missing).toEqual([]);
+  });
+
+  it("accepts a legacy source ZIP when the source link is absent", () => {
+    const missing = getMissingSubmissionRequirements({
+      title: "Smart Attendance System",
+      title_en: "Smart Attendance System",
+      abstract: "Complete abstract",
+      supervisor_name: "Dr. Example",
+      demo_video_url: "https://drive.google.com/file/d/example",
+      source_code_url: null,
+      hasLegacySourceZip: true,
       teamMemberCount: 3,
       fileTypes: ["documentation_pdf", "source_code_zip"],
     });

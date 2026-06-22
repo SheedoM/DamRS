@@ -12,6 +12,7 @@ export type StudentProject = {
   technologies_used: string | null;
   github_url: string | null;
   demo_video_url: string | null;
+  source_code_url: string | null;
   status: string;
   submitted_at: string | null;
   created_at: string;
@@ -65,7 +66,7 @@ export async function getStudentProject(teamLeaderId: string) {
   const { data: project } = await supabase
     .from("projects")
     .select(
-      "id, cycle_id, project_number, title, title_en, abstract, supervisor_name, technologies_used, github_url, demo_video_url, status, submitted_at, created_at, updated_at",
+      "id, cycle_id, project_number, title, title_en, abstract, supervisor_name, technologies_used, github_url, demo_video_url, source_code_url, status, submitted_at, created_at, updated_at",
     )
     .eq("team_leader_id", teamLeaderId)
     .order("created_at", { ascending: false })

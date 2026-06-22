@@ -7,6 +7,7 @@ import { z } from "zod";
 import { discussionCriteria, discussionScoreSchema } from "@/lib/review/grading";
 import { requireRole } from "@/lib/auth/require-role";
 import { getActiveCycleGradingState } from "@/lib/panel/queries";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions";
 import { writeAuditLog } from "@/lib/audit";
@@ -25,6 +26,25 @@ async function ensureActiveAssignment(projectId: string, panelMemberId: string, 
   if (role) query = query.eq("role", role);
   const { data } = await query.limit(1).maybeSingle();
   return Boolean(data);
+}
+
+async function setAssignmentFinalized(
+  projectId: string,
+  panelMemberId: string,
+  role: "committee" | "supervisor",
+  finalize: boolean,
+) {
+  const adminClient = createSupabaseAdminClient();
+  const { error } = await adminClient
+    .from("panel_assignments")
+    .update({ finalized_at: finalize ? new Date().toISOString() : null })
+    .eq("project_id", projectId)
+    .eq("panel_member_id", panelMemberId)
+    .eq("role", role)
+    .eq("is_active", true)
+    .is("revoked_at", null);
+
+  return error;
 }
 
 async function getProjectTerm(projectId: string): Promise<"first" | "second"> {
@@ -56,7 +76,7 @@ export async function saveDiscussionScoresAction(
     return { ok: false, message: "باب التقييم مغلق حاليًا." };
   }
 
-  if (!(await ensureActiveAssignment(projectId, profile.id))) {
+  if (!(await ensureActiveAssignment(projectId, profile.id, "committee"))) {
     return { ok: false, message: "ليس لديك إسناد فعّال لهذا المشروع." };
   }
 
@@ -117,11 +137,18 @@ export async function saveDiscussionScoresAction(
     return { ok: false, message: error.message };
   }
 
+  const intent = formData.get("intent");
+  const finalizeError = await setAssignmentFinalized(projectId, profile.id, "committee", intent === "finalize");
+  if (finalizeError) {
+    return { ok: false, message: finalizeError.message };
+  }
+
   await writeAuditLog(profile.id, "panel_saved_discussion_scores", "project", projectId, {
     students: rows.length,
+    finalized: intent === "finalize",
   });
   revalidatePath("/", "layout");
-  redirect(`/panel/projects/${projectId}?success=draft-saved`);
+  redirect(`/panel/projects/${projectId}?success=${intent === "finalize" ? "scores-finalized" : "draft-saved"}`);
 }
 
 // Supervisor entry: a single mark per student — أعمال السنة (30) in the second
@@ -189,10 +216,17 @@ export async function saveSupervisionScoresAction(
     return { ok: false, message: error.message };
   }
 
+  const intent = formData.get("intent");
+  const finalizeError = await setAssignmentFinalized(projectId, profile.id, "supervisor", intent === "finalize");
+  if (finalizeError) {
+    return { ok: false, message: finalizeError.message };
+  }
+
   await writeAuditLog(profile.id, "panel_saved_supervision_scores", "project", projectId, {
     students: rows.length,
     term,
+    finalized: intent === "finalize",
   });
   revalidatePath("/", "layout");
-  redirect(`/panel/projects/${projectId}?success=supervision-saved`);
+  redirect(`/panel/projects/${projectId}?success=${intent === "finalize" ? "supervision-finalized" : "supervision-saved"}`);
 }

@@ -6,6 +6,7 @@ import { saveSupervisionScoresAction } from "./review-actions";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { programLabel } from "@/lib/i18n/labels";
 import type { SupervisionEntry } from "@/lib/panel/queries";
 
@@ -23,11 +24,12 @@ type SupervisionFormProps = {
   students: Student[];
   existing: SupervisionEntry[];
   locked?: boolean;
+  finalized?: boolean;
 };
 
 const initialState = { ok: true, message: "" };
 
-export function SupervisionForm({ projectId, term, students, existing, locked = false }: SupervisionFormProps) {
+export function SupervisionForm({ projectId, term, students, existing, locked = false, finalized = false }: SupervisionFormProps) {
   const [state, formAction, isPending] = useActionState(saveSupervisionScoresAction, initialState);
 
   const max = term === "first" ? 10 : 30;
@@ -46,6 +48,7 @@ export function SupervisionForm({ projectId, term, students, existing, locked = 
       <input type="hidden" name="project_id" value={projectId} />
       {!state.ok ? <Alert>{state.message}</Alert> : null}
       {state.ok && state.message ? <p className="text-sm text-emerald-700">{state.message}</p> : null}
+      {finalized ? <Badge tone="success">تم الاعتماد</Badge> : null}
 
       <p className="text-sm text-slate-600">
         أدخل درجة <span className="font-medium">{label}</span> لكل طالب (من {max}).
@@ -88,9 +91,22 @@ export function SupervisionForm({ projectId, term, students, existing, locked = 
           باب التقييم مغلق حاليًا. لا يمكنك إدخال أو تعديل الدرجات حتى يفتحه المسؤول.
         </p>
       ) : (
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "جارٍ الحفظ..." : "حفظ الدرجات"}
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button type="submit" name="intent" value="draft" variant="outline" disabled={isPending}>
+            {isPending ? "جارٍ الحفظ..." : "حفظ كمسودة"}
+          </Button>
+          <ConfirmSubmitButton
+            name="intent"
+            value="finalize"
+            pending={isPending}
+            pendingLabel="جارٍ الاعتماد..."
+            title="اعتماد درجات الإشراف"
+            message="سيتم اعتماد درجاتك لهذا المشروع ويمكنك إعادة حفظها كمسودة لاحقًا ما دام باب التقييم مفتوحًا."
+            confirmLabel="اعتماد الدرجات"
+          >
+            اعتماد الدرجات
+          </ConfirmSubmitButton>
+        </div>
       )}
     </form>
   );
