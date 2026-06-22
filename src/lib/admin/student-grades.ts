@@ -11,6 +11,10 @@ export type ProjectStudentGrade = {
   evaluatorsSubmitted: number;
   firstSemester: number;
   supervision: number;
+  // True when a supervision-grades row exists (i.e. the supervisor — or an admin
+  // override — has entered the term's coursework mark). Lets the admin UI tell
+  // "entered 0" apart from "not entered yet".
+  hasGrade: boolean;
   final: number; // /termMax(term)
 };
 
@@ -71,6 +75,7 @@ export async function getProjectStudentGrades(
     const id = member.id as string;
     const discussionTotals = discussionByMember.get(id) || [];
     const sup = supervisionByMember.get(id) || { firstSemester: 0, supervision: 0 };
+    const hasGrade = supervisionByMember.has(id);
     const discussionSum = Number(discussionTotals.reduce((a, b) => a + b, 0).toFixed(2));
 
     return {
@@ -83,6 +88,7 @@ export async function getProjectStudentGrades(
       evaluatorsSubmitted: discussionTotals.length,
       firstSemester: sup.firstSemester,
       supervision: sup.supervision,
+      hasGrade,
       final: calcStudentFinal({
         term,
         firstSemester: sup.firstSemester,

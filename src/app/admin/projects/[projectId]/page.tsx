@@ -57,6 +57,8 @@ export default async function AdminProjectDetailPage({
   });
   const isComplete = missingRequirements.length === 0;
 
+  const supervisorName = activeAssignments.find((a) => a.roles.supervisor)?.panel_member_name ?? null;
+
   return (
     <AppShell title="تفاصيل المشروع" profile={profile}>
       <div className="space-y-5">
@@ -200,7 +202,7 @@ export default async function AdminProjectDetailPage({
               درجة المناقشة (60) = مجموع درجات المقيّمين. أدخل درجة الفصل الأول (10) وتقييم لجنة الإشراف (30) لكل طالب.
             </p>
             {studentGrades.length > 0 ? (
-              <StudentGradesForm projectId={project.id} students={studentGrades} term={term} />
+              <StudentGradesForm projectId={project.id} students={studentGrades} term={term} supervisorName={supervisorName} />
             ) : (
               <p className="text-sm text-slate-500">لا يوجد طلاب في هذا المشروع.</p>
             )}

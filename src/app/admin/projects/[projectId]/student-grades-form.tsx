@@ -22,10 +22,12 @@ export function StudentGradesForm({
   projectId,
   students,
   term,
+  supervisorName,
 }: {
   projectId: string;
   students: ProjectStudentGrade[];
   term: CycleTerm;
+  supervisorName: string | null;
 }) {
   const [state, formAction, isPending] = useActionState(saveStudentGradesAction, initialState);
   const isSecond = term === "second";
@@ -38,11 +40,26 @@ export function StudentGradesForm({
         ]),
       ) as Record<string, { first: number; supervision: number }>,
   );
+  // Which rows the admin is currently overriding. Only edited rows are submitted,
+  // so untouched supervisor entries keep their value and attribution.
+  const [editing, setEditing] = useState<Record<string, boolean>>({});
+  const anyEditing = Object.values(editing).some(Boolean);
+
+  // Collapse all overrides once a save succeeds.
+  const [prevState, setPrevState] = useState(state);
+  if (state !== prevState) {
+    setPrevState(state);
+    if (state.ok && state.message) setEditing({});
+  }
 
   const setField = (id: string, field: "first" | "supervision") => (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
     setEntries((prev) => ({ ...prev, [id]: { ...prev[id], [field]: isNaN(value) ? 0 : value } }));
   };
+
+  // The coursework grade that the supervisor enters: أعمال السنة (30) in the
+  // second term, أعمال الفصل (10) in the first.
+  const gradeLabel = isSecond ? `أعمال السنة (${SUPERVISION_MAX})` : `أعمال الفصل (${FIRST_SEMESTER_MAX})`;
 
   return (
     <form action={formAction} className="space-y-4">
@@ -52,11 +69,17 @@ export function StudentGradesForm({
         <p className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-800">{state.message}</p>
       ) : null}
 
-      <p className="text-xs text-slate-500">
-        {isSecond
-          ? "الفصل الثاني: المناقشة (60) + أعمال السنة (30). يمكنك تعديل أعمال السنة كتجاوز إداري."
-          : "الفصل الأول: أعمال الفصل (10) فقط."}
-      </p>
+      <div className="rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+        <p>
+          <span className="font-medium text-slate-900">{gradeLabel}</span> يُدخلها المشرف.{" "}
+          {supervisorName ? (
+            <>المشرف المسؤول: <span className="font-medium text-slate-900">{supervisorName}</span>.</>
+          ) : (
+            <span className="text-amber-700">لم يُعيَّن مشرف لهذا المشروع بعد.</span>
+          )}
+        </p>
+        <p className="mt-1">القيمة الظاهرة هنا هي ما أدخله المشرف؛ استخدم «تعديل» للتجاوز الإداري عند الحاجة.</p>
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[520px] text-right text-sm">
           <thead className="bg-slate-50 text-xs text-slate-500">
@@ -99,35 +122,42 @@ export function StudentGradesForm({
                     </td>
                   ) : null}
                   <td className="px-3 py-2">
-                    {isSecond ? (
+                    {editing[student.teamMemberId] ? (
                       <>
                         <input
-                          name={`grades.${student.teamMemberId}.supervision_score`}
+                          name={`grades.${student.teamMemberId}.${isSecond ? "supervision_score" : "first_semester_score"}`}
                           type="number"
                           min="0"
-                          max={String(SUPERVISION_MAX)}
+                          max={String(isSecond ? SUPERVISION_MAX : FIRST_SEMESTER_MAX)}
                           step="0.5"
-                          value={entry.supervision}
-                          onChange={setField(student.teamMemberId, "supervision")}
+                          value={isSecond ? entry.supervision : entry.first}
+                          onChange={setField(student.teamMemberId, isSecond ? "supervision" : "first")}
                           className="h-9 w-24 rounded-md border border-slate-300 px-2 text-sm"
+                          autoFocus
                         />
-                        {/* keep the unused term's value intact */}
-                        <input type="hidden" name={`grades.${student.teamMemberId}.first_semester_score`} value={entry.first} />
+                        {/* keep the unused term's value intact on save */}
+                        <input
+                          type="hidden"
+                          name={`grades.${student.teamMemberId}.${isSecond ? "first_semester_score" : "supervision_score"}`}
+                          value={isSecond ? entry.first : entry.supervision}
+                        />
+                        <span className="ms-1 text-[11px] text-amber-700">تجاوز إداري</span>
                       </>
                     ) : (
-                      <>
-                        <input
-                          name={`grades.${student.teamMemberId}.first_semester_score`}
-                          type="number"
-                          min="0"
-                          max={String(FIRST_SEMESTER_MAX)}
-                          step="0.5"
-                          value={entry.first}
-                          onChange={setField(student.teamMemberId, "first")}
-                          className="h-9 w-24 rounded-md border border-slate-300 px-2 text-sm"
-                        />
-                        <input type="hidden" name={`grades.${student.teamMemberId}.supervision_score`} value={entry.supervision} />
-                      </>
+                      <div className="flex items-center gap-2">
+                        {student.hasGrade ? (
+                          <span className="font-medium text-slate-900">{isSecond ? entry.supervision : entry.first}</span>
+                        ) : (
+                          <span className="text-xs text-amber-700">بانتظار إدخال المشرف</span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setEditing((prev) => ({ ...prev, [student.teamMemberId]: true }))}
+                          className="text-xs text-[var(--brand-blue)] hover:underline"
+                        >
+                          تعديل
+                        </button>
+                      </div>
                     )}
                   </td>
                   <td className="px-3 py-2 font-semibold text-slate-950">{final}</td>
@@ -138,9 +168,11 @@ export function StudentGradesForm({
         </table>
       </div>
 
-      <Button type="submit" disabled={isPending}>
-        {isPending ? "جارٍ الحفظ..." : "حفظ درجات الطلاب"}
-      </Button>
+      {anyEditing ? (
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "جارٍ الحفظ..." : "حفظ التعديلات"}
+        </Button>
+      ) : null}
     </form>
   );
 }
