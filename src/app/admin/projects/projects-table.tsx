@@ -82,8 +82,14 @@ const columns = [
     cell: (info) => (
       <div>
         <p className="font-medium text-slate-950">{info.getValue() || "—"}</p>
-        <p className="text-xs text-slate-500">{info.row.original.team_leader_student_id || "—"}</p>
+        <p className="text-xs text-slate-500">{info.row.original.team_leader_name}</p>
       </div>
+    ),
+  }),
+  columnHelper.accessor("team_leader_student_id", {
+    header: "رقم القائد الجامعي",
+    cell: (info) => (
+      <span className="font-mono text-sm text-slate-700">{info.getValue() || "—"}</span>
     ),
   }),
   columnHelper.accessor("status", {
