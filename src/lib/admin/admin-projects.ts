@@ -16,6 +16,7 @@ export type AdminProjectRow = {
   department: string;
   supervisor_name: string;
   team_leader_name: string;
+  team_leader_student_id: string | null;
   active_assignment_count: number;
   team_member_count: number;
   // Discussion: one score per (active evaluator × team member).

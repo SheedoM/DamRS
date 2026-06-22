@@ -83,7 +83,7 @@ type RawProject = {
   submitted_at: string | null;
   team_leader_id: string | null;
   leader_full_name: string | null;
-  profiles: { full_name: string } | null;
+  profiles: { full_name: string; student_id: string | null } | null;
   panel_assignments: { panel_member_id: string }[] | null;
   team_members: { id: string }[] | null;
   student_discussion_scores: { panel_member_id: string; team_member_id: string }[] | null;
@@ -120,6 +120,7 @@ function toProjectRow(project: RawProject): AdminProjectRow {
     supervisor_name: project.supervisor_name || "",
     team_leader_name:
       project.profiles?.full_name || project.leader_full_name || "بانتظار تسجيل القائد",
+    team_leader_student_id: project.profiles?.student_id ?? null,
     active_assignment_count: activePanelMemberIds.length,
     team_member_count: teamMemberCount,
     ...counts,
@@ -173,7 +174,7 @@ function collapseByMember(assignments: Assignment[]): Assignment[] {
 }
 
 const PROJECT_ROW_SELECT =
-  "id, project_number, title, title_en, status, department, supervisor_name, submitted_at, team_leader_id, leader_full_name, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(panel_member_id), team_members(id), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)";
+  "id, project_number, title, title_en, status, department, supervisor_name, submitted_at, team_leader_id, leader_full_name, profiles!projects_team_leader_id_fkey(full_name, student_id), panel_assignments!left(panel_member_id), team_members(id), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)";
 
 export async function getAdminProjects() {
   const supabase = await createSupabaseServerClient();

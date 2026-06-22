@@ -11,6 +11,7 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
+  type FilterFn,
   type SortingState,
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
@@ -35,6 +36,17 @@ import { cn } from "@/lib/utils";
 const assignmentStatusLabels: Record<AssignmentStatus, string> = {
   assigned: "مُسند",
   unassigned: "غير مُسند",
+};
+
+const projectGlobalFilter: FilterFn<AdminProjectRow> = (row, _columnId, filterValue) => {
+  const q = String(filterValue).toLowerCase();
+  return [
+    row.original.title,
+    row.original.team_leader_name,
+    row.original.team_leader_student_id,
+    row.original.supervisor_name,
+    row.original.project_number,
+  ].some((v) => v?.toLowerCase().includes(q));
 };
 
 const columnHelper = createColumnHelper<AdminProjectRow>();
@@ -173,6 +185,7 @@ export function AdminProjectsTable({
     getRowId: (row) => row.id,
     onGlobalFilterChange: setGlobalFilter,
     onSortingChange: setSorting,
+    globalFilterFn: projectGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -184,7 +197,7 @@ export function AdminProjectsTable({
         <Input
           value={globalFilter}
           onChange={(event) => setGlobalFilter(event.target.value)}
-          placeholder="ابحث في المشاريع، البرامج، المشرفين..."
+          placeholder="ابحث بعنوان المشروع، اسم القائد، رقمه الجامعي، أو المشرف..."
         />
         <select
           value={submission}
