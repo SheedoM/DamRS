@@ -84,7 +84,7 @@ const columns = [
     ),
   }),
   columnHelper.accessor("team_leader_student_id", {
-    header: "رقم القائد الجامعي",
+    header: "رائد الفريق",
     cell: (info) => (
       <span className="font-mono text-sm text-slate-700">{info.getValue() || "—"}</span>
     ),
