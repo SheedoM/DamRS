@@ -35,6 +35,8 @@ export function MobileNav({ role }: MobileNavProps) {
         type="button"
         className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-slate-700"
         onClick={() => setIsOpen(true)}
+        aria-expanded={isOpen}
+        aria-controls="mobile-nav-drawer"
       >
         <span className="sr-only">فتح القائمة الرئيسية</span>
         <Menu className="h-6 w-6" aria-hidden="true" />
@@ -48,11 +50,17 @@ export function MobileNav({ role }: MobileNavProps) {
         />
       )}
 
-      {/* Drawer */}
+      {/* Drawer — kept mounted for the slide animation, but made inert when
+          closed so it never intercepts taps or extends the page width. */}
       <div
+        id="mobile-nav-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="القائمة الرئيسية"
+        aria-hidden={!isOpen}
         className={cn(
-          "fixed inset-y-0 right-0 z-50 w-72 transform bg-white transition-transform duration-300 ease-in-out",
-          isOpen ? "translate-x-0" : "translate-x-full",
+          "fixed inset-y-0 right-0 z-50 w-72 max-w-[85%] transform bg-white shadow-xl transition-transform duration-300 ease-in-out",
+          isOpen ? "translate-x-0" : "pointer-events-none translate-x-full",
         )}
       >
         <div className="flex h-20 items-center justify-between border-b border-slate-200 px-5">
