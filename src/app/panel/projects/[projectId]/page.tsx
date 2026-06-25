@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, FileText } from "lucide-react";
+import { ArrowRight, ExternalLink, FileText } from "lucide-react";
 
 import { DiscussionForm } from "./discussion-form";
 import { SupervisionForm } from "./supervision-form";
@@ -67,24 +67,13 @@ export default async function PanelProjectDetailPage({
               <p><span className="font-medium text-slate-950">المشرف:</span> {project.supervisor_name}</p>
               <p><span className="font-medium text-slate-950">التقنيات:</span> {project.technologies_used || "غير محددة"}</p>
             </div>
-            <div className="flex flex-wrap gap-3">
-              {project.github_url ? (
-                <a className={cn(buttonVariants({ variant: "outline", size: "sm" }))} href={project.github_url} target="_blank" rel="noreferrer">GitHub</a>
-              ) : null}
-              {project.demo_video_url ? (
-                <a className={cn(buttonVariants({ variant: "outline", size: "sm" }))} href={project.demo_video_url} target="_blank" rel="noreferrer">فيديو العرض</a>
-              ) : null}
-              {project.source_code_url ? (
-                <a className={cn(buttonVariants({ variant: "outline", size: "sm" }))} href={project.source_code_url} target="_blank" rel="noreferrer">الكود المصدري</a>
-              ) : null}
-            </div>
           </CardContent>
         </Card>
 
         <Card data-tour="panel-files">
           <CardHeader><CardTitle>الملفات المرفوعة</CardTitle></CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
-            {project.files.length > 0 ? project.files.map((file) => (
+            {project.files.map((file) => (
               <div key={file.id} className="rounded-md border border-slate-200 p-3">
                 <p className="font-medium text-slate-950">{file.file_name}</p>
                 <p className="text-sm text-slate-500">
@@ -99,9 +88,40 @@ export default async function PanelProjectDetailPage({
                   <p className="mt-2 text-xs text-amber-700">رابط المعاينة غير متاح.</p>
                 )}
               </div>
-            )) : (
-              <p className="text-sm text-slate-500">لا توجد ملفات مرفوعة.</p>
-            )}
+            ))}
+            {project.github_url ? (
+              <div className="rounded-md border border-slate-200 p-3">
+                <p className="font-medium text-slate-950">GitHub</p>
+                <p className="text-sm text-slate-500">رابط خارجي</p>
+                <a href={project.github_url} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-3")}>
+                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                  فتح الرابط
+                </a>
+              </div>
+            ) : null}
+            {project.demo_video_url ? (
+              <div className="rounded-md border border-slate-200 p-3">
+                <p className="font-medium text-slate-950">فيديو العرض</p>
+                <p className="text-sm text-slate-500">رابط خارجي</p>
+                <a href={project.demo_video_url} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-3")}>
+                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                  فتح الرابط
+                </a>
+              </div>
+            ) : null}
+            {project.source_code_url ? (
+              <div className="rounded-md border border-slate-200 p-3">
+                <p className="font-medium text-slate-950">الكود المصدري</p>
+                <p className="text-sm text-slate-500">رابط خارجي</p>
+                <a href={project.source_code_url} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-3")}>
+                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                  فتح الرابط
+                </a>
+              </div>
+            ) : null}
+            {project.files.length === 0 && !project.github_url && !project.demo_video_url && !project.source_code_url ? (
+              <p className="text-sm text-slate-500 sm:col-span-2">لا توجد ملفات أو روابط مرفوعة.</p>
+            ) : null}
           </CardContent>
         </Card>
 
