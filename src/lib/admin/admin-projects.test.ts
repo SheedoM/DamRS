@@ -28,6 +28,7 @@ function makeProject(overrides: Partial<AdminProjectRow>): AdminProjectRow {
     grading_status: "not_graded",
     submitted_at: "2026-06-01T10:00:00.000Z",
     is_complete: false,
+    team_member_names: [],
     ...overrides,
   };
 }

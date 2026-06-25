@@ -10,12 +10,12 @@ import { getPanelProjects, isActiveCycleGradingOpen } from "@/lib/panel/queries"
 import {
   filterPanelProjects,
   getPanelDashboardStats,
-  getPanelProjectReviewBadge,
   getPanelProjectStatuses,
   type PanelProjectReviewFilter,
 } from "@/lib/panel/panel-projects";
 import { projectStatusLabel } from "@/lib/i18n/labels";
-import { cn, formatDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { PanelProjectList } from "./panel-project-list";
 
 export const dynamic = "force-dynamic";
 
@@ -85,46 +85,7 @@ export default async function PanelHomePage({
                 </div>
               ) : null}
             </div>
-            {filteredProjects.length > 0 ? filteredProjects.map((project) => {
-              const reviewBadge = getPanelProjectReviewBadge(project.gradingState);
-              return (
-                <div
-                  key={project.id}
-                  className="flex flex-col gap-4 rounded-md border border-slate-200 p-4 md:flex-row md:items-center md:justify-between"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <h2 className="font-semibold text-slate-950">{project.title}</h2>
-                      {/* eslint-disable-next-line react-hooks/purity */}
-                      {project.assigned_at && (Date.now() - new Date(project.assigned_at).getTime()) < 48 * 60 * 60 * 1000 ? (
-                        <Badge tone="info">جديد</Badge>
-                      ) : null}
-                    </div>
-                    <p className="text-sm text-slate-500">
-                      {project.team_leader_name}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge tone={reviewBadge.tone}>{reviewBadge.label}</Badge>
-                      {project.roles.committee_head ? (
-                        <Badge tone="success">رئيس اللجنة</Badge>
-                      ) : project.roles.committee ? (
-                        <Badge tone="info">عضو</Badge>
-                      ) : null}
-                      {project.roles.supervisor ? <Badge tone="neutral">مشرف</Badge> : null}
-                    </div>
-                    <p className="text-xs text-slate-500">تاريخ الإسناد {formatDate(project.assigned_at)}</p>
-                  </div>
-                  <Link
-                    href={`/panel/projects/${project.id}`}
-                    className={cn(buttonVariants({ variant: "outline", size: "sm" }), "self-start md:self-center")}
-                  >
-                    فتح وتقييم
-                  </Link>
-                </div>
-              );
-            }) : (
-              <p className="text-sm text-slate-500">لا توجد مشاريع مطابقة لهذا العرض.</p>
-            )}
+            <PanelProjectList projects={filteredProjects} />
           </CardContent>
         </Card>
       </div>

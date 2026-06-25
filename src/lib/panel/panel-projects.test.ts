@@ -10,6 +10,7 @@ const baseProject = {
   submitted_at: "2026-06-20T10:00:00.000Z",
   assigned_at: "2026-06-20T11:00:00.000Z",
   roles: { committee: true, committee_head: false, supervisor: false },
+  team_member_names: [] as string[],
 };
 
 const projects: (typeof baseProject & { id: string; title: string; gradingState: PanelProjectGradingState })[] = [

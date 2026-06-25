@@ -17,6 +17,7 @@ type ProjectRelation = {
   source_code_url?: string | null;
   submitted_at: string | null;
   profiles?: { full_name: string } | { full_name: string }[] | null;
+  team_members?: { full_name: string; student_id: string }[] | null;
 };
 
 type RawAssignment = {
@@ -42,6 +43,8 @@ export type PanelProjectListItem = {
   assigned_at: string;
   gradingState: PanelProjectGradingState;
   roles: PanelRoles;
+  // Full names of every team member — used for name search.
+  team_member_names: string[];
 };
 
 export type SupervisionEntry = {
@@ -101,6 +104,9 @@ function toProjectListItem(
     assigned_at: assignment.assigned_at,
     gradingState,
     roles,
+    team_member_names: (project.team_members || [])
+      .map((m) => m.full_name)
+      .filter((n): n is string => Boolean(n)),
   };
 }
 
@@ -159,7 +165,7 @@ export async function getPanelProjects(panelMemberId: string) {
   const { data } = await supabase
     .from("panel_assignments")
     .select(
-      "id, project_id, assigned_at, finalized_at, role, projects(id, title, status, supervisor_name, submitted_at, profiles!projects_team_leader_id_fkey(full_name))",
+      "id, project_id, assigned_at, finalized_at, role, projects(id, title, status, supervisor_name, submitted_at, profiles!projects_team_leader_id_fkey(full_name), team_members(full_name, student_id))",
     )
     .eq("panel_member_id", panelMemberId)
     .eq("is_active", true)

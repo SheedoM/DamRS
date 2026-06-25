@@ -88,7 +88,7 @@ type RawProject = {
   leader_university_id: string | null;
   profiles: { full_name: string; student_id: string | null } | null;
   panel_assignments: { panel_member_id: string }[] | null;
-  team_members: { id: string }[] | null;
+  team_members: { id: string; full_name: string; student_id: string }[] | null;
   project_files: { file_type: string }[] | null;
   student_discussion_scores: { panel_member_id: string; team_member_id: string }[] | null;
   student_supervision_grades: { team_member_id: string }[] | null;
@@ -145,6 +145,9 @@ function toProjectRow(project: RawProject): AdminProjectRow {
     grading_status: getGradingProgress(counts),
     submitted_at: project.submitted_at,
     is_complete: isComplete,
+    team_member_names: (project.team_members || [])
+      .map((m) => m.full_name)
+      .filter((n): n is string => Boolean(n)),
   };
 }
 
@@ -195,7 +198,7 @@ function collapseByMember(assignments: Assignment[]): Assignment[] {
 }
 
 const PROJECT_ROW_SELECT =
-  "id, project_number, title, title_en, abstract, status, department, supervisor_name, demo_video_url, source_code_url, submitted_at, team_leader_id, leader_full_name, leader_university_id, profiles!projects_team_leader_id_fkey(full_name, student_id), panel_assignments!left(panel_member_id), team_members(id), project_files(file_type), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)";
+  "id, project_number, title, title_en, abstract, status, department, supervisor_name, demo_video_url, source_code_url, submitted_at, team_leader_id, leader_full_name, leader_university_id, profiles!projects_team_leader_id_fkey(full_name, student_id), panel_assignments!left(panel_member_id), team_members(id, full_name, student_id), project_files(file_type), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)";
 
 export async function getAdminProjects() {
   const supabase = await createSupabaseServerClient();
@@ -214,7 +217,7 @@ export async function getAdminProjectDetail(projectId: string) {
   const { data: project } = await supabase
     .from("projects")
     .select(
-      "id, project_number, title, title_en, abstract, status, department, supervisor_name, technologies_used, github_url, demo_video_url, source_code_url, submitted_at, team_leader_id, leader_full_name, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(panel_member_id), team_members(id), project_files(file_type), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)",
+      "id, project_number, title, title_en, abstract, status, department, supervisor_name, technologies_used, github_url, demo_video_url, source_code_url, submitted_at, team_leader_id, leader_full_name, profiles!projects_team_leader_id_fkey(full_name), panel_assignments!left(panel_member_id), team_members(id, full_name, student_id), project_files(file_type), student_discussion_scores(panel_member_id, team_member_id), student_supervision_grades(team_member_id)",
     )
     .is("panel_assignments.revoked_at", null)
     .eq("panel_assignments.is_active", true)

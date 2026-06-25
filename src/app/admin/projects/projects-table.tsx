@@ -47,6 +47,7 @@ const projectGlobalFilter: FilterFn<AdminProjectRow> = (row, _columnId, filterVa
     row.original.team_leader_student_id,
     row.original.supervisor_name,
     row.original.project_number,
+    ...row.original.team_member_names,
   ].some((v) => v?.toLowerCase().includes(q));
 };
 
@@ -209,7 +210,7 @@ export function AdminProjectsTable({
         <Input
           value={globalFilter}
           onChange={(event) => setGlobalFilter(event.target.value)}
-          placeholder="ابحث بعنوان المشروع، اسم القائد، رقمه الجامعي، أو المشرف..."
+          placeholder="ابحث بعنوان المشروع، اسم أي طالب، رقمه الجامعي، أو المشرف..."
         />
         <select
           value={submission}

@@ -30,6 +30,8 @@ export type AdminProjectRow = {
   // True when the project meets the same requirements the student submit check
   // enforces — i.e. it could be marked submitted right now.
   is_complete: boolean;
+  // Full names of every team member (including leader) — used for name search.
+  team_member_names: string[];
 };
 
 export type AdminProjectFilters = {
